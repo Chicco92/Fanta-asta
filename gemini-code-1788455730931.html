@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Asta Fantacalcio Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch-dark:#0E2A1E;
+    --pitch-mid:#153A28;
+    --pitch-mid-2:#1B4530;
+    --pitch-line: rgba(233,230,219,0.16);
+    --chalk:#E7E3D4;
+    --chalk-dim: rgba(231,227,212,0.62);
+    --gold:#E3B23C;
+    --gold-soft: rgba(227,178,60,0.16);
+    --gold-dim: rgba(227,178,60,0.38);
+    --brick:#C15A45;
+    --brick-soft: rgba(193,90,69,0.18);
+    --turf-btn:#1F5C3C;
+    --turf-btn-hover:#276F49;
+    --radius: 8px;
+    --font-display: 'Archivo Black', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background: var(--pitch-dark);
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 64px);
+    color: var(--chalk);
+    font-family: var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  button{ font-family: inherit; cursor:pointer; }
+  input{ font-family: inherit; }
+  a{ color: inherit; }
+  :focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .screen{ display:none; min-height:100vh; }
+  .screen.active{ display:flex; }
+
+  /* ---------- HOME ---------- */
+  #screen-home{
+    flex-direction:column; align-items:center; justify-content:center;
+    padding: 32px 20px; text-align:center; gap: 36px;
+  }
+  .home-title{
+    font-family: var(--font-display);
+    font-size: clamp(28px, 6vw, 46px);
+    letter-spacing: 0.5px;
+    line-height: 1.05;
+    max-width: 640px;
+  }
+  .home-title span{ color: var(--gold); }
+  .home-sub{ color: var(--chalk-dim); max-width: 460px; font-size: 15px; line-height:1.5; margin-top: -18px; }
+  .role-grid{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; max-width: 640px; }
+  .role-card{
+    width: 190px; padding: 24px 18px; background: var(--pitch-mid);
+    border: 1px solid var(--pitch-line); border-radius: var(--radius);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    transition: border-color .15s ease, transform .15s ease;
+    color: var(--chalk);
+  }
+  .role-card:hover{ border-color: var(--gold); transform: translateY(-2px); }
+  .role-card .icon{ font-size: 30px; }
+  .role-card .label{ font-weight:700; font-size:16px; }
+  .role-card .desc{ font-size: 12.5px; color: var(--chalk-dim); line-height:1.4; }
+
+  /* ---------- SHARED ---------- */
+  .topbar{
+    position:fixed; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center;
+    padding: 14px 18px; font-size: 13px; color: var(--chalk-dim); z-index: 5;
+    background: rgba(14,42,30,0.85); backdrop-filter: blur(8px);
+  }
+  .link-btn{ background:none; border:none; color: var(--chalk-dim); font-size:13px; text-decoration: underline; padding:4px; }
+  .link-btn:hover{ color: var(--chalk); }
+
+  .panel-wrap{ flex:1; display:flex; align-items:center; justify-content:center; padding: 80px 18px 40px; width: 100%; }
+  .panel{ width:100%; max-width: 460px; }
+  .panel h2{ font-family: var(--font-display); font-size: 22px; margin: 0 0 6px; letter-spacing: .3px; }
+  .panel .hint{ color: var(--chalk-dim); font-size: 13.5px; margin: 0 0 22px; line-height:1.5; }
+
+  .field{ margin-bottom: 16px; }
+  .field label{ display:block; font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
+  .field input{
+    width:100%; padding: 13px 14px; background: var(--pitch-mid); border:1px solid var(--pitch-line);
+    border-radius: var(--radius); color: var(--chalk); font-size: 16px;
+  }
+  .field input::placeholder{ color: rgba(231,227,212,0.35); }
+  .field input:focus{ border-color: var(--gold); }
+
+  .btn-primary{
+    width:100%; padding: 14px 16px; background: var(--gold); color: #17240F; border:none;
+    border-radius: var(--radius); font-weight:800; font-size: 15px; letter-spacing:.2px;
+  }
+  .btn-primary:hover{ background:#eec25c; }
+  .btn-primary:disabled{ background: rgba(227,178,60,0.35); color: rgba(23,36,15,0.55); cursor:not-allowed; }
+
+  .btn-outline{
+    width:100%; padding: 12px 16px; background: transparent; color: var(--chalk);
+    border:1px solid var(--pitch-line); border-radius: var(--radius); font-weight:600; font-size: 14px;
+  }
+  .btn-outline:hover{ border-color: var(--gold); }
+
+  .btn-danger{
+    width:100%; padding: 12px 16px; background: transparent; color: var(--brick);
+    border:1px solid var(--brick-soft); border-radius: var(--radius); font-weight:700; font-size: 14px;
+  }
+  .btn-danger:hover{ background: var(--brick-soft); }
+
+  .msg{ font-size: 13px; margin-top: 10px; min-height: 18px; }
+  .msg.error{ color: var(--brick); }
+  .msg.ok{ color: var(--gold); }
+
+  /* ---------- TABELLONE (TV) ---------- */
+  #screen-tabellone{ flex-direction:column; align-items:center; justify-content:flex-start; padding: 75px 20px 40px; }
+  .board{
+    width:100%; max-width: 900px; background: var(--pitch-mid);
+    border: 2px solid var(--gold-dim); border-radius: 14px; overflow:hidden;
+  }
+  .board-row{ padding: clamp(18px,3vw,34px) clamp(20px,4vw,48px); border-top: 1px solid var(--pitch-line); }
+  .board-row:first-child{ border-top:none; }
+  .board-label{ font-size: clamp(12px,1.4vw,15px); color: var(--chalk-dim); letter-spacing:.3px; margin-bottom: 6px; }
+  .board-player{ font-family: var(--font-display); font-size: clamp(30px, 6.2vw, 64px); line-height:1.05; letter-spacing:.3px; word-break: break-word; }
+  .board-price{
+    font-family: var(--font-display); font-size: clamp(48px, 11vw, 120px); color: var(--gold);
+    line-height:1; font-variant-numeric: tabular-nums; transition: transform .18s ease;
+  }
+  .board-price.pulse{ transform: scale(1.06); }
+  .board-price .unit{ font-family: var(--font-body); font-size: 0.28em; color: var(--chalk-dim); font-weight:700; margin-left: 10px; }
+  .board-bidder{ font-family: var(--font-display); font-size: clamp(22px, 4vw, 42px); }
+  .board-idle{ text-align:center; padding: 60px 20px; color: var(--chalk-dim); }
+  .board-idle .big{ font-family: var(--font-display); font-size: clamp(22px,3.4vw,32px); color: var(--chalk); margin-bottom: 8px; }
+  .board-closed-banner{
+    background: var(--gold); color: #17240F; text-align:center; font-family: var(--font-display);
+    font-size: clamp(18px, 3vw, 28px); padding: 16px 20px;
+  }
+  .tv-footer{ margin-top: 22px; color: var(--chalk-dim); font-size: 13px; text-align:center; }
+  .tv-footer b{ color: var(--gold); }
+
+  /* ---------- PARTECIPANTE ---------- */
+  .bid-hero{ text-align:center; margin-bottom: 26px; }
+  .bid-hero .label{ font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
+  .bid-hero .player{ font-family: var(--font-display); font-size: clamp(24px,7vw,32px); margin-bottom: 14px; }
+  .bid-hero .price{ font-family: var(--font-display); font-size: clamp(46px,16vw,64px); color: var(--gold); font-variant-numeric: tabular-nums; }
+  .bid-hero .bidder{ font-size: 14px; color: var(--chalk-dim); margin-top: 8px; }
+  .bid-hero .bidder b{ color: var(--chalk); }
+
+  .quick-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+  .btn-quick{
+    padding: 16px 6px; background: var(--turf-btn); border: 1px solid rgba(233,230,219,0.08);
+    border-radius: var(--radius); color: var(--chalk); font-weight:800; font-size: 15px;
+  }
+  .btn-quick:hover{ background: var(--turf-btn-hover); }
+  .btn-quick:disabled{ background: var(--pitch-mid); color: var(--chalk-dim); cursor:not-allowed; }
+
+  .custom-bid{ display:flex; gap:8px; margin-bottom: 6px; }
+  .custom-bid input{ flex:1; padding: 13px 14px; background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius); color: var(--chalk); font-size:16px; }
+  .custom-bid button{ padding: 0 18px; background: var(--gold); color:#17240F; border:none; border-radius: var(--radius); font-weight:800; }
+  .custom-bid button:disabled{ background: rgba(227,178,60,0.35); color: rgba(23,36,15,0.55); }
+
+  .status-banner{ text-align:center; padding: 14px 16px; border-radius: var(--radius); font-size: 14px; margin-bottom: 18px; }
+  .status-banner.open{ background: var(--gold-soft); color: var(--gold); border:1px solid var(--gold-dim); }
+  .status-banner.closed{ background: var(--brick-soft); color: var(--brick); border:1px solid var(--brick-soft); }
+  .status-banner.idle{ background: var(--pitch-mid); color: var(--chalk-dim); border:1px solid var(--pitch-line); }
+
+  .you-are{ text-align:center; font-size: 12.5px; color: var(--chalk-dim); margin-top: 18px; margin-bottom: 20px; }
+
+  /* ---------- TABELLE SQUADRE & ACQUISTI ---------- */
+  .section-divider{ height: 1px; background: var(--pitch-line); margin: 24px 0 16px; }
+  .section-header{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 12px; }
+  .section-title{ font-family: var(--font-display); font-size: 16px; color: var(--chalk); }
+  .section-meta{ font-size: 12.5px; color: var(--gold); font-weight: 600; }
+
+  .team-table{ width:100%; border-collapse: collapse; font-size: 13.5px; background: var(--pitch-mid); border-radius: var(--radius); overflow:hidden; border: 1px solid var(--pitch-line); }
+  .team-table th, .team-table td{ text-align:left; padding: 9px 12px; border-bottom: 1px solid var(--pitch-line); }
+  .team-table th{ color: var(--chalk-dim); font-weight:600; font-size:12px; background: rgba(0,0,0,0.18); }
+  .team-table td.price-cell{ text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--gold); }
+  .team-table th.price-head{ text-align: right; }
+  .team-empty{ color: var(--chalk-dim); font-size: 13px; text-align:center; padding: 16px; background: var(--pitch-mid); border-radius: var(--radius); border: 1px dashed var(--pitch-line); }
+
+  .teams-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%; max-width: 900px; margin-top: 28px; }
+  .team-card{ background: var(--pitch-mid); border: 1px solid var(--pitch-line); border-radius: var(--radius); padding: 16px; }
+  .team-card-header{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; border-bottom: 1px solid var(--pitch-line); padding-bottom: 8px; }
+  .team-card-name{ font-family: var(--font-display); font-size: 15px; color: var(--gold); }
+  .team-card-stats{ font-size: 12px; color: var(--chalk-dim); }
+
+  /* ---------- ADMIN ---------- */
+  .admin-panel{ max-width: 520px; }
+  .admin-current{
+    background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 22px; font-size: 14px;
+  }
+  .admin-current .row{ display:flex; justify-content:space-between; padding: 5px 0; }
+  .admin-current .row span:first-child{ color: var(--chalk-dim); }
+  .admin-current .row span:last-child{ font-weight:700; }
+  .divider{ height:1px; background: var(--pitch-line); margin: 26px 0 18px; }
+
+  @media (max-width: 480px){
+    .role-grid{ flex-direction:column; align-items:stretch; }
+    .role-card{ width:100%; flex-direction:row; text-align:left; justify-content:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen active">
+    <div>
+      <div class="home-title">Asta <span>Fantacalcio</span> Live</div>
+      <p class="home-sub">Scegli come vuoi entrare. Tutti vedono le stesse offerte in tempo reale, senza mai ricaricare la pagina.</p>
+    </div>
+    <div class="role-grid">
+      <button class="role-card" onclick="goHome('tabellone')">
+        <div class="icon">📺</div>
+        <div class="label">Tabellone</div>
+        <div class="desc">Apri su TV o PC: mostra calciatore, prezzo e rose.</div>
+      </button>
+      <button class="role-card" onclick="checkParticipantEntry()">
+        <div class="icon">📱</div>
+        <div class="label">Partecipante</div>
+        <div class="desc">Entra con il tuo nome e fai le tue offerte.</div>
+      </button>
+      <button class="role-card" onclick="goHome('admin')">
+        <div class="icon">⚙️</div>
+        <div class="label">Banditore</div>
+        <div class="desc">Metti all'asta i calciatori e assegna il vincitore.</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- TABELLONE (TV) -->
+  <div id="screen-tabellone" class="screen">
+    <div class="topbar"><span>Tabellone Live</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
+    <div class="board" id="board-content"></div>
+    <div class="tv-footer">Aggiornamento automatico · offri da smartphone su <b id="tv-hint-url"></b></div>
+
+    <!-- Rose partecipanti su tabellone -->
+    <div class="teams-grid" id="tv-teams-grid"></div>
+  </div>
+
+  <!-- PARTECIPANTE: JOIN -->
+  <div id="screen-join" class="screen">
+    <div class="topbar"><span>Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
+    <div class="panel-wrap">
+      <div class="panel">
+        <h2>Entra all'asta</h2>
+        <p class="hint">Inserisci il nome con cui vuoi essere riconosciuto. Se ti disconnetti potrai rientrare sotto questo nome.</p>
+        <div class="field">
+          <label for="join-name">Il tuo nome</label>
+          <input id="join-name" type="text" placeholder="Es. Marco" maxlength="24" autocomplete="off">
+        </div>
+        <button class="btn-primary" onclick="joinAsParticipant()">Entra</button>
+        <div class="msg error" id="join-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTECIPANTE: BID & ROSA -->
+  <div id="screen-bid" class="screen">
+    <div class="topbar"><span id="bid-topbar-name">Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
+    <div class="panel-wrap">
+      <div class="panel">
+        <div class="status-banner idle" id="bid-status-banner">In attesa che il banditore apra l'asta…</div>
+        <div class="bid-hero">
+          <div class="label">In asta</div>
+          <div class="player" id="bid-player">—</div>
+          <div class="price" id="bid-price">0<span style="font-size:0.4em;color:var(--chalk-dim);"> cfu</span></div>
+          <div class="bidder" id="bid-bidder"></div>
+        </div>
+
+        <div class="quick-grid">
+          <button class="btn-quick" id="btn-plus1" onclick="quickBid(1)">+1</button>
+          <button class="btn-quick" id="btn-plus5" onclick="quickBid(5)">+5</button>
+          <button class="btn-quick" id="btn-plus10" onclick="quickBid(10)">+10</button>
+        </div>
+        <div class="custom-bid">
+          <input id="custom-bid-input" type="number" inputmode="numeric" placeholder="Rilancio personalizzato">
+          <button id="btn-custom" onclick="customBid()">Offri</button>
+        </div>
+        <div class="msg" id="bid-msg"></div>
+        <div class="you-are">
+          Stai partecipando come <b id="you-are-name" style="color:var(--chalk)"></b> · 
+          <button class="link-btn" onclick="logoutParticipant()" style="padding:0;">non sei tu?</button>
+        </div>
+
+        <!-- Sezione La Mia Rosa -->
+        <div class="section-divider"></div>
+        <div class="section-header">
+          <span class="section-title">La tua rosa</span>
+          <span class="section-meta" id="my-team-stats">0 giocatori · 0 crediti spesi</span>
+        </div>
+        <div id="my-team-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="screen-admin" class="screen">
+    <div class="topbar"><span>Banditore</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
+    <div class="panel-wrap">
+      <div class="panel admin-panel">
+        <h2>Gestisci l'asta</h2>
+        <p class="hint">Inserisci il calciatore da battere. Quando l'asta si chiude, assegnalo all'ultimo offerente.</p>
+
+        <div class="field">
+          <label for="admin-player">Nome calciatore</label>
+          <input id="admin-player" type="text" placeholder="Es. Lautaro Martinez" maxlength="40">
+        </div>
+        <div class="field">
+          <label for="admin-base">Prezzo di partenza (crediti)</label>
+          <input id="admin-base" type="number" inputmode="numeric" value="1" min="1">
+        </div>
+        <button class="btn-primary" onclick="startAuction()">Avvia asta</button>
+        <div class="msg" id="admin-msg"></div>
+
+        <div class="admin-current" id="admin-current" style="display:none;">
+          <div class="row"><span>Calciatore</span><span id="ac-player">—</span></div>
+          <div class="row"><span>Prezzo attuale</span><span id="ac-price">—</span></div>
+          <div class="row"><span>Ultima offerta</span><span id="ac-bidder">—</span></div>
+          <div class="row"><span>Stato</span><span id="ac-status">—</span></div>
+        </div>
+        <button class="btn-danger" id="btn-close-auction" onclick="closeAuction()" style="display:none; margin-top: 10px;">Chiudi e assegna</button>
+
+        <div class="divider"></div>
+        <div class="section-header">
+          <span class="section-title">Rose partecipanti</span>
+        </div>
+        <div id="admin-teams-wrap"></div>
+
+        <div class="divider"></div>
+        <div class="section-header">
+          <span class="section-title">Cronologia completa</span>
+        </div>
+        <div id="log-wrap"><div class="team-empty">Ancora nessun calciatore assegnato.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ---------- storage keys ----------
+  var STATE_KEY = 'fanta_auction_state';
+  var LOG_KEY = 'fanta_auction_log';
+  var USER_KEY = 'fanta_saved_username';
+
+  // ---------- in-memory session ----------
+  var myName = localStorage.getItem(USER_KEY) || '';
+  var currentRoute = 'home';
+  var lastKnownPrice = null;
+  var pollTimer = null;
+
+  document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
+
+  // ---------- universal storage layer ----------
+  // Supporta window.storage (se presente in sandbox) con fallback robusto a localStorage
+  var store = {
+    get: async function(key){
+      if(window.storage && typeof window.storage.get === 'function'){
+        try {
+          var res = await window.storage.get(key, true);
+          if(res && res.value !== undefined) return JSON.parse(res.value);
+        } catch(e){}
+      }
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    },
+    set: async function(key, val){
+      var str = JSON.stringify(val);
+      localStorage.setItem(key, str);
+      if(window.storage && typeof window.storage.set === 'function'){
+        try {
+          await window.storage.set(key, str, true);
+        } catch(e){}
+      }
+      return true;
+    }
+  };
+
+  async function loadState(){
+    var s = await store.get(STATE_KEY);
+    return s || null;
+  }
+  async function saveState(state){
+    return await store.set(STATE_KEY, state);
+  }
+  async function loadLog(){
+    var l = await store.get(LOG_KEY);
+    return Array.isArray(l) ? l : [];
+  }
+  async function saveLog(log){
+    return await store.set(LOG_KEY, log);
+  }
+  async function ensureInit(){
+    var s = await loadState();
+    if(!s){
+      s = { player:'', basePrice:1, price:0, bidder:'', status:'idle', updatedAt: Date.now() };
+      await saveState(s);
+    }
+    return s;
+  }
+
+  // ---------- navigation & flow ----------
+  function checkParticipantEntry(){
+    if(myName){
+      goHome('bid');
+    } else {
+      goHome('join');
+    }
+  }
+
+  function goHome(route){
+    currentRoute = route;
+    document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
+    var map = { home:'screen-home', tabellone:'screen-tabellone', join:'screen-join', bid:'screen-bid', admin:'screen-admin' };
+    var targetId = map[route] || 'screen-home';
+    document.getElementById(targetId).classList.add('active');
+    
+    if(route === 'bid'){
+      document.getElementById('you-are-name').textContent = myName;
+      document.getElementById('bid-topbar-name').textContent = 'Ciao, ' + myName;
+    }
+    refreshNow();
+  }
+
+  function logoutParticipant(){
+    localStorage.removeItem(USER_KEY);
+    myName = '';
+    document.getElementById('join-name').value = '';
+    goHome('join');
+  }
+
+  function showMsg(id, text, cls){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = text || '';
+    el.className = 'msg' + (cls ? (' ' + cls) : '');
+    if(text){
+      setTimeout(function(){ if(el.textContent === text){ el.textContent=''; el.className='msg'; } }, 3000);
+    }
+  }
+
+  // ---------- join ----------
+  function joinAsParticipant(){
+    var v = document.getElementById('join-name').value.trim();
+    if(!v){
+      showMsg('join-msg', 'Inserisci il tuo nome per continuare.', 'error');
+      return;
+    }
+    myName = v;
+    localStorage.setItem(USER_KEY, myName);
+    document.getElementById('join-name').value = '';
+    goHome('bid');
+  }
+
+  // ---------- bidding ----------
+  async function quickBid(amount){
+    var s = await loadState();
+    if(!s || s.status !== 'open'){
+      showMsg('bid-msg', 'L\'asta non è aperta al momento.', 'error');
+      return;
+    }
+    var newPrice = s.price + amount;
+    var newState = Object.assign({}, s, { price:newPrice, bidder: myName, updatedAt: Date.now() });
+    var ok = await saveState(newState);
+    if(ok){
+      renderBidScreen(newState);
+      showMsg('bid-msg', 'Offerta di ' + newPrice + ' crediti inviata!', 'ok');
+    }
+  }
+
+  async function customBid(){
+    var input = document.getElementById('custom-bid-input');
+    var val = parseInt(input.value, 10);
+    var s = await loadState();
+    if(!s || s.status !== 'open'){
+      showMsg('bid-msg', 'L\'asta non è aperta al momento.', 'error');
+      return;
+    }
+    if(isNaN(val) || val <= s.price){
+      showMsg('bid-msg', 'La tua offerta deve superare ' + s.price + ' crediti.', 'error');
+      return;
+    }
+    var newState = Object.assign({}, s, { price:val, bidder: myName, updatedAt: Date.now() });
+    var ok = await saveState(newState);
+    if(ok){
+      input.value = '';
+      renderBidScreen(newState);
+      showMsg('bid-msg', 'Offerta di ' + val + ' crediti inviata!', 'ok');
+    }
+  }
+
+  function renderBidScreen(s){
+    document.getElementById('bid-player').textContent = s.player || '—';
+    document.getElementById('bid-price').innerHTML = (s.status === 'idle' ? '0' : s.price) + '<span style="font-size:0.4em;color:var(--chalk-dim);"> cfu</span>';
+    document.getElementById('bid-bidder').innerHTML = s.bidder ? ('Offerta più alta: <b>' + escapeHtml(s.bidder) + '</b>') : '';
+
+    var banner = document.getElementById('bid-status-banner');
+    var quickBtns = [document.getElementById('btn-plus1'), document.getElementById('btn-plus5'), document.getElementById('btn-plus10')];
+    var customBtn = document.getElementById('btn-custom');
+
+    if(s.status === 'open'){
+      banner.className = 'status-banner open';
+      banner.textContent = 'Asta aperta — fai la tua offerta';
+      quickBtns.forEach(function(b){ b.disabled = false; });
+      customBtn.disabled = false;
+    } else if(s.status === 'closed'){
+      banner.className = 'status-banner closed';
+      banner.textContent = s.bidder
+        ? ('Asta chiusa — ' + s.player + ' assegnato a ' + s.bidder + ' per ' + s.price + ' crediti')
+        : ('Asta chiusa — nessuna offerta ricevuta per ' + s.player);
+      quickBtns.forEach(function(b){ b.disabled = true; });
+      customBtn.disabled = true;
+    } else {
+      banner.className = 'status-banner idle';
+      banner.textContent = 'In attesa che il banditore apra l\'asta…';
+      quickBtns.forEach(function(b){ b.disabled = true; });
+      customBtn.disabled = true;
+    }
+  }
+
+  // ---------- tabellone ----------
+  function renderTabellone(s){
+    var el = document.getElementById('board-content');
+    if(!s || s.status === 'idle'){
+      el.innerHTML = '<div class="board-idle"><div class="big">Asta in preparazione</div>In attesa che il banditore metta all\'asta il primo calciatore.</div>';
+      return;
+    }
+    var priceChanged = (lastKnownPrice !== null && lastKnownPrice !== s.price);
+    lastKnownPrice = s.price;
+
+    var html = '';
+    if(s.status === 'closed'){
+      html += '<div class="board-closed-banner">' +
+        (s.bidder ? ('AGGIUDICATO A ' + escapeHtml(s.bidder).toUpperCase()) : 'ASTA CHIUSA SENZA OFFERTE') +
+      '</div>';
+    }
+    html += '<div class="board-row"><div class="board-label">In asta</div><div class="board-player">' + escapeHtml(s.player) + '</div></div>';
+    html += '<div class="board-row"><div class="board-label">Prezzo attuale</div><div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div></div>';
+    html += '<div class="board-row"><div class="board-label">Ultimo offerente</div><div class="board-bidder">' + (s.bidder ? escapeHtml(s.bidder) : '— nessuna offerta —') + '</div></div>';
+    el.innerHTML = html;
+
+    if(priceChanged){
+      setTimeout(function(){
+        var pe = el.querySelector('.board-price');
+        if(pe) pe.classList.remove('pulse');
+      }, 250);
+    }
+  }
+
+  // ---------- admin ----------
+  async function startAuction(){
+    var playerInput = document.getElementById('admin-player');
+    var baseInput = document.getElementById('admin-base');
+    var player = playerInput.value.trim();
+    var base = parseInt(baseInput.value, 10);
+
+    if(!player){
+      showMsg('admin-msg', 'Inserisci il nome del calciatore.', 'error');
+      return;
+    }
+    if(isNaN(base) || base < 1){ base = 1; }
+
+    var s = await loadState();
+    if(s && s.status === 'open'){
+      var confirmOverwrite = confirm('C\'è già un\'asta aperta per "' + s.player + '". Vuoi sostituirla con "' + player + '"?');
+      if(!confirmOverwrite) return;
+    }
+
+    var newState = { player: player, basePrice: base, price: base, bidder: '', status: 'open', updatedAt: Date.now() };
+    var ok = await saveState(newState);
+    if(ok){
+      playerInput.value = '';
+      baseInput.value = '1';
+      showMsg('admin-msg', 'Asta avviata per ' + player + '.', 'ok');
+      renderAdmin(newState);
+    }
+  }
+
+  async function closeAuction(){
+    var s = await loadState();
+    if(!s || s.status !== 'open'){
+      showMsg('admin-msg', 'Non c\'è nessuna asta aperta da chiudere.', 'error');
+      return;
+    }
+    var newState = Object.assign({}, s, { status:'closed', updatedAt: Date.now() });
+    var ok = await saveState(newState);
+    if(ok){
+      var log = await loadLog();
+      log.unshift({ player: s.player, price: s.bidder ? s.price : null, bidder: s.bidder || null, ts: Date.now() });
+      await saveLog(log);
+      renderAdmin(newState);
+      refreshNow();
+      showMsg('admin-msg', s.bidder ? (s.player + ' assegnato a ' + s.bidder + '.') : (s.player + ' chiuso senza offerte.'), 'ok');
+    }
+  }
+
+  function renderAdmin(s){
+    var currentBox = document.getElementById('admin-current');
+    var closeBtn = document.getElementById('btn-close-auction');
+    if(!s || s.status === 'idle'){
+      currentBox.style.display = 'none';
+      closeBtn.style.display = 'none';
+      return;
+    }
+    currentBox.style.display = 'block';
+    document.getElementById('ac-player').textContent = s.player;
+    document.getElementById('ac-price').textContent = s.price + ' crediti';
+    document.getElementById('ac-bidder').textContent = s.bidder || '—';
+    document.getElementById('ac-status').textContent = s.status === 'open' ? 'Aperta' : 'Chiusa';
+    closeBtn.style.display = s.status === 'open' ? 'block' : 'none';
+  }
+
+  // ---------- log & rose logic ----------
+  function groupPurchasesByParticipant(log){
+    var map = {};
+    (log || []).forEach(function(item){
+      if(!item.bidder || item.price === null) return;
+      if(!map[item.bidder]){
+        map[item.bidder] = { items: [], totalSpent: 0 };
+      }
+      map[item.bidder].items.push(item);
+      map[item.bidder].totalSpent += item.price;
+    });
+    return map;
+  }
+
+  function renderParticipantRoster(log){
+    var wrap = document.getElementById('my-team-wrap');
+    var statsEl = document.getElementById('my-team-stats');
+    if(!wrap || !statsEl) return;
+
+    var groups = groupPurchasesByParticipant(log);
+    var myData = groups[myName] || { items: [], totalSpent: 0 };
+
+    statsEl.textContent = myData.items.length + ' giocator' + (myData.items.length === 1 ? 'e' : 'i') + ' · ' + myData.totalSpent + ' crediti';
+
+    if(myData.items.length === 0){
+      wrap.innerHTML = '<div class="team-empty">Nessun acquisto registrato finora.</div>';
+      return;
+    }
+
+    var html = '<table class="team-table"><thead><tr><th>Calciatore</th><th class="price-head">Costo</th></tr></thead><tbody>';
+    myData.items.forEach(function(p){
+      html += '<tr><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+  function renderTvRosters(log){
+    var grid = document.getElementById('tv-teams-grid');
+    if(!grid) return;
+
+    var groups = groupPurchasesByParticipant(log);
+    var names = Object.keys(groups);
+
+    if(names.length === 0){
+      grid.innerHTML = '';
+      return;
+    }
+
+    var html = '';
+    names.forEach(function(name){
+      var data = groups[name];
+      html += '<div class="team-card">';
+      html += '  <div class="team-card-header">';
+      html += '    <span class="team-card-name">' + escapeHtml(name) + '</span>';
+      html += '    <span class="team-card-stats">' + data.items.length + ' giog. · <b>' + data.totalSpent + ' cfu</b></span>';
+      html += '  </div>';
+      html += '  <table class="team-table"><tbody>';
+      data.items.forEach(function(p){
+        html += '<tr><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+      });
+      html += '  </tbody></table>';
+      html += '</div>';
+    });
+    grid.innerHTML = html;
+  }
+
+  function renderAdminRosters(log){
+    var wrap = document.getElementById('admin-teams-wrap');
+    if(!wrap) return;
+
+    var groups = groupPurchasesByParticipant(log);
+    var names = Object.keys(groups);
+
+    if(names.length === 0){
+      wrap.innerHTML = '<div class="team-empty">Nessuna rosa compilata al momento.</div>';
+      return;
+    }
+
+    var html = '<div class="teams-grid" style="margin-top:0;">';
+    names.forEach(function(name){
+      var data = groups[name];
+      html += '<div class="team-card">';
+      html += '  <div class="team-card-header">';
+      html += '    <span class="team-card-name">' + escapeHtml(name) + '</span>';
+      html += '    <span class="team-card-stats">' + data.items.length + ' acquisti · <b>' + data.totalSpent + ' crediti</b></span>';
+      html += '  </div>';
+      html += '  <table class="team-table"><tbody>';
+      data.items.forEach(function(p){
+        html += '<tr><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+      });
+      html += '  </tbody></table>';
+      html += '</div>';
+    });
+    html += '</div>';
+    wrap.innerHTML = html;
+  }
+
+  function renderLog(log){
+    var wrap = document.getElementById('log-wrap');
+    if(!wrap) return;
+    if(!log || log.length === 0){
+      wrap.innerHTML = '<div class="team-empty">Ancora nessun calciatore assegnato.</div>';
+      return;
+    }
+    var html = '<table class="team-table"><thead><tr><th>Calciatore</th><th>Assegnato a</th><th class="price-head">Prezzo</th></tr></thead><tbody>';
+    log.forEach(function(entry){
+      html += '<tr><td>' + escapeHtml(entry.player) + '</td><td>' + (entry.bidder ? escapeHtml(entry.bidder) : '—') + '</td><td class="price-cell">' + (entry.price !== null ? entry.price + ' cfu' : '—') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+  // ---------- utils ----------
+  function escapeHtml(str){
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+
+  // ---------- polling & refresh loop ----------
+  async function refreshNow(){
+    var s = await loadState();
+    var log = await loadLog();
+    if(!s) return;
+
+    if(currentRoute === 'tabellone'){
+      renderTabellone(s);
+      renderTvRosters(log);
+    }
+    if(currentRoute === 'bid'){
+      renderBidScreen(s);
+      renderParticipantRoster(log);
+    }
+    if(currentRoute === 'admin'){
+      renderAdmin(s);
+      renderAdminRosters(log);
+      renderLog(log);
+    }
+  }
+
+  function startPolling(){
+    if(pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(refreshNow, 1000);
+  }
+
+  // ---------- boot ----------
+  (async function init(){
+    await ensureInit();
+    startPolling();
+    refreshNow();
+  })();
+</script>
+</body>
+</html>
