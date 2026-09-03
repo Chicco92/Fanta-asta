@@ -103,12 +103,6 @@
   .btn-primary:hover{ background:#eec25c; }
   .btn-primary:disabled{ background: rgba(227,178,60,0.35); color: rgba(23,36,15,0.55); cursor:not-allowed; }
 
-  .btn-outline{
-    width:100%; padding: 12px 16px; background: transparent; color: var(--chalk);
-    border:1px solid var(--pitch-line); border-radius: var(--radius); font-weight:600; font-size: 14px;
-  }
-  .btn-outline:hover{ border-color: var(--gold); }
-
   .btn-danger{
     width:100%; padding: 12px 16px; background: transparent; color: var(--brick);
     border:1px solid var(--brick-soft); border-radius: var(--radius); font-weight:700; font-size: 14px;
@@ -132,7 +126,6 @@
   .board-player-wrap{ display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
   .board-player{ font-family: var(--font-display); font-size: clamp(28px, 5.5vw, 56px); line-height:1.05; letter-spacing:.3px; word-break: break-word; }
   
-  /* Dettagli giocatore sul tabellone */
   .player-meta-badges{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
   .player-team-pill{
     background: var(--pitch-dark); border: 1px solid var(--pitch-line); padding: 4px 10px;
@@ -228,11 +221,12 @@
   .role-D{ background: #2E8540; color: #fff; }
   .role-C{ background: #2B6CB0; color: #fff; }
   .role-A{ background: #C53030; color: #fff; }
-  .btn-call-player{
-    padding: 4px 8px; background: var(--gold); color: #17240F; border: none;
+  .btn-select-player{
+    padding: 5px 10px; background: var(--gold); color: #17240F; border: none;
     border-radius: 4px; font-weight: 700; font-size: 11px;
   }
-  .badge-assigned{ font-size: 11px; color: var(--chalk-dim); font-style: italic; }
+  .btn-select-player:hover{ background:#eec25c; }
+  .badge-assigned{ font-size: 11px; color: var(--brick); font-style: italic; font-weight: 600; }
 
   /* ADMIN */
   .admin-current{
@@ -274,7 +268,7 @@
       <button class="role-card" onclick="goHome('admin')">
         <div class="icon">⚙️</div>
         <div class="label">Banditore</div>
-        <div class="desc">Carica il listone, batti all'asta e assegna.</div>
+        <div class="desc">Carica il listone, prepara la base e batti l'asta.</div>
       </button>
     </div>
   </div>
@@ -333,7 +327,6 @@
           <button class="link-btn" onclick="logoutParticipant()" style="padding:0;">non sei tu?</button>
         </div>
 
-        <!-- Sezione La Mia Rosa -->
         <div class="section-divider"></div>
         <div class="section-header">
           <span class="section-title">La tua rosa</span>
@@ -341,7 +334,6 @@
         </div>
         <div id="my-team-wrap"></div>
 
-        <!-- Listone Consultazione -->
         <div class="section-divider"></div>
         <div class="section-header">
           <span class="section-title">Consulta Listone</span>
@@ -373,7 +365,7 @@
     <div class="panel-wrap">
       <div class="panel">
         <h2>Gestisci l'asta</h2>
-        <p class="hint">Carica il listone ufficiale o digita manualmente il calciatore da battere.</p>
+        <p class="hint">Carica il listone, premi "Seleziona", regola la base d'asta desiderata e clicca "Avvia asta".</p>
 
         <!-- CARICAMENTO FILE LISTONE -->
         <div class="field">
@@ -399,18 +391,24 @@
           </div>
         </div>
 
+        <!-- CAMPI PREPARAZIONE ASTA -->
         <div class="field">
           <label for="admin-player">Nome calciatore</label>
           <input id="admin-player" type="text" placeholder="Es. Lautaro Martinez" maxlength="40">
         </div>
+        
+        <!-- BADGE INFO GIOCATORE SELEZIONATO -->
+        <div id="admin-selected-meta" class="player-meta-badges" style="margin-top:-8px; margin-bottom:14px; min-height: 24px;"></div>
+
         <div class="field">
-          <label for="admin-base">Prezzo di partenza (crediti)</label>
+          <label for="admin-base">Base d'asta (crediti) — modificabile</label>
           <input id="admin-base" type="number" inputmode="numeric" value="1" min="1">
         </div>
+        
         <button class="btn-primary" onclick="startAuctionManually()">Avvia asta</button>
         <div class="msg" id="admin-msg"></div>
 
-        <div class="admin-current" id="admin-current" style="display:none;">
+        <div class="admin-current" id="admin-current" style="display:none; margin-top: 20px;">
           <div class="row"><span>Calciatore</span><span id="ac-player">—</span></div>
           <div class="row"><span>Prezzo attuale</span><span id="ac-price">—</span></div>
           <div class="row"><span>Ultima offerta</span><span id="ac-bidder">—</span></div>
@@ -445,6 +443,9 @@
   var pollTimer = null;
   var cachedListone = [];
   var filterRoles = { admin: '', user: '' };
+
+  // Dati del giocatore selezionato prima di avviare l'asta
+  var pendingPlayer = { role: '', team: '', qt: 1 };
 
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
 
@@ -528,7 +529,7 @@
     el.textContent = text || '';
     el.className = 'msg' + (cls ? (' ' + cls) : '');
     if(text){
-      setTimeout(function(){ if(el.textContent === text){ el.textContent=''; el.className='msg'; } }, 3000);
+      setTimeout(function(){ if(el.textContent === text){ el.textContent=''; el.className='msg'; } }, 3500);
     }
   }
 
@@ -585,7 +586,6 @@
   function renderBidScreen(s){
     document.getElementById('bid-player').textContent = s.player || '—';
     
-    // Badges ruolo e squadra nel pannello partecipante
     var metaWrap = document.getElementById('bid-meta-badges');
     if(s.status !== 'idle' && s.player){
       var metaHtml = '';
@@ -641,14 +641,12 @@
       '</div>';
     }
 
-    // RIGA 1: CALCIATORE + DETTAGLI LISTONE (RUOLO, SQUADRA, QT)
     html += '<div class="board-row">';
     html += '  <div class="board-label">In asta</div>';
     html += '  <div class="board-player-wrap">';
     html += '    <div class="board-player">' + escapeHtml(s.player) + '</div>';
     html += '  </div>';
     
-    // Metadati visibili sul tabellone
     html += '  <div class="player-meta-badges">';
     if(s.role) html += '<span class="role-tag role-' + s.role + '">' + s.role + '</span>';
     if(s.team) html += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
@@ -656,10 +654,7 @@
     html += '  </div>';
     html += '</div>';
 
-    // RIGA 2: PREZZO
     html += '<div class="board-row"><div class="board-label">Prezzo attuale</div><div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div></div>';
-    
-    // RIGA 3: ULTIMO OFFERENTE
     html += '<div class="board-row"><div class="board-label">Ultimo offerente</div><div class="board-bidder">' + (s.bidder ? escapeHtml(s.bidder) : '— nessuna offerta —') + '</div></div>';
     el.innerHTML = html;
 
@@ -672,24 +667,63 @@
   }
 
   // ---------- admin & asta ----------
-  function startAuctionManually(){
+  // MODIFICA 1: Seleziona compila i campi e permette di scegliere la base d'asta
+  function selectFromListone(name, price, role, team){
+    document.getElementById('admin-player').value = name;
+    document.getElementById('admin-base').value = price; // precompilata con qt, modificabile
+    
+    pendingPlayer = { role: role, team: team, qt: price };
+    
+    var metaBox = document.getElementById('admin-selected-meta');
+    metaBox.innerHTML = 
+      '<span class="role-tag role-' + role + '">' + role + '</span>' +
+      '<span class="player-team-pill">' + escapeHtml(team) + '</span>' +
+      '<span class="player-qt-pill">Quotazione: ' + price + ' cfu</span>';
+
+    // Scroll verso i campi di avvio
+    document.getElementById('admin-player').focus();
+    showMsg('admin-msg', 'Calciatore selezionato! Modifica la base d\'asta se lo desideri e clicca "Avvia asta".', 'ok');
+  }
+
+  // Avvio manuale con controllo che non sia già stato assegnato
+  async function startAuctionManually(){
     var player = document.getElementById('admin-player').value.trim();
     var base = parseInt(document.getElementById('admin-base').value, 10) || 1;
-    
-    // Cerca se esiste nel listone per associare ruolo e squadra
-    var found = cachedListone.find(function(p){ return p.name.toLowerCase() === player.toLowerCase(); });
-    var role = found ? found.role : '';
-    var team = found ? found.team : '';
-    var qt = found ? found.price : base;
+
+    if(!player){
+      showMsg('admin-msg', 'Inserisci o seleziona il nome del calciatore.', 'error');
+      return;
+    }
+
+    // MODIFICA 2: Controllo blocco se già assegnato
+    var log = await loadLog();
+    var alreadyAssigned = log.find(function(item){
+      return item.bidder && item.player && item.player.toLowerCase() === player.toLowerCase();
+    });
+
+    if(alreadyAssigned){
+      showMsg('admin-msg', player + ' è già stato assegnato a ' + alreadyAssigned.bidder + ' e non può essere ribattuto!', 'error');
+      return;
+    }
+
+    // Se non arriva dal click "Seleziona", cerca nel listone se esiste
+    var role = pendingPlayer.role;
+    var team = pendingPlayer.team;
+    var qt = pendingPlayer.qt;
+
+    if(!role){
+      var found = cachedListone.find(function(p){ return p.name.toLowerCase() === player.toLowerCase(); });
+      if(found){
+        role = found.role;
+        team = found.team;
+        qt = found.price;
+      }
+    }
 
     launchAuction(player, base, role, team, qt);
   }
 
   async function launchAuction(player, base, role, team, qt){
-    if(!player){
-      showMsg('admin-msg', 'Inserisci il nome del calciatore.', 'error');
-      return;
-    }
     if(isNaN(base) || base < 1){ base = 1; }
 
     var s = await loadState();
@@ -714,7 +748,9 @@
     if(ok){
       document.getElementById('admin-player').value = '';
       document.getElementById('admin-base').value = '1';
-      showMsg('admin-msg', 'Asta avviata per ' + player + '.', 'ok');
+      document.getElementById('admin-selected-meta').innerHTML = '';
+      pendingPlayer = { role: '', team: '', qt: 1 };
+      showMsg('admin-msg', 'Asta aperta per ' + player + ' con base a ' + base + ' crediti!', 'ok');
       renderAdmin(newState);
     }
   }
@@ -740,7 +776,7 @@
       await saveLog(log);
       renderAdmin(newState);
       refreshNow();
-      showMsg('admin-msg', s.bidder ? (s.player + ' assegnato a ' + s.bidder + '.') : (s.player + ' chiuso senza offerte.'), 'ok');
+      showMsg('admin-msg', s.bidder ? (s.player + ' assegnato a ' + s.bidder + '.') : (s.player + ' chiuso senza offerte (svincolato).'), 'ok');
     }
   }
 
@@ -760,7 +796,7 @@
     closeBtn.style.display = s.status === 'open' ? 'block' : 'none';
   }
 
-  // ---------- GESTIONE FILE LISTONE ROBUSTA ----------
+  // ---------- GESTIONE FILE LISTONE ----------
   function handleFileUpload(e){
     var file = e.target.files[0];
     if(!file) return;
@@ -775,7 +811,7 @@
 
         var parsed = parseFantaRows(rows);
         if(parsed.length === 0){
-          alert('Non sono stati trovati calciatori. Verifica che il file contenga le colonne Ruolo, Nome e Quotazione.');
+          alert('Non sono stati trovati calciatori validi. Verifica che il file contenga le colonne Ruolo, Nome e Quotazione.');
           return;
         }
 
@@ -784,7 +820,7 @@
         document.getElementById('admin-listone-box').style.display = 'block';
         renderListoneTable('admin');
         renderListoneTable('user');
-        alert('Listone caricato con successo: ' + parsed.length + ' calciatori pronti con le rispettive quotazioni!');
+        alert('Listone caricato con successo: ' + parsed.length + ' calciatori pronti!');
       } catch(err){
         console.error(err);
         alert('Errore nella lettura del file. Verifica che sia un file Excel o CSV valido.');
@@ -797,19 +833,14 @@
     var headerIndex = -1;
     var rIdx = -1, nameIdx = -1, teamIdx = -1, qtIdx = -1;
 
-    // Ispezione delle prime 15 righe per trovare l'header esatto
     for(var i = 0; i < Math.min(rows.length, 15); i++){
       var row = (rows[i] || []).map(function(c){
         return String(c || '').toLowerCase().trim().replace(/[\._\s]/g, '');
       });
 
-      // Ruolo
       rIdx = row.findIndex(function(c){ return c === 'r' || c === 'ruolo'; });
-      // Nome Calciatore
       nameIdx = row.findIndex(function(c){ return c === 'nome' || c === 'calciatore' || c === 'giocatore'; });
-      // Squadra
       teamIdx = row.findIndex(function(c){ return c === 'squadra' || c === 'club'; });
-      // Quotazione (supporta qta, qti, qt, qa, qi, quotazione, quotazioneattuale, valore)
       qtIdx = row.findIndex(function(c){
         return c === 'qta' || c === 'qti' || c === 'qt' || c === 'qa' || c === 'qi' ||
                c === 'quotazione' || c === 'quotazionea' || c === 'valore';
@@ -829,11 +860,9 @@
       if(!r || !r[nameIdx]) continue;
       
       var rawRole = String(r[rIdx] || '').trim().toUpperCase();
-      // Normalizzazione ruoli Mantra o con separatori (es. "C;W" prende "C")
       var primaryRole = rawRole.charAt(0);
       if(!['P','D','C','A'].includes(primaryRole)) continue;
 
-      // Parsing del prezzo quotazione
       var rawPrice = qtIdx !== -1 ? r[qtIdx] : 1;
       var priceParsed = parseInt(String(rawPrice).replace(/[^0-9]/g, ''), 10);
       if(isNaN(priceParsed) || priceParsed < 1) priceParsed = 1;
@@ -859,6 +888,7 @@
     renderListoneTable(context);
   }
 
+  // MODIFICA 2: Rendering tabelle con blocco dei giocatori già assegnati
   async function renderListoneTable(context){
     var log = await loadLog();
     var soldMap = {};
@@ -895,21 +925,19 @@
 
       if(context === 'admin'){
         if(isSold){
-          html += '<td><span class="badge-assigned">Preso da ' + escapeHtml(buyer) + '</span></td>';
+          // Calciatore già assegnato: nessun tasto batti/seleziona
+          html += '<td><span class="badge-assigned">Assegnato a ' + escapeHtml(buyer) + '</span></td>';
         } else {
-          html += '<td><button class="btn-call-player" onclick="callFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ', \'' + p.role + '\', \'' + escapeHtml(p.team).replace(/'/g, "\\'") + '\')">Batti</button></td>';
+          // Calciatore libero: tasto "Seleziona" per precompilare e scegliere la base d'asta
+          html += '<td><button class="btn-select-player" onclick="selectFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ', \'' + p.role + '\', \'' + escapeHtml(p.team).replace(/'/g, "\\'") + '\')">Seleziona</button></td>';
         }
       } else {
-        html += '<td>' + (isSold ? ('<span class="badge-assigned">' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
+        html += '<td>' + (isSold ? ('<span class="badge-assigned">Preso da ' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
       }
       html += '</tr>';
     });
 
     tableBody.innerHTML = html;
-  }
-
-  function callFromListone(name, price, role, team){
-    launchAuction(name, price, role, team, price);
   }
 
   // ---------- rose & log ----------
@@ -1025,7 +1053,6 @@
     wrap.innerHTML = html;
   }
 
-  // ---------- utils ----------
   function escapeHtml(str){
     return String(str)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
