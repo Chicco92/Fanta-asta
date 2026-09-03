@@ -6,6 +6,8 @@
 <title>Asta Fantacalcio Live</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- SheetJS per leggere file Excel/CSV di Fantacalcio -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root{
     --pitch-dark:#0E2A1E;
@@ -38,14 +40,14 @@
     -webkit-font-smoothing: antialiased;
   }
   button{ font-family: inherit; cursor:pointer; }
-  input{ font-family: inherit; }
+  input, select{ font-family: inherit; }
   a{ color: inherit; }
   :focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
 
   .screen{ display:none; min-height:100vh; }
   .screen.active{ display:flex; }
 
-  /* ---------- HOME ---------- */
+  /* HOME */
   #screen-home{
     flex-direction:column; align-items:center; justify-content:center;
     padding: 32px 20px; text-align:center; gap: 36px;
@@ -72,7 +74,7 @@
   .role-card .label{ font-weight:700; font-size:16px; }
   .role-card .desc{ font-size: 12.5px; color: var(--chalk-dim); line-height:1.4; }
 
-  /* ---------- SHARED ---------- */
+  /* SHARED */
   .topbar{
     position:fixed; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center;
     padding: 14px 18px; font-size: 13px; color: var(--chalk-dim); z-index: 5;
@@ -82,17 +84,16 @@
   .link-btn:hover{ color: var(--chalk); }
 
   .panel-wrap{ flex:1; display:flex; align-items:center; justify-content:center; padding: 80px 18px 40px; width: 100%; }
-  .panel{ width:100%; max-width: 460px; }
+  .panel{ width:100%; max-width: 520px; }
   .panel h2{ font-family: var(--font-display); font-size: 22px; margin: 0 0 6px; letter-spacing: .3px; }
   .panel .hint{ color: var(--chalk-dim); font-size: 13.5px; margin: 0 0 22px; line-height:1.5; }
 
   .field{ margin-bottom: 16px; }
   .field label{ display:block; font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
-  .field input{
+  .field input, .field select{
     width:100%; padding: 13px 14px; background: var(--pitch-mid); border:1px solid var(--pitch-line);
     border-radius: var(--radius); color: var(--chalk); font-size: 16px;
   }
-  .field input::placeholder{ color: rgba(231,227,212,0.35); }
   .field input:focus{ border-color: var(--gold); }
 
   .btn-primary{
@@ -118,7 +119,7 @@
   .msg.error{ color: var(--brick); }
   .msg.ok{ color: var(--gold); }
 
-  /* ---------- TABELLONE (TV) ---------- */
+  /* TABELLONE */
   #screen-tabellone{ flex-direction:column; align-items:center; justify-content:flex-start; padding: 75px 20px 40px; }
   .board{
     width:100%; max-width: 900px; background: var(--pitch-mid);
@@ -144,7 +145,7 @@
   .tv-footer{ margin-top: 22px; color: var(--chalk-dim); font-size: 13px; text-align:center; }
   .tv-footer b{ color: var(--gold); }
 
-  /* ---------- PARTECIPANTE ---------- */
+  /* PARTECIPANTE */
   .bid-hero{ text-align:center; margin-bottom: 26px; }
   .bid-hero .label{ font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
   .bid-hero .player{ font-family: var(--font-display); font-size: clamp(24px,7vw,32px); margin-bottom: 14px; }
@@ -172,7 +173,7 @@
 
   .you-are{ text-align:center; font-size: 12.5px; color: var(--chalk-dim); margin-top: 18px; margin-bottom: 20px; }
 
-  /* ---------- TABELLE SQUADRE & ACQUISTI ---------- */
+  /* TABELLE & ROSE */
   .section-divider{ height: 1px; background: var(--pitch-line); margin: 24px 0 16px; }
   .section-header{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 12px; }
   .section-title{ font-family: var(--font-display); font-size: 16px; color: var(--chalk); }
@@ -191,16 +192,33 @@
   .team-card-name{ font-family: var(--font-display); font-size: 15px; color: var(--gold); }
   .team-card-stats{ font-size: 12px; color: var(--chalk-dim); }
 
-  /* ---------- ADMIN ---------- */
-  .admin-panel{ max-width: 520px; }
-  .admin-current{
-    background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius);
-    padding: 16px 18px; margin-bottom: 22px; font-size: 14px;
+  /* LISTONE UI */
+  .listone-box{
+    background: var(--pitch-mid); border: 1px solid var(--pitch-line); border-radius: var(--radius);
+    padding: 16px; margin-top: 16px;
   }
-  .admin-current .row{ display:flex; justify-content:space-between; padding: 5px 0; }
-  .admin-current .row span:first-child{ color: var(--chalk-dim); }
-  .admin-current .row span:last-child{ font-weight:700; }
-  .divider{ height:1px; background: var(--pitch-line); margin: 26px 0 18px; }
+  .listone-search{ width:100%; padding: 10px 12px; background: var(--pitch-dark); border:1px solid var(--pitch-line); border-radius: var(--radius); color: var(--chalk); font-size:14px; margin-bottom: 10px; }
+  .role-filters{ display: flex; gap: 6px; margin-bottom: 12px; }
+  .btn-filter{
+    flex: 1; padding: 6px 0; background: var(--pitch-mid-2); border: 1px solid var(--pitch-line);
+    color: var(--chalk-dim); font-size: 12px; font-weight: 700; border-radius: 4px;
+  }
+  .btn-filter.active{ background: var(--gold); color: #17240F; border-color: var(--gold); }
+  
+  .listone-table-wrap{ max-height: 280px; overflow-y: auto; border: 1px solid var(--pitch-line); border-radius: 6px; }
+  .listone-table{ width: 100%; border-collapse: collapse; font-size: 13px; }
+  .listone-table th, .listone-table td{ padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--pitch-line); }
+  .listone-table th{ position: sticky; top: 0; background: var(--pitch-dark); color: var(--chalk-dim); font-size: 11px; z-index: 2; }
+  .role-tag{ display: inline-block; padding: 2px 6px; border-radius: 3px; font-weight: 800; font-size: 11px; }
+  .role-P{ background: #D9822B; color: #fff; }
+  .role-D{ background: #2E8540; color: #fff; }
+  .role-C{ background: #2B6CB0; color: #fff; }
+  .role-A{ background: #C53030; color: #fff; }
+  .btn-call-player{
+    padding: 4px 8px; background: var(--gold); color: #17240F; border: none;
+    border-radius: 4px; font-weight: 700; font-size: 11px;
+  }
+  .badge-assigned{ font-size: 11px; color: var(--chalk-dim); font-style: italic; }
 
   @media (max-width: 480px){
     .role-grid{ flex-direction:column; align-items:stretch; }
@@ -232,7 +250,7 @@
       <button class="role-card" onclick="goHome('admin')">
         <div class="icon">⚙️</div>
         <div class="label">Banditore</div>
-        <div class="desc">Metti all'asta i calciatori e assegna il vincitore.</div>
+        <div class="desc">Carica il listone, batti all'asta e assegna.</div>
       </button>
     </div>
   </div>
@@ -242,8 +260,6 @@
     <div class="topbar"><span>Tabellone Live</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
     <div class="board" id="board-content"></div>
     <div class="tv-footer">Aggiornamento automatico · offri da smartphone su <b id="tv-hint-url"></b></div>
-
-    <!-- Rose partecipanti su tabellone -->
     <div class="teams-grid" id="tv-teams-grid"></div>
   </div>
 
@@ -299,6 +315,29 @@
           <span class="section-meta" id="my-team-stats">0 giocatori · 0 crediti spesi</span>
         </div>
         <div id="my-team-wrap"></div>
+
+        <!-- Listone Consultazione -->
+        <div class="section-divider"></div>
+        <div class="section-header">
+          <span class="section-title">Consulta Listone</span>
+        </div>
+        <div class="listone-box">
+          <input type="text" class="listone-search" id="user-search-player" placeholder="Cerca giocatore o squadra..." oninput="renderListoneTable('user')">
+          <div class="role-filters" id="user-role-filters">
+            <button class="btn-filter active" onclick="setRoleFilter('user', '')">TUTTI</button>
+            <button class="btn-filter" onclick="setRoleFilter('user', 'P')">P</button>
+            <button class="btn-filter" onclick="setRoleFilter('user', 'D')">D</button>
+            <button class="btn-filter" onclick="setRoleFilter('user', 'C')">C</button>
+            <button class="btn-filter" onclick="setRoleFilter('user', 'A')">A</button>
+          </div>
+          <div class="listone-table-wrap">
+            <table class="listone-table" id="user-listone-table">
+              <thead><tr><th>R</th><th>Calciatore</th><th>Squadra</th><th>Qt</th><th>Stato</th></tr></thead>
+              <tbody><tr><td colspan="5" style="text-align:center; color:var(--chalk-dim);">Nessun listone caricato.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -307,9 +346,33 @@
   <div id="screen-admin" class="screen">
     <div class="topbar"><span>Banditore</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
     <div class="panel-wrap">
-      <div class="panel admin-panel">
+      <div class="panel">
         <h2>Gestisci l'asta</h2>
-        <p class="hint">Inserisci il calciatore da battere. Quando l'asta si chiude, assegnalo all'ultimo offerente.</p>
+        <p class="hint">Carica il listone ufficiale o digita manualmente il calciatore da battere.</p>
+
+        <!-- CARICAMENTO FILE LISTONE -->
+        <div class="field">
+          <label>Carica Listone Fantacalcio (file .xlsx o .csv)</label>
+          <input type="file" id="file-listone" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(event)">
+        </div>
+
+        <!-- LISTONE BROWSER BANDITORE -->
+        <div class="listone-box" id="admin-listone-box" style="margin-bottom: 20px; display: none;">
+          <input type="text" class="listone-search" id="admin-search-player" placeholder="Cerca per nome o squadra..." oninput="renderListoneTable('admin')">
+          <div class="role-filters" id="admin-role-filters">
+            <button class="btn-filter active" onclick="setRoleFilter('admin', '')">TUTTI</button>
+            <button class="btn-filter" onclick="setRoleFilter('admin', 'P')">P</button>
+            <button class="btn-filter" onclick="setRoleFilter('admin', 'D')">D</button>
+            <button class="btn-filter" onclick="setRoleFilter('admin', 'C')">C</button>
+            <button class="btn-filter" onclick="setRoleFilter('admin', 'A')">A</button>
+          </div>
+          <div class="listone-table-wrap">
+            <table class="listone-table" id="admin-listone-table">
+              <thead><tr><th>R</th><th>Calciatore</th><th>Sq</th><th>Qt</th><th>Azione</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
 
         <div class="field">
           <label for="admin-player">Nome calciatore</label>
@@ -331,15 +394,11 @@
         <button class="btn-danger" id="btn-close-auction" onclick="closeAuction()" style="display:none; margin-top: 10px;">Chiudi e assegna</button>
 
         <div class="divider"></div>
-        <div class="section-header">
-          <span class="section-title">Rose partecipanti</span>
-        </div>
+        <div class="section-header"><span class="section-title">Rose partecipanti</span></div>
         <div id="admin-teams-wrap"></div>
 
         <div class="divider"></div>
-        <div class="section-header">
-          <span class="section-title">Cronologia completa</span>
-        </div>
+        <div class="section-header"><span class="section-title">Cronologia completa</span></div>
         <div id="log-wrap"><div class="team-empty">Ancora nessun calciatore assegnato.</div></div>
       </div>
     </div>
@@ -352,17 +411,19 @@
   var STATE_KEY = 'fanta_auction_state';
   var LOG_KEY = 'fanta_auction_log';
   var USER_KEY = 'fanta_saved_username';
+  var LISTONE_KEY = 'fanta_auction_listone';
 
   // ---------- in-memory session ----------
   var myName = localStorage.getItem(USER_KEY) || '';
   var currentRoute = 'home';
   var lastKnownPrice = null;
   var pollTimer = null;
+  var cachedListone = [];
+  var filterRoles = { admin: '', user: '' };
 
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
 
-  // ---------- universal storage layer ----------
-  // Supporta window.storage (se presente in sandbox) con fallback robusto a localStorage
+  // ---------- storage layer ----------
   var store = {
     get: async function(key){
       if(window.storage && typeof window.storage.get === 'function'){
@@ -386,36 +447,29 @@
     }
   };
 
-  async function loadState(){
-    var s = await store.get(STATE_KEY);
-    return s || null;
-  }
-  async function saveState(state){
-    return await store.set(STATE_KEY, state);
-  }
-  async function loadLog(){
-    var l = await store.get(LOG_KEY);
-    return Array.isArray(l) ? l : [];
-  }
-  async function saveLog(log){
-    return await store.set(LOG_KEY, log);
-  }
+  async function loadState(){ return await store.get(STATE_KEY); }
+  async function saveState(s){ return await store.set(STATE_KEY, s); }
+  async function loadLog(){ var l = await store.get(LOG_KEY); return Array.isArray(l) ? l : []; }
+  async function saveLog(l){ return await store.set(LOG_KEY, l); }
+  async function loadListone(){ var l = await store.get(LISTONE_KEY); return Array.isArray(l) ? l : []; }
+  async function saveListone(l){ return await store.set(LISTONE_KEY, l); }
+
   async function ensureInit(){
     var s = await loadState();
     if(!s){
       s = { player:'', basePrice:1, price:0, bidder:'', status:'idle', updatedAt: Date.now() };
       await saveState(s);
     }
+    cachedListone = await loadListone();
+    if(cachedListone.length > 0){
+      document.getElementById('admin-listone-box').style.display = 'block';
+    }
     return s;
   }
 
-  // ---------- navigation & flow ----------
+  // ---------- router ----------
   function checkParticipantEntry(){
-    if(myName){
-      goHome('bid');
-    } else {
-      goHome('join');
-    }
+    if(myName){ goHome('bid'); } else { goHome('join'); }
   }
 
   function goHome(route){
@@ -428,6 +482,10 @@
     if(route === 'bid'){
       document.getElementById('you-are-name').textContent = myName;
       document.getElementById('bid-topbar-name').textContent = 'Ciao, ' + myName;
+      renderListoneTable('user');
+    }
+    if(route === 'admin'){
+      renderListoneTable('admin');
     }
     refreshNow();
   }
@@ -462,7 +520,7 @@
     goHome('bid');
   }
 
-  // ---------- bidding ----------
+  // ---------- offerte ----------
   async function quickBid(amount){
     var s = await loadState();
     if(!s || s.status !== 'open'){
@@ -557,7 +615,7 @@
     }
   }
 
-  // ---------- admin ----------
+  // ---------- admin & asta ----------
   async function startAuction(){
     var playerInput = document.getElementById('admin-player');
     var baseInput = document.getElementById('admin-base');
@@ -620,7 +678,143 @@
     closeBtn.style.display = s.status === 'open' ? 'block' : 'none';
   }
 
-  // ---------- log & rose logic ----------
+  // ---------- GESTIONE FILE LISTONE ----------
+  function handleFileUpload(e){
+    var file = e.target.files[0];
+    if(!file) return;
+
+    var reader = new FileReader();
+    reader.onload = async function(evt){
+      try {
+        var data = new Uint8Array(evt.target.result);
+        var workbook = XLSX.read(data, { type: 'array' });
+        var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+        // Identifica colonne (R, Nome, Squadra, Quotazione)
+        var parsed = parseFantaRows(rows);
+        if(parsed.length === 0){
+          alert('Non sono stati trovati calciatori validi nel file. Assicurati che sia il file esportato da Leghe Fantacalcio.');
+          return;
+        }
+
+        cachedListone = parsed;
+        await saveListone(parsed);
+        document.getElementById('admin-listone-box').style.display = 'block';
+        renderListoneTable('admin');
+        renderListoneTable('user');
+        alert('Listone caricato con successo: ' + parsed.length + ' calciatori pronti!');
+      } catch(err){
+        console.error(err);
+        alert('Errore nella lettura del file. Verifica che sia un file Excel o CSV valido.');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function parseFantaRows(rows){
+    var headerIndex = -1;
+    var rIdx = -1, nameIdx = -1, teamIdx = -1, qtIdx = -1;
+
+    for(var i = 0; i < Math.min(rows.length, 10); i++){
+      var row = rows[i].map(function(c){ return String(c || '').toLowerCase().trim(); });
+      rIdx = row.findIndex(function(c){ return c === 'r' || c === 'ruolo'; });
+      nameIdx = row.findIndex(function(c){ return c === 'nome' || c === 'calciatore'; });
+      teamIdx = row.findIndex(function(c){ return c === 'squadra'; });
+      qtIdx = row.findIndex(function(c){ return c === 'qt. a' || c === 'qt' || c === 'qta' || c === 'quotazione'; });
+
+      if(nameIdx !== -1 && rIdx !== -1){
+        headerIndex = i;
+        break;
+      }
+    }
+
+    if(headerIndex === -1) return [];
+
+    var list = [];
+    for(var j = headerIndex + 1; j < rows.length; j++){
+      var r = rows[j];
+      if(!r || !r[nameIdx]) continue;
+      var role = String(r[rIdx] || '').trim().toUpperCase();
+      if(!['P','D','C','A'].includes(role)) continue;
+
+      list.push({
+        name: String(r[nameIdx]).trim(),
+        role: role,
+        team: teamIdx !== -1 ? String(r[teamIdx] || '').trim() : '',
+        price: qtIdx !== -1 ? (parseInt(r[qtIdx], 10) || 1) : 1
+      });
+    }
+    return list;
+  }
+
+  function setRoleFilter(context, role){
+    filterRoles[context] = role;
+    var container = document.getElementById(context + '-role-filters');
+    if(container){
+      container.querySelectorAll('.btn-filter').forEach(function(b){
+        b.classList.toggle('active', b.textContent === (role || 'TUTTI'));
+      });
+    }
+    renderListoneTable(context);
+  }
+
+  async function renderListoneTable(context){
+    var log = await loadLog();
+    var soldMap = {};
+    log.forEach(function(item){
+      if(item.player && item.bidder) soldMap[item.player.toLowerCase()] = item.bidder;
+    });
+
+    var q = (document.getElementById(context + '-search-player').value || '').toLowerCase().trim();
+    var roleFilter = filterRoles[context];
+    var tableBody = document.querySelector('#' + context + '-listone-table tbody');
+    if(!tableBody) return;
+
+    var filtered = cachedListone.filter(function(p){
+      if(roleFilter && p.role !== roleFilter) return false;
+      if(q && !p.name.toLowerCase().includes(q) && !p.team.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    if(filtered.length === 0){
+      tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--chalk-dim);">Nessun calciatore trovato.</td></tr>';
+      return;
+    }
+
+    var html = '';
+    filtered.slice(0, 100).forEach(function(p){
+      var buyer = soldMap[p.name.toLowerCase()];
+      var isSold = !!buyer;
+
+      html += '<tr>';
+      html += '  <td><span class="role-tag role-' + p.role + '">' + p.role + '</span></td>';
+      html += '  <td><b>' + escapeHtml(p.name) + '</b></td>';
+      html += '  <td>' + escapeHtml(p.team) + '</td>';
+      html += '  <td style="color:var(--gold); font-weight:700;">' + p.price + '</td>';
+
+      if(context === 'admin'){
+        if(isSold){
+          html += '<td><span class="badge-assigned">Preso da ' + escapeHtml(buyer) + '</span></td>';
+        } else {
+          html += '<td><button class="btn-call-player" onclick="callFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ')">Batti</button></td>';
+        }
+      } else {
+        html += '<td>' + (isSold ? ('<span class="badge-assigned">' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
+      }
+      html += '</tr>';
+    });
+
+    tableBody.innerHTML = html;
+  }
+
+  function callFromListone(name, price){
+    document.getElementById('admin-player').value = name;
+    document.getElementById('admin-base').value = price;
+    startAuction();
+  }
+
+  // ---------- rose & log ----------
   function groupPurchasesByParticipant(log){
     var map = {};
     (log || []).forEach(function(item){
@@ -733,14 +927,13 @@
     wrap.innerHTML = html;
   }
 
-  // ---------- utils ----------
   function escapeHtml(str){
     return String(str)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
 
-  // ---------- polling & refresh loop ----------
+  // ---------- loop ----------
   async function refreshNow(){
     var s = await loadState();
     var log = await loadLog();
