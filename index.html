@@ -125,12 +125,26 @@
     width:100%; max-width: 900px; background: var(--pitch-mid);
     border: 2px solid var(--gold-dim); border-radius: 14px; overflow:hidden;
   }
-  .board-row{ padding: clamp(18px,3vw,34px) clamp(20px,4vw,48px); border-top: 1px solid var(--pitch-line); }
+  .board-row{ padding: clamp(16px,2.5vw,28px) clamp(20px,4vw,48px); border-top: 1px solid var(--pitch-line); }
   .board-row:first-child{ border-top:none; }
-  .board-label{ font-size: clamp(12px,1.4vw,15px); color: var(--chalk-dim); letter-spacing:.3px; margin-bottom: 6px; }
-  .board-player{ font-family: var(--font-display); font-size: clamp(30px, 6.2vw, 64px); line-height:1.05; letter-spacing:.3px; word-break: break-word; }
+  .board-label{ font-size: clamp(12px,1.4vw,14px); color: var(--chalk-dim); letter-spacing:.3px; margin-bottom: 6px; }
+  
+  .board-player-wrap{ display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .board-player{ font-family: var(--font-display); font-size: clamp(28px, 5.5vw, 56px); line-height:1.05; letter-spacing:.3px; word-break: break-word; }
+  
+  /* Dettagli giocatore sul tabellone */
+  .player-meta-badges{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .player-team-pill{
+    background: var(--pitch-dark); border: 1px solid var(--pitch-line); padding: 4px 10px;
+    border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--chalk);
+  }
+  .player-qt-pill{
+    background: rgba(227,178,60,0.15); border: 1px solid var(--gold-dim); padding: 4px 10px;
+    border-radius: 20px; font-size: 13px; font-weight: 700; color: var(--gold);
+  }
+
   .board-price{
-    font-family: var(--font-display); font-size: clamp(48px, 11vw, 120px); color: var(--gold);
+    font-family: var(--font-display); font-size: clamp(48px, 11vw, 110px); color: var(--gold);
     line-height:1; font-variant-numeric: tabular-nums; transition: transform .18s ease;
   }
   .board-price.pulse{ transform: scale(1.06); }
@@ -148,7 +162,7 @@
   /* PARTECIPANTE */
   .bid-hero{ text-align:center; margin-bottom: 26px; }
   .bid-hero .label{ font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
-  .bid-hero .player{ font-family: var(--font-display); font-size: clamp(24px,7vw,32px); margin-bottom: 14px; }
+  .bid-hero .player{ font-family: var(--font-display); font-size: clamp(24px,7vw,32px); margin-bottom: 6px; }
   .bid-hero .price{ font-family: var(--font-display); font-size: clamp(46px,16vw,64px); color: var(--gold); font-variant-numeric: tabular-nums; }
   .bid-hero .bidder{ font-size: 14px; color: var(--chalk-dim); margin-top: 8px; }
   .bid-hero .bidder b{ color: var(--chalk); }
@@ -209,7 +223,7 @@
   .listone-table{ width: 100%; border-collapse: collapse; font-size: 13px; }
   .listone-table th, .listone-table td{ padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--pitch-line); }
   .listone-table th{ position: sticky; top: 0; background: var(--pitch-dark); color: var(--chalk-dim); font-size: 11px; z-index: 2; }
-  .role-tag{ display: inline-block; padding: 2px 6px; border-radius: 3px; font-weight: 800; font-size: 11px; }
+  .role-tag{ display: inline-block; padding: 2px 7px; border-radius: 4px; font-weight: 800; font-size: 12px; }
   .role-P{ background: #D9822B; color: #fff; }
   .role-D{ background: #2E8540; color: #fff; }
   .role-C{ background: #2B6CB0; color: #fff; }
@@ -219,6 +233,16 @@
     border-radius: 4px; font-weight: 700; font-size: 11px;
   }
   .badge-assigned{ font-size: 11px; color: var(--chalk-dim); font-style: italic; }
+
+  /* ADMIN */
+  .admin-current{
+    background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 22px; font-size: 14px;
+  }
+  .admin-current .row{ display:flex; justify-content:space-between; padding: 5px 0; }
+  .admin-current .row span:first-child{ color: var(--chalk-dim); }
+  .admin-current .row span:last-child{ font-weight:700; }
+  .divider{ height:1px; background: var(--pitch-line); margin: 26px 0 18px; }
 
   @media (max-width: 480px){
     .role-grid{ flex-direction:column; align-items:stretch; }
@@ -240,7 +264,7 @@
       <button class="role-card" onclick="goHome('tabellone')">
         <div class="icon">📺</div>
         <div class="label">Tabellone</div>
-        <div class="desc">Apri su TV o PC: mostra calciatore, prezzo e rose.</div>
+        <div class="desc">Mostra calciatore, dettagli e rose in tempo reale.</div>
       </button>
       <button class="role-card" onclick="checkParticipantEntry()">
         <div class="icon">📱</div>
@@ -289,6 +313,7 @@
         <div class="bid-hero">
           <div class="label">In asta</div>
           <div class="player" id="bid-player">—</div>
+          <div class="player-meta-badges" id="bid-meta-badges" style="justify-content:center; margin-bottom:12px;"></div>
           <div class="price" id="bid-price">0<span style="font-size:0.4em;color:var(--chalk-dim);"> cfu</span></div>
           <div class="bidder" id="bid-bidder"></div>
         </div>
@@ -352,7 +377,7 @@
 
         <!-- CARICAMENTO FILE LISTONE -->
         <div class="field">
-          <label>Carica Listone Fantacalcio (file .xlsx o .csv)</label>
+          <label>Carica Listone Fantacalcio (.xlsx, .xls o .csv)</label>
           <input type="file" id="file-listone" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(event)">
         </div>
 
@@ -382,7 +407,7 @@
           <label for="admin-base">Prezzo di partenza (crediti)</label>
           <input id="admin-base" type="number" inputmode="numeric" value="1" min="1">
         </div>
-        <button class="btn-primary" onclick="startAuction()">Avvia asta</button>
+        <button class="btn-primary" onclick="startAuctionManually()">Avvia asta</button>
         <div class="msg" id="admin-msg"></div>
 
         <div class="admin-current" id="admin-current" style="display:none;">
@@ -457,7 +482,7 @@
   async function ensureInit(){
     var s = await loadState();
     if(!s){
-      s = { player:'', basePrice:1, price:0, bidder:'', status:'idle', updatedAt: Date.now() };
+      s = { player:'', role:'', team:'', qt:1, basePrice:1, price:0, bidder:'', status:'idle', updatedAt: Date.now() };
       await saveState(s);
     }
     cachedListone = await loadListone();
@@ -559,6 +584,19 @@
 
   function renderBidScreen(s){
     document.getElementById('bid-player').textContent = s.player || '—';
+    
+    // Badges ruolo e squadra nel pannello partecipante
+    var metaWrap = document.getElementById('bid-meta-badges');
+    if(s.status !== 'idle' && s.player){
+      var metaHtml = '';
+      if(s.role) metaHtml += '<span class="role-tag role-' + s.role + '">' + s.role + '</span>';
+      if(s.team) metaHtml += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
+      if(s.qt) metaHtml += '<span class="player-qt-pill">Qt. ' + s.qt + '</span>';
+      metaWrap.innerHTML = metaHtml;
+    } else {
+      metaWrap.innerHTML = '';
+    }
+
     document.getElementById('bid-price').innerHTML = (s.status === 'idle' ? '0' : s.price) + '<span style="font-size:0.4em;color:var(--chalk-dim);"> cfu</span>';
     document.getElementById('bid-bidder').innerHTML = s.bidder ? ('Offerta più alta: <b>' + escapeHtml(s.bidder) + '</b>') : '';
 
@@ -602,8 +640,26 @@
         (s.bidder ? ('AGGIUDICATO A ' + escapeHtml(s.bidder).toUpperCase()) : 'ASTA CHIUSA SENZA OFFERTE') +
       '</div>';
     }
-    html += '<div class="board-row"><div class="board-label">In asta</div><div class="board-player">' + escapeHtml(s.player) + '</div></div>';
+
+    // RIGA 1: CALCIATORE + DETTAGLI LISTONE (RUOLO, SQUADRA, QT)
+    html += '<div class="board-row">';
+    html += '  <div class="board-label">In asta</div>';
+    html += '  <div class="board-player-wrap">';
+    html += '    <div class="board-player">' + escapeHtml(s.player) + '</div>';
+    html += '  </div>';
+    
+    // Metadati visibili sul tabellone
+    html += '  <div class="player-meta-badges">';
+    if(s.role) html += '<span class="role-tag role-' + s.role + '">' + s.role + '</span>';
+    if(s.team) html += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
+    if(s.qt) html += '<span class="player-qt-pill">Quotazione base: ' + s.qt + ' crediti</span>';
+    html += '  </div>';
+    html += '</div>';
+
+    // RIGA 2: PREZZO
     html += '<div class="board-row"><div class="board-label">Prezzo attuale</div><div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div></div>';
+    
+    // RIGA 3: ULTIMO OFFERENTE
     html += '<div class="board-row"><div class="board-label">Ultimo offerente</div><div class="board-bidder">' + (s.bidder ? escapeHtml(s.bidder) : '— nessuna offerta —') + '</div></div>';
     el.innerHTML = html;
 
@@ -616,12 +672,20 @@
   }
 
   // ---------- admin & asta ----------
-  async function startAuction(){
-    var playerInput = document.getElementById('admin-player');
-    var baseInput = document.getElementById('admin-base');
-    var player = playerInput.value.trim();
-    var base = parseInt(baseInput.value, 10);
+  function startAuctionManually(){
+    var player = document.getElementById('admin-player').value.trim();
+    var base = parseInt(document.getElementById('admin-base').value, 10) || 1;
+    
+    // Cerca se esiste nel listone per associare ruolo e squadra
+    var found = cachedListone.find(function(p){ return p.name.toLowerCase() === player.toLowerCase(); });
+    var role = found ? found.role : '';
+    var team = found ? found.team : '';
+    var qt = found ? found.price : base;
 
+    launchAuction(player, base, role, team, qt);
+  }
+
+  async function launchAuction(player, base, role, team, qt){
     if(!player){
       showMsg('admin-msg', 'Inserisci il nome del calciatore.', 'error');
       return;
@@ -634,11 +698,22 @@
       if(!confirmOverwrite) return;
     }
 
-    var newState = { player: player, basePrice: base, price: base, bidder: '', status: 'open', updatedAt: Date.now() };
+    var newState = {
+      player: player,
+      role: role || '',
+      team: team || '',
+      qt: qt || base,
+      basePrice: base,
+      price: base,
+      bidder: '',
+      status: 'open',
+      updatedAt: Date.now()
+    };
+
     var ok = await saveState(newState);
     if(ok){
-      playerInput.value = '';
-      baseInput.value = '1';
+      document.getElementById('admin-player').value = '';
+      document.getElementById('admin-base').value = '1';
       showMsg('admin-msg', 'Asta avviata per ' + player + '.', 'ok');
       renderAdmin(newState);
     }
@@ -654,7 +729,14 @@
     var ok = await saveState(newState);
     if(ok){
       var log = await loadLog();
-      log.unshift({ player: s.player, price: s.bidder ? s.price : null, bidder: s.bidder || null, ts: Date.now() });
+      log.unshift({
+        player: s.player,
+        role: s.role || '',
+        team: s.team || '',
+        price: s.bidder ? s.price : null,
+        bidder: s.bidder || null,
+        ts: Date.now()
+      });
       await saveLog(log);
       renderAdmin(newState);
       refreshNow();
@@ -671,14 +753,14 @@
       return;
     }
     currentBox.style.display = 'block';
-    document.getElementById('ac-player').textContent = s.player;
+    document.getElementById('ac-player').textContent = s.player + (s.role ? ' (' + s.role + ' - ' + s.team + ')' : '');
     document.getElementById('ac-price').textContent = s.price + ' crediti';
     document.getElementById('ac-bidder').textContent = s.bidder || '—';
     document.getElementById('ac-status').textContent = s.status === 'open' ? 'Aperta' : 'Chiusa';
     closeBtn.style.display = s.status === 'open' ? 'block' : 'none';
   }
 
-  // ---------- GESTIONE FILE LISTONE ----------
+  // ---------- GESTIONE FILE LISTONE ROBUSTA ----------
   function handleFileUpload(e){
     var file = e.target.files[0];
     if(!file) return;
@@ -691,10 +773,9 @@
         var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         var rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-        // Identifica colonne (R, Nome, Squadra, Quotazione)
         var parsed = parseFantaRows(rows);
         if(parsed.length === 0){
-          alert('Non sono stati trovati calciatori validi nel file. Assicurati che sia il file esportato da Leghe Fantacalcio.');
+          alert('Non sono stati trovati calciatori. Verifica che il file contenga le colonne Ruolo, Nome e Quotazione.');
           return;
         }
 
@@ -703,7 +784,7 @@
         document.getElementById('admin-listone-box').style.display = 'block';
         renderListoneTable('admin');
         renderListoneTable('user');
-        alert('Listone caricato con successo: ' + parsed.length + ' calciatori pronti!');
+        alert('Listone caricato con successo: ' + parsed.length + ' calciatori pronti con le rispettive quotazioni!');
       } catch(err){
         console.error(err);
         alert('Errore nella lettura del file. Verifica che sia un file Excel o CSV valido.');
@@ -716,12 +797,23 @@
     var headerIndex = -1;
     var rIdx = -1, nameIdx = -1, teamIdx = -1, qtIdx = -1;
 
-    for(var i = 0; i < Math.min(rows.length, 10); i++){
-      var row = rows[i].map(function(c){ return String(c || '').toLowerCase().trim(); });
+    // Ispezione delle prime 15 righe per trovare l'header esatto
+    for(var i = 0; i < Math.min(rows.length, 15); i++){
+      var row = (rows[i] || []).map(function(c){
+        return String(c || '').toLowerCase().trim().replace(/[\._\s]/g, '');
+      });
+
+      // Ruolo
       rIdx = row.findIndex(function(c){ return c === 'r' || c === 'ruolo'; });
-      nameIdx = row.findIndex(function(c){ return c === 'nome' || c === 'calciatore'; });
-      teamIdx = row.findIndex(function(c){ return c === 'squadra'; });
-      qtIdx = row.findIndex(function(c){ return c === 'qt. a' || c === 'qt' || c === 'qta' || c === 'quotazione'; });
+      // Nome Calciatore
+      nameIdx = row.findIndex(function(c){ return c === 'nome' || c === 'calciatore' || c === 'giocatore'; });
+      // Squadra
+      teamIdx = row.findIndex(function(c){ return c === 'squadra' || c === 'club'; });
+      // Quotazione (supporta qta, qti, qt, qa, qi, quotazione, quotazioneattuale, valore)
+      qtIdx = row.findIndex(function(c){
+        return c === 'qta' || c === 'qti' || c === 'qt' || c === 'qa' || c === 'qi' ||
+               c === 'quotazione' || c === 'quotazionea' || c === 'valore';
+      });
 
       if(nameIdx !== -1 && rIdx !== -1){
         headerIndex = i;
@@ -735,14 +827,22 @@
     for(var j = headerIndex + 1; j < rows.length; j++){
       var r = rows[j];
       if(!r || !r[nameIdx]) continue;
-      var role = String(r[rIdx] || '').trim().toUpperCase();
-      if(!['P','D','C','A'].includes(role)) continue;
+      
+      var rawRole = String(r[rIdx] || '').trim().toUpperCase();
+      // Normalizzazione ruoli Mantra o con separatori (es. "C;W" prende "C")
+      var primaryRole = rawRole.charAt(0);
+      if(!['P','D','C','A'].includes(primaryRole)) continue;
+
+      // Parsing del prezzo quotazione
+      var rawPrice = qtIdx !== -1 ? r[qtIdx] : 1;
+      var priceParsed = parseInt(String(rawPrice).replace(/[^0-9]/g, ''), 10);
+      if(isNaN(priceParsed) || priceParsed < 1) priceParsed = 1;
 
       list.push({
         name: String(r[nameIdx]).trim(),
-        role: role,
+        role: primaryRole,
         team: teamIdx !== -1 ? String(r[teamIdx] || '').trim() : '',
-        price: qtIdx !== -1 ? (parseInt(r[qtIdx], 10) || 1) : 1
+        price: priceParsed
       });
     }
     return list;
@@ -797,7 +897,7 @@
         if(isSold){
           html += '<td><span class="badge-assigned">Preso da ' + escapeHtml(buyer) + '</span></td>';
         } else {
-          html += '<td><button class="btn-call-player" onclick="callFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ')">Batti</button></td>';
+          html += '<td><button class="btn-call-player" onclick="callFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ', \'' + p.role + '\', \'' + escapeHtml(p.team).replace(/'/g, "\\'") + '\')">Batti</button></td>';
         }
       } else {
         html += '<td>' + (isSold ? ('<span class="badge-assigned">' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
@@ -808,10 +908,8 @@
     tableBody.innerHTML = html;
   }
 
-  function callFromListone(name, price){
-    document.getElementById('admin-player').value = name;
-    document.getElementById('admin-base').value = price;
-    startAuction();
+  function callFromListone(name, price, role, team){
+    launchAuction(name, price, role, team, price);
   }
 
   // ---------- rose & log ----------
@@ -843,9 +941,9 @@
       return;
     }
 
-    var html = '<table class="team-table"><thead><tr><th>Calciatore</th><th class="price-head">Costo</th></tr></thead><tbody>';
+    var html = '<table class="team-table"><thead><tr><th>R</th><th>Calciatore</th><th class="price-head">Costo</th></tr></thead><tbody>';
     myData.items.forEach(function(p){
-      html += '<tr><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+      html += '<tr><td>' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
     });
     html += '</tbody></table>';
     wrap.innerHTML = html;
@@ -873,7 +971,7 @@
       html += '  </div>';
       html += '  <table class="team-table"><tbody>';
       data.items.forEach(function(p){
-        html += '<tr><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+        html += '<tr><td>' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
       });
       html += '  </tbody></table>';
       html += '</div>';
@@ -903,7 +1001,7 @@
       html += '  </div>';
       html += '  <table class="team-table"><tbody>';
       data.items.forEach(function(p){
-        html += '<tr><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+        html += '<tr><td>' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
       });
       html += '  </tbody></table>';
       html += '</div>';
@@ -927,13 +1025,14 @@
     wrap.innerHTML = html;
   }
 
+  // ---------- utils ----------
   function escapeHtml(str){
     return String(str)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
 
-  // ---------- loop ----------
+  // ---------- polling loop ----------
   async function refreshNow(){
     var s = await loadState();
     var log = await loadLog();
