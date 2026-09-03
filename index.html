@@ -94,7 +94,7 @@
     width:100%; padding: 13px 14px; background: var(--pitch-mid); border:1px solid var(--pitch-line);
     border-radius: var(--radius); color: var(--chalk); font-size: 16px;
   }
-  .field input:focus{ border-color: var(--gold); }
+  .field input:focus, .field select:focus{ border-color: var(--gold); }
 
   .btn-primary{
     width:100%; padding: 14px 16px; background: var(--gold); color: #17240F; border:none;
@@ -108,6 +108,12 @@
     border:1px solid var(--brick-soft); border-radius: var(--radius); font-weight:700; font-size: 14px;
   }
   .btn-danger:hover{ background: var(--brick-soft); }
+
+  .btn-secondary{
+    width:100%; padding: 12px 16px; background: var(--pitch-mid-2); color: var(--gold);
+    border:1px solid var(--gold-dim); border-radius: var(--radius); font-weight:700; font-size: 14px;
+  }
+  .btn-secondary:hover{ background: rgba(227,178,60,0.12); }
 
   .msg{ font-size: 13px; margin-top: 10px; min-height: 18px; }
   .msg.error{ color: var(--brick); }
@@ -231,16 +237,24 @@
   /* ADMIN */
   .admin-current{
     background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius);
-    padding: 16px 18px; margin-bottom: 22px; font-size: 14px;
+    padding: 16px 18px; margin-bottom: 16px; font-size: 14px;
   }
   .admin-current .row{ display:flex; justify-content:space-between; padding: 5px 0; }
   .admin-current .row span:first-child{ color: var(--chalk-dim); }
   .admin-current .row span:last-child{ font-weight:700; }
   .divider{ height:1px; background: var(--pitch-line); margin: 26px 0 18px; }
 
+  .quick-assign-box{
+    background: var(--pitch-dark); border: 1px solid var(--pitch-line);
+    border-radius: var(--radius); padding: 12px; margin-top: 10px;
+  }
+  .quick-assign-box label{ display: block; font-size: 12px; color: var(--chalk-dim); margin-bottom: 6px; }
+  .quick-assign-row{ display: flex; gap: 8px; }
+
   @media (max-width: 480px){
     .role-grid{ flex-direction:column; align-items:stretch; }
     .role-card{ width:100%; flex-direction:row; text-align:left; justify-content:flex-start; }
+    .quick-assign-row{ flex-direction: column; }
   }
 </style>
 </head>
@@ -365,7 +379,7 @@
     <div class="panel-wrap">
       <div class="panel">
         <h2>Gestisci l'asta</h2>
-        <p class="hint">Carica il listone, premi "Seleziona", regola la base d'asta desiderata e clicca "Avvia asta".</p>
+        <p class="hint">Carica il listone, scegli la base (anche da 0 crediti) oppure assegna direttamente a 1 credito.</p>
 
         <!-- CARICAMENTO FILE LISTONE -->
         <div class="field">
@@ -397,23 +411,35 @@
           <input id="admin-player" type="text" placeholder="Es. Lautaro Martinez" maxlength="40">
         </div>
         
-        <!-- BADGE INFO GIOCATORE SELEZIONATO -->
         <div id="admin-selected-meta" class="player-meta-badges" style="margin-top:-8px; margin-bottom:14px; min-height: 24px;"></div>
 
         <div class="field">
-          <label for="admin-base">Base d'asta (crediti) — modificabile</label>
-          <input id="admin-base" type="number" inputmode="numeric" value="1" min="1">
+          <label for="admin-base">Base d'asta (crediti) — impostabile da 0</label>
+          <input id="admin-base" type="number" inputmode="numeric" value="0" min="0">
         </div>
         
         <button class="btn-primary" onclick="startAuctionManually()">Avvia asta</button>
         <div class="msg" id="admin-msg"></div>
 
+        <!-- STATO ASTA IN CORSO -->
         <div class="admin-current" id="admin-current" style="display:none; margin-top: 20px;">
           <div class="row"><span>Calciatore</span><span id="ac-player">—</span></div>
           <div class="row"><span>Prezzo attuale</span><span id="ac-price">—</span></div>
           <div class="row"><span>Ultima offerta</span><span id="ac-bidder">—</span></div>
           <div class="row"><span>Stato</span><span id="ac-status">—</span></div>
         </div>
+
+        <!-- ASSEGNAZIONE DIRETTA A 1 CREDITO -->
+        <div class="quick-assign-box" id="admin-quick-assign-box" style="display:none;">
+          <label>Oppure assegna direttamente a 1 credito a:</label>
+          <div class="quick-assign-row">
+            <select id="admin-quick-participant" style="flex:1; padding: 9px 10px; background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius:var(--radius); color:var(--chalk); font-size:13px;">
+              <option value="">Seleziona partecipante...</option>
+            </select>
+            <button class="btn-secondary" style="width: auto; padding: 9px 14px; font-size:13px;" onclick="assignDirectlyForOne()">Assegna a 1</button>
+          </div>
+        </div>
+
         <button class="btn-danger" id="btn-close-auction" onclick="closeAuction()" style="display:none; margin-top: 10px;">Chiudi e assegna</button>
 
         <div class="divider"></div>
@@ -435,6 +461,7 @@
   var LOG_KEY = 'fanta_auction_log';
   var USER_KEY = 'fanta_saved_username';
   var LISTONE_KEY = 'fanta_auction_listone';
+  var PARTICIPANTS_KEY = 'fanta_auction_known_participants';
 
   // ---------- in-memory session ----------
   var myName = localStorage.getItem(USER_KEY) || '';
@@ -444,7 +471,6 @@
   var cachedListone = [];
   var filterRoles = { admin: '', user: '' };
 
-  // Dati del giocatore selezionato prima di avviare l'asta
   var pendingPlayer = { role: '', team: '', qt: 1 };
 
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
@@ -480,10 +506,23 @@
   async function loadListone(){ var l = await store.get(LISTONE_KEY); return Array.isArray(l) ? l : []; }
   async function saveListone(l){ return await store.set(LISTONE_KEY, l); }
 
+  async function loadParticipants(){
+    var p = await store.get(PARTICIPANTS_KEY);
+    return Array.isArray(p) ? p : [];
+  }
+  async function registerParticipant(name){
+    if(!name) return;
+    var list = await loadParticipants();
+    if(!list.includes(name)){
+      list.push(name);
+      await store.set(PARTICIPANTS_KEY, list);
+    }
+  }
+
   async function ensureInit(){
     var s = await loadState();
     if(!s){
-      s = { player:'', role:'', team:'', qt:1, basePrice:1, price:0, bidder:'', status:'idle', updatedAt: Date.now() };
+      s = { player:'', role:'', team:'', qt:0, basePrice:0, price:0, bidder:'', status:'idle', updatedAt: Date.now() };
       await saveState(s);
     }
     cachedListone = await loadListone();
@@ -512,6 +551,7 @@
     }
     if(route === 'admin'){
       renderListoneTable('admin');
+      updateAdminParticipantSelect();
     }
     refreshNow();
   }
@@ -534,7 +574,7 @@
   }
 
   // ---------- join ----------
-  function joinAsParticipant(){
+  async function joinAsParticipant(){
     var v = document.getElementById('join-name').value.trim();
     if(!v){
       showMsg('join-msg', 'Inserisci il tuo nome per continuare.', 'error');
@@ -542,18 +582,27 @@
     }
     myName = v;
     localStorage.setItem(USER_KEY, myName);
+    await registerParticipant(myName);
     document.getElementById('join-name').value = '';
     goHome('bid');
   }
 
-  // ---------- offerte ----------
+  // ---------- offerte con base da 0 crediti ----------
   async function quickBid(amount){
     var s = await loadState();
     if(!s || s.status !== 'open'){
       showMsg('bid-msg', 'L\'asta non è aperta al momento.', 'error');
       return;
     }
-    var newPrice = s.price + amount;
+    
+    // Se la base era a 0 e non ci sono ancora offerte, il primo rilancio a +1 porta l'asta a 1 credito
+    var newPrice;
+    if(s.price === 0 && !s.bidder){
+      newPrice = amount;
+    } else {
+      newPrice = s.price + amount;
+    }
+
     var newState = Object.assign({}, s, { price:newPrice, bidder: myName, updatedAt: Date.now() });
     var ok = await saveState(newState);
     if(ok){
@@ -570,8 +619,8 @@
       showMsg('bid-msg', 'L\'asta non è aperta al momento.', 'error');
       return;
     }
-    if(isNaN(val) || val <= s.price){
-      showMsg('bid-msg', 'La tua offerta deve superare ' + s.price + ' crediti.', 'error');
+    if(isNaN(val) || val <= s.price || val < 1){
+      showMsg('bid-msg', 'La tua offerta deve essere superiore a ' + s.price + ' crediti.', 'error');
       return;
     }
     var newState = Object.assign({}, s, { price:val, bidder: myName, updatedAt: Date.now() });
@@ -591,14 +640,14 @@
       var metaHtml = '';
       if(s.role) metaHtml += '<span class="role-tag role-' + s.role + '">' + s.role + '</span>';
       if(s.team) metaHtml += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
-      if(s.qt) metaHtml += '<span class="player-qt-pill">Qt. ' + s.qt + '</span>';
+      if(s.qt !== undefined) metaHtml += '<span class="player-qt-pill">Qt. ' + s.qt + '</span>';
       metaWrap.innerHTML = metaHtml;
     } else {
       metaWrap.innerHTML = '';
     }
 
     document.getElementById('bid-price').innerHTML = (s.status === 'idle' ? '0' : s.price) + '<span style="font-size:0.4em;color:var(--chalk-dim);"> cfu</span>';
-    document.getElementById('bid-bidder').innerHTML = s.bidder ? ('Offerta più alta: <b>' + escapeHtml(s.bidder) + '</b>') : '';
+    document.getElementById('bid-bidder').innerHTML = s.bidder ? ('Offerta più alta: <b>' + escapeHtml(s.bidder) + '</b>') : (s.status === 'open' ? '<i>Ancora nessuna offerta (base: ' + s.basePrice + ')</i>' : '');
 
     var banner = document.getElementById('bid-status-banner');
     var quickBtns = [document.getElementById('btn-plus1'), document.getElementById('btn-plus5'), document.getElementById('btn-plus10')];
@@ -650,12 +699,12 @@
     html += '  <div class="player-meta-badges">';
     if(s.role) html += '<span class="role-tag role-' + s.role + '">' + s.role + '</span>';
     if(s.team) html += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
-    if(s.qt) html += '<span class="player-qt-pill">Quotazione base: ' + s.qt + ' crediti</span>';
+    if(s.qt !== undefined) html += '<span class="player-qt-pill">Quotazione: ' + s.qt + ' cfu</span>';
     html += '  </div>';
     html += '</div>';
 
     html += '<div class="board-row"><div class="board-label">Prezzo attuale</div><div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div></div>';
-    html += '<div class="board-row"><div class="board-label">Ultimo offerente</div><div class="board-bidder">' + (s.bidder ? escapeHtml(s.bidder) : '— nessuna offerta —') + '</div></div>';
+    html += '<div class="board-row"><div class="board-label">Ultimo offerente</div><div class="board-bidder">' + (s.bidder ? escapeHtml(s.bidder) : '— nessuna offerta (base ' + s.basePrice + ') —') + '</div></div>';
     el.innerHTML = html;
 
     if(priceChanged){
@@ -667,10 +716,10 @@
   }
 
   // ---------- admin & asta ----------
-  // MODIFICA 1: Seleziona compila i campi e permette di scegliere la base d'asta
   function selectFromListone(name, price, role, team){
     document.getElementById('admin-player').value = name;
-    document.getElementById('admin-base').value = price; // precompilata con qt, modificabile
+    // Lascia la base libera da personalizzare (default a 0 o alla qt)
+    document.getElementById('admin-base').value = 0;
     
     pendingPlayer = { role: role, team: team, qt: price };
     
@@ -680,33 +729,30 @@
       '<span class="player-team-pill">' + escapeHtml(team) + '</span>' +
       '<span class="player-qt-pill">Quotazione: ' + price + ' cfu</span>';
 
-    // Scroll verso i campi di avvio
-    document.getElementById('admin-player').focus();
-    showMsg('admin-msg', 'Calciatore selezionato! Modifica la base d\'asta se lo desideri e clicca "Avvia asta".', 'ok');
+    document.getElementById('admin-base').focus();
+    showMsg('admin-msg', 'Selezionato! Imposta la base desiderata (anche 0) e avvia.', 'ok');
   }
 
-  // Avvio manuale con controllo che non sia già stato assegnato
   async function startAuctionManually(){
     var player = document.getElementById('admin-player').value.trim();
-    var base = parseInt(document.getElementById('admin-base').value, 10) || 1;
+    var base = parseInt(document.getElementById('admin-base').value, 10);
+    if(isNaN(base) || base < 0) base = 0; // Supporto base 0
 
     if(!player){
       showMsg('admin-msg', 'Inserisci o seleziona il nome del calciatore.', 'error');
       return;
     }
 
-    // MODIFICA 2: Controllo blocco se già assegnato
     var log = await loadLog();
     var alreadyAssigned = log.find(function(item){
       return item.bidder && item.player && item.player.toLowerCase() === player.toLowerCase();
     });
 
     if(alreadyAssigned){
-      showMsg('admin-msg', player + ' è già stato assegnato a ' + alreadyAssigned.bidder + ' e non può essere ribattuto!', 'error');
+      showMsg('admin-msg', player + ' è già assegnato a ' + alreadyAssigned.bidder + '!', 'error');
       return;
     }
 
-    // Se non arriva dal click "Seleziona", cerca nel listone se esiste
     var role = pendingPlayer.role;
     var team = pendingPlayer.team;
     var qt = pendingPlayer.qt;
@@ -724,8 +770,6 @@
   }
 
   async function launchAuction(player, base, role, team, qt){
-    if(isNaN(base) || base < 1){ base = 1; }
-
     var s = await loadState();
     if(s && s.status === 'open'){
       var confirmOverwrite = confirm('C\'è già un\'asta aperta per "' + s.player + '". Vuoi sostituirla con "' + player + '"?');
@@ -736,7 +780,7 @@
       player: player,
       role: role || '',
       team: team || '',
-      qt: qt || base,
+      qt: qt !== undefined ? qt : base,
       basePrice: base,
       price: base,
       bidder: '',
@@ -747,11 +791,48 @@
     var ok = await saveState(newState);
     if(ok){
       document.getElementById('admin-player').value = '';
-      document.getElementById('admin-base').value = '1';
+      document.getElementById('admin-base').value = '0';
       document.getElementById('admin-selected-meta').innerHTML = '';
       pendingPlayer = { role: '', team: '', qt: 1 };
-      showMsg('admin-msg', 'Asta aperta per ' + player + ' con base a ' + base + ' crediti!', 'ok');
+      showMsg('admin-msg', 'Asta aperta per ' + player + ' (base ' + base + ' crediti)!', 'ok');
       renderAdmin(newState);
+      updateAdminParticipantSelect();
+    }
+  }
+
+  // Assegnazione rapida a 1 credito
+  async function assignDirectlyForOne(){
+    var s = await loadState();
+    if(!s || s.status !== 'open'){
+      showMsg('admin-msg', 'Nessuna asta aperta da assegnare.', 'error');
+      return;
+    }
+
+    var select = document.getElementById('admin-quick-participant');
+    var targetUser = select.value.trim();
+
+    if(!targetUser){
+      showMsg('admin-msg', 'Seleziona un partecipante a cui assegnare il giocatore.', 'error');
+      return;
+    }
+
+    var newState = Object.assign({}, s, { price: 1, bidder: targetUser, status: 'closed', updatedAt: Date.now() });
+    var ok = await saveState(newState);
+    if(ok){
+      var log = await loadLog();
+      log.unshift({
+        player: s.player,
+        role: s.role || '',
+        team: s.team || '',
+        price: 1,
+        bidder: targetUser,
+        ts: Date.now()
+      });
+      await saveLog(log);
+      await registerParticipant(targetUser);
+      renderAdmin(newState);
+      refreshNow();
+      showMsg('admin-msg', s.player + ' assegnato direttamente a ' + targetUser + ' per 1 credito!', 'ok');
     }
   }
 
@@ -774,6 +855,7 @@
         ts: Date.now()
       });
       await saveLog(log);
+      if(s.bidder) await registerParticipant(s.bidder);
       renderAdmin(newState);
       refreshNow();
       showMsg('admin-msg', s.bidder ? (s.player + ' assegnato a ' + s.bidder + '.') : (s.player + ' chiuso senza offerte (svincolato).'), 'ok');
@@ -783,9 +865,12 @@
   function renderAdmin(s){
     var currentBox = document.getElementById('admin-current');
     var closeBtn = document.getElementById('btn-close-auction');
+    var quickBox = document.getElementById('admin-quick-assign-box');
+
     if(!s || s.status === 'idle'){
       currentBox.style.display = 'none';
       closeBtn.style.display = 'none';
+      quickBox.style.display = 'none';
       return;
     }
     currentBox.style.display = 'block';
@@ -793,7 +878,31 @@
     document.getElementById('ac-price').textContent = s.price + ' crediti';
     document.getElementById('ac-bidder').textContent = s.bidder || '—';
     document.getElementById('ac-status').textContent = s.status === 'open' ? 'Aperta' : 'Chiusa';
+    
     closeBtn.style.display = s.status === 'open' ? 'block' : 'none';
+    quickBox.style.display = s.status === 'open' ? 'block' : 'none';
+  }
+
+  async function updateAdminParticipantSelect(){
+    var select = document.getElementById('admin-quick-participant');
+    if(!select) return;
+    
+    var list = await loadParticipants();
+    var log = await loadLog();
+    var groups = groupPurchasesByParticipant(log);
+    
+    // Combina partecipanti registrati e chi ha già acquistato
+    var allNames = Array.from(new Set(list.concat(Object.keys(groups))));
+    
+    var currentVal = select.value;
+    select.innerHTML = '<option value="">Seleziona partecipante...</option>';
+    allNames.forEach(function(name){
+      var opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      if(name === currentVal) opt.selected = true;
+      select.appendChild(opt);
+    });
   }
 
   // ---------- GESTIONE FILE LISTONE ----------
@@ -865,7 +974,7 @@
 
       var rawPrice = qtIdx !== -1 ? r[qtIdx] : 1;
       var priceParsed = parseInt(String(rawPrice).replace(/[^0-9]/g, ''), 10);
-      if(isNaN(priceParsed) || priceParsed < 1) priceParsed = 1;
+      if(isNaN(priceParsed) || priceParsed < 0) priceParsed = 1;
 
       list.push({
         name: String(r[nameIdx]).trim(),
@@ -888,7 +997,6 @@
     renderListoneTable(context);
   }
 
-  // MODIFICA 2: Rendering tabelle con blocco dei giocatori già assegnati
   async function renderListoneTable(context){
     var log = await loadLog();
     var soldMap = {};
@@ -925,10 +1033,8 @@
 
       if(context === 'admin'){
         if(isSold){
-          // Calciatore già assegnato: nessun tasto batti/seleziona
           html += '<td><span class="badge-assigned">Assegnato a ' + escapeHtml(buyer) + '</span></td>';
         } else {
-          // Calciatore libero: tasto "Seleziona" per precompilare e scegliere la base d'asta
           html += '<td><button class="btn-select-player" onclick="selectFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ', \'' + p.role + '\', \'' + escapeHtml(p.team).replace(/'/g, "\\'") + '\')">Seleziona</button></td>';
         }
       } else {
