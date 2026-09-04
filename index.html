@@ -183,9 +183,9 @@
   .msg.ok{ color: var(--gold); }
 
   /* ---------- TABELLONE ---------- */
-  #screen-tabellone{ flex-direction:column; align-items:center; justify-content:flex-start; padding: 75px 20px 40px; }
+  #screen-tabellone{ flex-direction:column; align-items:center; justify-content:flex-start; padding: 75px 20px 40px; width: 100%; }
   .board{
-    width:100%; max-width: 900px; background: var(--pitch-mid);
+    width:100%; max-width: 1200px; background: var(--pitch-mid);
     border: 2px solid var(--gold-dim); border-radius: 14px; overflow:hidden;
   }
   .board-row{ padding: clamp(16px,2.5vw,28px) clamp(20px,4vw,48px); border-top: 1px solid var(--pitch-line); }
@@ -262,12 +262,44 @@
   .profile-pick-btn .p-name{ font-weight:700; font-size:14px; }
   .profile-pick-btn .p-team{ font-size:12px; color: var(--gold); }
 
-  /* ---------- TABELLE & ROSE ---------- */
+  /* ---------- TABELLONE SLOT ROSE (TV / PC) ---------- */
   .section-divider{ height: 1px; background: var(--pitch-line); margin: 24px 0 16px; }
   .section-header{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 12px; }
   .section-title{ font-family: var(--font-display); font-size: 16px; color: var(--chalk); }
   .section-meta{ font-size: 12.5px; color: var(--gold); font-weight: 600; }
 
+  .teams-slots-grid{
+    display: flex; gap: 14px; overflow-x: auto; width: 100%; max-width: 100%;
+    padding-bottom: 14px; margin-top: 28px;
+  }
+  .team-slot-column{
+    min-width: 250px; width: 250px; flex-shrink: 0; background: var(--pitch-mid);
+    border: 1px solid var(--pitch-line); border-radius: var(--radius); display: flex;
+    flex-direction: column; overflow: hidden;
+  }
+  .team-slot-header{
+    padding: 12px 14px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.22);
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  }
+  .team-slot-header-info{ overflow: hidden; }
+  .team-slot-name{ font-family: var(--font-display); font-size: 14px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .team-slot-owner{ font-size: 11px; color: var(--chalk-dim); }
+  .team-slot-stats{ font-size: 11.5px; font-weight: 700; color: var(--chalk); text-align: right; white-space: nowrap; }
+
+  .role-section-title{
+    background: rgba(255,255,255,0.03); padding: 5px 10px; font-size: 11px; font-weight: 800;
+    letter-spacing: .5px; color: var(--chalk-dim); border-bottom: 1px solid rgba(233,230,219,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .slot-row{
+    padding: 6px 10px; font-size: 12px; border-bottom: 1px solid rgba(233,230,219,0.05);
+    display: flex; justify-content: space-between; align-items: center; min-height: 31px;
+  }
+  .slot-row.empty{ color: rgba(231,227,212,0.25); font-style: italic; }
+  .slot-player-name{ font-weight: 600; color: var(--chalk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+  .slot-price{ color: var(--gold); font-weight: 700; font-size: 11.5px; }
+
+  /* ---------- TABELLE NORMALI ---------- */
   .team-table{ width:100%; border-collapse: collapse; font-size: 13.5px; background: var(--pitch-mid); border-radius: var(--radius); overflow:hidden; border: 1px solid var(--pitch-line); }
   .team-table th, .team-table td{ text-align:left; padding: 9px 12px; border-bottom: 1px solid var(--pitch-line); }
   .team-table th{ color: var(--chalk-dim); font-weight:600; font-size:12px; background: rgba(0,0,0,0.18); }
@@ -549,7 +581,9 @@
     </div>
     <div class="board" id="board-content"></div>
     <div class="tv-footer">Aggiornamento automatico · offri da smartphone su <b id="tv-hint-url"></b></div>
-    <div class="teams-grid" id="tv-teams-grid"></div>
+
+    <!-- COLONNE ROSE CON SLOT FISSI P:3, D:8, C:8, A:6 -->
+    <div class="teams-slots-grid" id="tv-teams-slots-grid"></div>
   </div>
 
   <!-- ==================== PARTECIPANTE: PROFILO & STEMMA ==================== -->
@@ -824,6 +858,14 @@
   var ACTIVE_ROOM_KEY = 'fanta_active_room_id';
   var SUPER_ADMIN_USER = 'Chicco';
   var SUPER_ADMIN_PASS = 'Fedoro03';
+
+  // Configurazione slot di default per rosa (25 calciatori)
+  var ROSTER_SLOTS_CONFIG = {
+    P: { count: 3, label: 'PORTIERI (3)' },
+    D: { count: 8, label: 'DIFENSORI (8)' },
+    C: { count: 8, label: 'CENTROCAMPISTI (8)' },
+    A: { count: 6, label: 'ATTACCANTI (6)' }
+  };
 
   var DEVICE_TOKEN_KEY = 'fanta_device_token';
   var myDeviceToken = localStorage.getItem(DEVICE_TOKEN_KEY);
@@ -1242,7 +1284,6 @@
     container.innerHTML = html;
   }
 
-  // Avvia modale sblocco con codice alfanumerico (max 6)
   async function startUnlockProfile(name){
     var profiles = await loadProfiles();
     var found = profiles.find(function(p){ return p.name.toLowerCase() === name.toLowerCase(); });
@@ -1308,7 +1349,6 @@
     goHome('bid');
   }
 
-  // Disconnessione sicura dal profilo
   function logoutParticipantProfile(){
     if(!confirm('Vuoi disconnetterti dal profilo? Per rientrare sarà necessario inserire il tuo codice di accesso.')) return;
     localStorage.removeItem('fanta_profile_' + currentRoomId);
@@ -1862,9 +1902,20 @@
     tableBody.innerHTML = html;
   }
 
-  // ---------- ROSE E GRUPPI SQUADRE ----------
-  function groupPurchasesByTeam(log){
+  // ---------- ROSE E GRUPPI SQUADRE (CON PROFILI COMPLETI) ----------
+  function groupPurchasesWithAllProfiles(profiles, log){
     var map = {};
+    (profiles || []).forEach(function(p){
+      map[p.teamName] = {
+        teamName: p.teamName,
+        ownerName: p.name,
+        logoUrl: p.logoUrl || '',
+        items: [],
+        totalSpent: 0,
+        totalListValue: 0
+      };
+    });
+
     (log || []).forEach(function(item){
       if(!item.bidder || item.price === null) return;
       var teamKey = item.bidderTeam || item.bidder;
@@ -1885,15 +1936,16 @@
       map[teamKey].totalSpent += item.price;
       map[teamKey].totalListValue += (item.qt || item.price);
     });
+
     return map;
   }
 
-  function renderParticipantRoster(log){
+  function renderParticipantRoster(log, profiles){
     var wrap = document.getElementById('my-team-wrap');
     var statsEl = document.getElementById('my-team-stats');
     if(!wrap || !statsEl || !myProfile) return;
 
-    var groups = groupPurchasesByTeam(log);
+    var groups = groupPurchasesWithAllProfiles(profiles, log);
     var myData = groups[myProfile.teamName] || groups[myProfile.name] || { items: [], totalSpent: 0 };
 
     statsEl.textContent = myData.items.length + ' giocator' + (myData.items.length === 1 ? 'e' : 'i') + ' · ' + myData.totalSpent + ' crediti';
@@ -1911,57 +1963,91 @@
     wrap.innerHTML = html;
   }
 
-  function renderTvRosters(log){
-    var grid = document.getElementById('tv-teams-grid');
+  // ---------- TABELLONE TV CON SLOT FISSI P:3, D:8, C:8, A:6 ----------
+  function renderTvFixedSlotsRosters(log, profiles){
+    var grid = document.getElementById('tv-teams-slots-grid');
     if(!grid) return;
 
-    var groups = groupPurchasesByTeam(log);
-    var teams = Object.keys(groups);
+    var groups = groupPurchasesWithAllProfiles(profiles, log);
+    var teams = Object.values(groups);
 
     if(teams.length === 0){
-      grid.innerHTML = '';
+      grid.innerHTML = '<div class="team-empty" style="width:100%;">In attesa che le squadre registrino il proprio profilo...</div>';
       return;
     }
 
     var html = '';
-    teams.forEach(function(tName){
-      var data = groups[tName];
-      html += '<div class="team-card">';
-      html += '  <div class="team-card-header">';
-      html += '    <div class="team-card-title-wrap">';
-      html +=        getCrestHtml(data.logoUrl, data.teamName, 'md');
-      html += '      <div>';
-      html += '        <span class="team-card-name">' + escapeHtml(data.teamName) + '</span>';
-      html += '        <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div>';
+    teams.forEach(function(t){
+      var byRole = { P: [], D: [], C: [], A: [] };
+      t.items.forEach(function(p){
+        var r = (p.role || 'A').toUpperCase().charAt(0);
+        if(byRole[r]) byRole[r].push(p);
+        else byRole['A'].push(p);
+      });
+
+      html += '<div class="team-slot-column">';
+      
+      // Intestazione Colonna Squadra
+      html += '  <div class="team-slot-header">';
+      html += '    <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">';
+      html +=        getCrestHtml(t.logoUrl, t.teamName, 'md');
+      html += '      <div class="team-slot-header-info">';
+      html += '        <div class="team-slot-name">' + escapeHtml(t.teamName) + '</div>';
+      html += '        <div class="team-slot-owner">' + escapeHtml(t.ownerName) + '</div>';
       html += '      </div>';
       html += '    </div>';
-      html += '    <span class="team-card-stats">' + data.items.length + ' giog. · <b>' + data.totalSpent + ' cfu</b></span>';
+      html += '    <div class="team-slot-stats">';
+      html += '      <div>' + t.items.length + '/25</div>';
+      html += '      <div style="color:var(--gold); font-size:11px;">' + t.totalSpent + ' cfu</div>';
+      html += '    </div>';
       html += '  </div>';
-      html += '  <table class="team-table"><tbody>';
-      data.items.forEach(function(p){
-        html += '<tr><td>' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+
+      // Generazione slot per ruolo
+      ['P', 'D', 'C', 'A'].forEach(function(rKey){
+        var cfg = ROSTER_SLOTS_CONFIG[rKey];
+        var assignedList = byRole[rKey] || [];
+        
+        html += '<div class="role-section-title">';
+        html += '  <span>' + cfg.label + '</span>';
+        html += '  <span>' + assignedList.length + '/' + cfg.count + '</span>';
+        html += '</div>';
+
+        for(var i = 0; i < cfg.count; i++){
+          var player = assignedList[i];
+          if(player){
+            html += '<div class="slot-row">';
+            html += '  <span class="slot-player-name"><b>' + escapeHtml(player.player) + '</b></span>';
+            html += '  <span class="slot-price">' + player.price + ' cfu</span>';
+            html += '</div>';
+          } else {
+            html += '<div class="slot-row empty">';
+            html += '  <span>Slot libero</span>';
+            html += '  <span>—</span>';
+            html += '</div>';
+          }
+        }
       });
-      html += '  </tbody></table>';
+
       html += '</div>';
     });
+
     grid.innerHTML = html;
   }
 
-  function renderAdminRosters(log){
+  function renderAdminRosters(log, profiles){
     var wrap = document.getElementById('admin-teams-wrap');
     if(!wrap) return;
 
-    var groups = groupPurchasesByTeam(log);
-    var teams = Object.keys(groups);
+    var groups = groupPurchasesWithAllProfiles(profiles, log);
+    var teams = Object.values(groups);
 
     if(teams.length === 0){
-      wrap.innerHTML = '<div class="team-empty">Nessuna rosa compilata al momento.</div>';
+      wrap.innerHTML = '<div class="team-empty">Nessuna squadra registrata al momento.</div>';
       return;
     }
 
     var html = '<div class="teams-grid" style="margin-top:0;">';
-    teams.forEach(function(tName){
-      var data = groups[tName];
+    teams.forEach(function(data){
       html += '<div class="team-card">';
       html += '  <div class="team-card-header">';
       html += '    <div class="team-card-title-wrap">';
@@ -2003,11 +2089,13 @@
   // ---------- SCHERMATA RESOCONTO FINALE ----------
   async function renderSummaryScreen(){
     var log = await loadLog();
+    var profiles = await loadProfiles();
+
     if(currentRoomData){
       document.getElementById('summary-league-title').textContent = currentRoomData.name;
     }
 
-    var groups = groupPurchasesByTeam(log);
+    var groups = groupPurchasesWithAllProfiles(profiles, log);
     var teams = Object.values(groups);
 
     var totalSpent = 0;
@@ -2155,6 +2243,7 @@
 
     var s = await loadState();
     var log = await loadLog();
+    var profiles = await loadProfiles();
     if(!s) return;
 
     if(s.status === 'ended' && currentRoute !== 'summary' && currentRoute !== 'home' && currentRoute !== 'super-admin'){
@@ -2178,15 +2267,15 @@
 
     if(currentRoute === 'tabellone'){
       renderTabellone(s);
-      renderTvRosters(log);
+      renderTvFixedSlotsRosters(log, profiles);
     }
     if(currentRoute === 'bid'){
       renderBidScreen(s);
-      renderParticipantRoster(log);
+      renderParticipantRoster(log, profiles);
     }
     if(currentRoute === 'admin'){
       renderAdmin(s);
-      renderAdminRosters(log);
+      renderAdminRosters(log, profiles);
       renderLog(log);
     }
   }
