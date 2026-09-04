@@ -262,7 +262,7 @@
   .profile-pick-btn .p-name{ font-weight:700; font-size:14px; }
   .profile-pick-btn .p-team{ font-size:12px; color: var(--gold); }
 
-  /* ---------- TABELLONE SLOT ROSE (TV / PC) ---------- */
+  /* ---------- TABELLONE SLOT ROSE (TV / PC / PARTECIPANTE) ---------- */
   .section-divider{ height: 1px; background: var(--pitch-line); margin: 24px 0 16px; }
   .section-header{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 12px; }
   .section-title{ font-family: var(--font-display); font-size: 16px; color: var(--chalk); }
@@ -273,9 +273,12 @@
     padding-bottom: 14px; margin-top: 28px;
   }
   .team-slot-column{
-    min-width: 250px; width: 250px; flex-shrink: 0; background: var(--pitch-mid);
+    min-width: 260px; width: 260px; flex-shrink: 0; background: var(--pitch-mid);
     border: 1px solid var(--pitch-line); border-radius: var(--radius); display: flex;
     flex-direction: column; overflow: hidden;
+  }
+  .team-slot-column.single{
+    width: 100%; min-width: 100%;
   }
   .team-slot-header{
     padding: 12px 14px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.22);
@@ -284,7 +287,7 @@
   .team-slot-header-info{ overflow: hidden; }
   .team-slot-name{ font-family: var(--font-display); font-size: 14px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .team-slot-owner{ font-size: 11px; color: var(--chalk-dim); }
-  .team-slot-stats{ font-size: 11.5px; font-weight: 700; color: var(--chalk); text-align: right; white-space: nowrap; }
+  .team-slot-stats{ font-size: 12px; font-weight: 700; color: var(--chalk); text-align: right; white-space: nowrap; line-height: 1.3; }
 
   .role-section-title{
     background: rgba(255,255,255,0.03); padding: 5px 10px; font-size: 11px; font-weight: 800;
@@ -344,6 +347,13 @@
   .badge-assigned{ font-size: 11px; color: var(--brick); font-style: italic; font-weight: 600; }
 
   /* ---------- ADMIN & ASSEGNAZIONE RAPIDA ---------- */
+  .budget-setup-box{
+    background: var(--pitch-mid-2); border: 1px solid var(--gold-dim); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .budget-setup-box label{ font-size: 13px; font-weight: 700; color: var(--chalk); }
+  .budget-setup-box input{ width: 110px; padding: 8px 10px; background: var(--pitch-dark); border: 1px solid var(--pitch-line); border-radius: 4px; color: var(--gold); font-size: 15px; font-weight: 800; text-align: center; }
+
   .admin-current{
     background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius);
     padding: 16px 18px; margin-bottom: 16px; font-size: 14px;
@@ -582,7 +592,7 @@
     <div class="board" id="board-content"></div>
     <div class="tv-footer">Aggiornamento automatico · offri da smartphone su <b id="tv-hint-url"></b></div>
 
-    <!-- COLONNE ROSE CON SLOT FISSI P:3, D:8, C:8, A:6 -->
+    <!-- COLONNE ROSE CON SLOT FISSI P:3, D:8, C:8, A:6 E CREDITI RESIDUI -->
     <div class="teams-slots-grid" id="tv-teams-slots-grid"></div>
   </div>
 
@@ -610,13 +620,11 @@
           <input id="join-team-name" type="text" placeholder="Es. Real Madrink" maxlength="32" autocomplete="off">
         </div>
 
-        <!-- CODICE ALFANUMERICO FINO A 6 CARATTERI -->
         <div class="field">
           <label for="join-pin">Crea un codice di accesso (alfanumerico, max 6 caratteri)</label>
           <input id="join-pin" type="password" placeholder="Es. 1234, roma, fanta1" maxlength="6" autocomplete="off">
         </div>
 
-        <!-- UPLOAD STEMMA SQUADRA -->
         <div class="field">
           <label for="join-team-logo">Stemma Squadra (opzionale)</label>
           <div style="display:flex; align-items:center; gap:12px;">
@@ -670,12 +678,13 @@
           <span>Profilo attivo: <b id="you-are-name" style="color:var(--chalk)"></b> (<span id="you-are-team" style="color:var(--gold)"></span>)</span>
         </div>
 
+        <!-- SEZIONE SLOT SQUADRA PARTECIPANTE -->
         <div class="section-divider"></div>
         <div class="section-header">
           <span class="section-title">La tua rosa</span>
-          <span class="section-meta" id="my-team-stats">0 giocatori · 0 crediti spesi</span>
+          <span class="section-meta" id="my-team-credits-meta">Rimangono: — cfu</span>
         </div>
-        <div id="my-team-wrap"></div>
+        <div id="my-team-slot-wrap" style="width:100%; margin-bottom: 24px;"></div>
 
         <div class="section-divider"></div>
         <div class="section-header">
@@ -714,7 +723,16 @@
     <div class="panel-wrap">
       <div class="panel">
         <h2>Gestisci l'asta</h2>
-        <p class="hint">Carica il listone, scegli la base oppure assegna direttamente a 1 credito.</p>
+        <p class="hint">Imposta il budget iniziale, carica il listone e batti i calciatori all'asta.</p>
+
+        <!-- CONFIGURAZIONE BUDGET INIZIALE -->
+        <div class="budget-setup-box">
+          <div>
+            <label for="admin-initial-budget">Budget crediti iniziale per squadra:</label>
+            <div style="font-size:11px; color:var(--chalk-dim); margin-top:2px;">Utilizzato per calcolare i crediti rimasti a ogni partecipante</div>
+          </div>
+          <input id="admin-initial-budget" type="number" value="500" min="1" step="10" onchange="updateInitialBudget(this.value)">
+        </div>
 
         <!-- CARICAMENTO FILE LISTONE -->
         <div class="field">
@@ -782,7 +800,7 @@
         <button class="btn-danger" style="border-color:var(--brick); color:var(--chalk); background:rgba(193,90,69,0.35);" onclick="concludeWholeAuction()">🏁 Concludi definitivamente l'asta</button>
 
         <div class="divider"></div>
-        <div class="section-header"><span class="section-title">Rose partecipanti</span></div>
+        <div class="section-header"><span class="section-title">Rose partecipanti (con crediti rimasti)</span></div>
         <div id="admin-teams-wrap"></div>
 
         <div class="divider"></div>
@@ -859,7 +877,7 @@
   var SUPER_ADMIN_USER = 'Chicco';
   var SUPER_ADMIN_PASS = 'Fedoro03';
 
-  // Configurazione slot di default per rosa (25 calciatori)
+  // Configurazione slot per ruolo (25 calciatori)
   var ROSTER_SLOTS_CONFIG = {
     P: { count: 3, label: 'PORTIERI (3)' },
     D: { count: 8, label: 'DIFENSORI (8)' },
@@ -886,6 +904,7 @@
   var pendingPlayer = { role: '', team: '', qt: 1 };
   var tempLogoBase64 = '';
   var pendingProfileToUnlock = null;
+  var currentInitialBudget = 500;
 
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
 
@@ -937,6 +956,14 @@
   async function loadAdminClaim(){ return await store.get(getRoomPath('adminClaim')); }
   async function saveAdminClaim(token){ return await store.set(getRoomPath('adminClaim'), token); }
 
+  async function loadBudget(){
+    var b = await store.get(getRoomPath('initialBudget'));
+    return (b !== null && !isNaN(b)) ? parseInt(b, 10) : 500;
+  }
+  async function saveBudget(b){
+    return await store.set(getRoomPath('initialBudget'), parseInt(b, 10));
+  }
+
   async function loadProfiles(){
     var p = await store.get(getRoomPath('profiles'));
     return Array.isArray(p) ? p : [];
@@ -956,6 +983,16 @@
   }
   async function saveRoomsIndex(rooms){
     return await store.set(ROOMS_INDEX_KEY, rooms);
+  }
+
+  // ---------- GESTIONE BUDGET BANDITORE ----------
+  async function updateInitialBudget(val){
+    var num = parseInt(val, 10);
+    if(isNaN(num) || num < 1) num = 500;
+    currentInitialBudget = num;
+    await saveBudget(num);
+    showMsg('admin-msg', 'Budget impostato a ' + num + ' crediti!', 'ok');
+    refreshNow();
   }
 
   // ---------- GESTIONE STEMMA E IMMAGINI ----------
@@ -1232,6 +1269,10 @@
       s = { player:'', role:'', team:'', qt:0, basePrice:0, price:0, bidder:'', bidderTeam:'', bidderLogo:'', status:'idle', updatedAt: Date.now() };
       await saveState(s);
     }
+    currentInitialBudget = await loadBudget();
+    var budgetInput = document.getElementById('admin-initial-budget');
+    if(budgetInput) budgetInput.value = currentInitialBudget;
+
     cachedListone = await loadListone();
     if(cachedListone.length > 0){
       document.getElementById('admin-listone-box').style.display = 'block';
@@ -1940,30 +1981,85 @@
     return map;
   }
 
-  function renderParticipantRoster(log, profiles){
-    var wrap = document.getElementById('my-team-wrap');
-    var statsEl = document.getElementById('my-team-stats');
-    if(!wrap || !statsEl || !myProfile) return;
-
-    var groups = groupPurchasesWithAllProfiles(profiles, log);
-    var myData = groups[myProfile.teamName] || groups[myProfile.name] || { items: [], totalSpent: 0 };
-
-    statsEl.textContent = myData.items.length + ' giocator' + (myData.items.length === 1 ? 'e' : 'i') + ' · ' + myData.totalSpent + ' crediti';
-
-    if(myData.items.length === 0){
-      wrap.innerHTML = '<div class="team-empty">Nessun acquisto registrato finora.</div>';
-      return;
-    }
-
-    var html = '<table class="team-table"><thead><tr><th>R</th><th>Calciatore</th><th class="price-head">Costo</th></tr></thead><tbody>';
-    myData.items.forEach(function(p){
-      html += '<tr><td>' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+  // Costruttore HTML per una colonna squadra con slot fissi (P:3, D:8, C:8, A:6)
+  function buildTeamSlotColumnHtml(t, isSingleColumn){
+    var remainingCredits = currentInitialBudget - t.totalSpent;
+    var byRole = { P: [], D: [], C: [], A: [] };
+    t.items.forEach(function(p){
+      var r = (p.role || 'A').toUpperCase().charAt(0);
+      if(byRole[r]) byRole[r].push(p);
+      else byRole['A'].push(p);
     });
-    html += '</tbody></table>';
-    wrap.innerHTML = html;
+
+    var html = '<div class="team-slot-column' + (isSingleColumn ? ' single' : '') + '">';
+    
+    // Intestazione con crediti RIMASTI
+    html += '  <div class="team-slot-header">';
+    html += '    <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">';
+    html +=        getCrestHtml(t.logoUrl, t.teamName, 'md');
+    html += '      <div class="team-slot-header-info">';
+    html += '        <div class="team-slot-name">' + escapeHtml(t.teamName) + '</div>';
+    html += '        <div class="team-slot-owner">' + escapeHtml(t.ownerName) + '</div>';
+    html += '      </div>';
+    html += '    </div>';
+    html += '    <div class="team-slot-stats">';
+    html += '      <div>' + t.items.length + '/25 giog.</div>';
+    html += '      <div style="color:var(--gold);">Rimangono: <b>' + remainingCredits + '</b> cfu</div>';
+    html += '    </div>';
+    html += '  </div>';
+
+    // Sezioni slot fissi
+    ['P', 'D', 'C', 'A'].forEach(function(rKey){
+      var cfg = ROSTER_SLOTS_CONFIG[rKey];
+      var assignedList = byRole[rKey] || [];
+      
+      html += '<div class="role-section-title">';
+      html += '  <span>' + cfg.label + '</span>';
+      html += '  <span>' + assignedList.length + '/' + cfg.count + '</span>';
+      html += '</div>';
+
+      for(var i = 0; i < cfg.count; i++){
+        var player = assignedList[i];
+        if(player){
+          html += '<div class="slot-row">';
+          html += '  <span class="slot-player-name"><b>' + escapeHtml(player.player) + '</b></span>';
+          html += '  <span class="slot-price">' + player.price + ' cfu</span>';
+          html += '</div>';
+        } else {
+          html += '<div class="slot-row empty">';
+          html += '  <span>Slot libero</span>';
+          html += '  <span>—</span>';
+          html += '</div>';
+        }
+      }
+    });
+
+    html += '</div>';
+    return html;
   }
 
-  // ---------- TABELLONE TV CON SLOT FISSI P:3, D:8, C:8, A:6 ----------
+  // Render Slot Squadra nella schermata Partecipante
+  function renderParticipantRoster(log, profiles){
+    var wrap = document.getElementById('my-team-slot-wrap');
+    var creditsMeta = document.getElementById('my-team-credits-meta');
+    if(!wrap || !creditsMeta || !myProfile) return;
+
+    var groups = groupPurchasesWithAllProfiles(profiles, log);
+    var myData = groups[myProfile.teamName] || groups[myProfile.name] || {
+      teamName: myProfile.teamName,
+      ownerName: myProfile.name,
+      logoUrl: myProfile.logoUrl || '',
+      items: [],
+      totalSpent: 0
+    };
+
+    var remaining = currentInitialBudget - myData.totalSpent;
+    creditsMeta.innerHTML = 'Rimangono: <b style="color:var(--gold); font-size:14px;">' + remaining + '</b> cfu (spesi: ' + myData.totalSpent + ')';
+
+    wrap.innerHTML = buildTeamSlotColumnHtml(myData, true);
+  }
+
+  // Render Colonne Slot sul Tabellone (TV)
   function renderTvFixedSlotsRosters(log, profiles){
     var grid = document.getElementById('tv-teams-slots-grid');
     if(!grid) return;
@@ -1978,57 +2074,7 @@
 
     var html = '';
     teams.forEach(function(t){
-      var byRole = { P: [], D: [], C: [], A: [] };
-      t.items.forEach(function(p){
-        var r = (p.role || 'A').toUpperCase().charAt(0);
-        if(byRole[r]) byRole[r].push(p);
-        else byRole['A'].push(p);
-      });
-
-      html += '<div class="team-slot-column">';
-      
-      // Intestazione Colonna Squadra
-      html += '  <div class="team-slot-header">';
-      html += '    <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">';
-      html +=        getCrestHtml(t.logoUrl, t.teamName, 'md');
-      html += '      <div class="team-slot-header-info">';
-      html += '        <div class="team-slot-name">' + escapeHtml(t.teamName) + '</div>';
-      html += '        <div class="team-slot-owner">' + escapeHtml(t.ownerName) + '</div>';
-      html += '      </div>';
-      html += '    </div>';
-      html += '    <div class="team-slot-stats">';
-      html += '      <div>' + t.items.length + '/25</div>';
-      html += '      <div style="color:var(--gold); font-size:11px;">' + t.totalSpent + ' cfu</div>';
-      html += '    </div>';
-      html += '  </div>';
-
-      // Generazione slot per ruolo
-      ['P', 'D', 'C', 'A'].forEach(function(rKey){
-        var cfg = ROSTER_SLOTS_CONFIG[rKey];
-        var assignedList = byRole[rKey] || [];
-        
-        html += '<div class="role-section-title">';
-        html += '  <span>' + cfg.label + '</span>';
-        html += '  <span>' + assignedList.length + '/' + cfg.count + '</span>';
-        html += '</div>';
-
-        for(var i = 0; i < cfg.count; i++){
-          var player = assignedList[i];
-          if(player){
-            html += '<div class="slot-row">';
-            html += '  <span class="slot-player-name"><b>' + escapeHtml(player.player) + '</b></span>';
-            html += '  <span class="slot-price">' + player.price + ' cfu</span>';
-            html += '</div>';
-          } else {
-            html += '<div class="slot-row empty">';
-            html += '  <span>Slot libero</span>';
-            html += '  <span>—</span>';
-            html += '</div>';
-          }
-        }
-      });
-
-      html += '</div>';
+      html += buildTeamSlotColumnHtml(t, false);
     });
 
     grid.innerHTML = html;
@@ -2048,6 +2094,7 @@
 
     var html = '<div class="teams-grid" style="margin-top:0;">';
     teams.forEach(function(data){
+      var remaining = currentInitialBudget - data.totalSpent;
       html += '<div class="team-card">';
       html += '  <div class="team-card-header">';
       html += '    <div class="team-card-title-wrap">';
@@ -2057,7 +2104,10 @@
       html += '        <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div>';
       html += '      </div>';
       html += '    </div>';
-      html += '    <span class="team-card-stats">' + data.items.length + ' acquisti · <b>' + data.totalSpent + ' cfu</b></span>';
+      html += '    <div style="text-align:right;">';
+      html += '      <div class="team-card-stats">' + data.items.length + '/25 giog.</div>';
+      html += '      <div style="font-size:11.5px; color:var(--gold);">Rimangono: <b>' + remaining + ' cfu</b></div>';
+      html += '    </div>';
       html += '  </div>';
       html += '  <table class="team-table"><tbody>';
       data.items.forEach(function(p){
@@ -2132,6 +2182,7 @@
 
     var html = '';
     teams.forEach(function(t){
+      var remaining = currentInitialBudget - t.totalSpent;
       html += '<div class="team-card">';
       html += '  <div class="team-card-header">';
       html += '    <div class="team-card-title-wrap">';
@@ -2141,7 +2192,7 @@
       html += '        <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(t.ownerName) + ')</div>';
       html += '      </div>';
       html += '    </div>';
-      html += '    <div style="text-align:right;"><span class="team-card-stats">Spesa: <b>' + t.totalSpent + ' cfu</b></span><div style="font-size:11px; color:var(--gold);">Valore Listone: ' + t.totalListValue + '</div></div>';
+      html += '    <div style="text-align:right;"><span class="team-card-stats">Rimasti: <b>' + remaining + ' cfu</b></span><div style="font-size:11px; color:var(--gold);">Valore Listone: ' + t.totalListValue + '</div></div>';
       html += '  </div>';
       html += '  <table class="team-table"><thead><tr><th>R</th><th>Calciatore</th><th class="price-head">Prezzo</th></tr></thead><tbody>';
       t.items.forEach(function(p){
@@ -2244,6 +2295,7 @@
     var s = await loadState();
     var log = await loadLog();
     var profiles = await loadProfiles();
+    currentInitialBudget = await loadBudget();
     if(!s) return;
 
     if(s.status === 'ended' && currentRoute !== 'summary' && currentRoute !== 'home' && currentRoute !== 'super-admin'){
