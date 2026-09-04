@@ -8,6 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- SheetJS per leggere file Excel/CSV di Fantacalcio -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- Firebase SDK compatibile -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <style>
   :root{
     --pitch-dark:#0E2A1E;
@@ -47,7 +51,47 @@
   .screen{ display:none; min-height:100vh; }
   .screen.active{ display:flex; }
 
-  /* HOME */
+  /* ---------- LOBBY PRINCIPALE ---------- */
+  #screen-lobby{
+    flex-direction:column; align-items:center; justify-content:flex-start;
+    padding: 60px 20px 40px; width:100%; max-width: 720px; margin: 0 auto;
+  }
+  .lobby-title{ font-family: var(--font-display); font-size: clamp(26px, 5vw, 40px); text-align:center; margin-bottom: 6px; }
+  .lobby-title span{ color: var(--gold); }
+  .lobby-sub{ color: var(--chalk-dim); text-align:center; font-size: 14px; margin-bottom: 28px; }
+
+  .lobby-actions{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; width:100%; margin-bottom: 30px; }
+  .lobby-card{
+    background: var(--pitch-mid); border: 1px solid var(--pitch-line); border-radius: var(--radius);
+    padding: 20px; text-align: left; transition: border-color .15s ease;
+  }
+  .lobby-card h3{ margin: 0 0 6px; font-size: 16px; font-family: var(--font-display); color: var(--chalk); }
+  .lobby-card p{ margin: 0 0 14px; font-size: 12.5px; color: var(--chalk-dim); line-height: 1.4; }
+
+  .rooms-list{ width:100%; display:flex; flex-direction:column; gap: 10px; }
+  .room-item{
+    background: var(--pitch-mid); border: 1px solid var(--pitch-line); border-radius: var(--radius);
+    padding: 14px 18px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .room-item:hover{ border-color: var(--gold-dim); }
+  .room-info h4{ margin:0 0 4px; font-size: 15px; color: var(--chalk); }
+  .room-info span{ font-size: 12px; color: var(--chalk-dim); }
+  .room-badge{ display:inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight:700; margin-left: 6px; }
+  .badge-public{ background: rgba(31,92,60,0.5); color: #7fe1a8; border: 1px solid rgba(127,225,168,0.3); }
+  .badge-private{ background: rgba(193,90,69,0.3); color: #f09581; border: 1px solid rgba(240,149,129,0.3); }
+
+  /* ---------- MODALI CREA / ACCEDI ---------- */
+  .modal-overlay{
+    position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7);
+    display:none; align-items:center; justify-content:center; padding: 20px; z-index: 99;
+  }
+  .modal-overlay.active{ display:flex; }
+  .modal{
+    background: var(--pitch-dark); border: 1px solid var(--pitch-line); border-radius: var(--radius);
+    padding: 24px; width: 100%; max-width: 400px;
+  }
+
+  /* ---------- HOME RUOLI NELLA STANZA ---------- */
   #screen-home{
     flex-direction:column; align-items:center; justify-content:center;
     padding: 32px 20px; text-align:center; gap: 36px;
@@ -74,7 +118,7 @@
   .role-card .label{ font-weight:700; font-size:16px; }
   .role-card .desc{ font-size: 12.5px; color: var(--chalk-dim); line-height:1.4; }
 
-  /* SHARED */
+  /* ---------- SHARED ---------- */
   .topbar{
     position:fixed; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center;
     padding: 14px 18px; font-size: 13px; color: var(--chalk-dim); z-index: 5;
@@ -119,7 +163,7 @@
   .msg.error{ color: var(--brick); }
   .msg.ok{ color: var(--gold); }
 
-  /* TABELLONE */
+  /* ---------- TABELLONE ---------- */
   #screen-tabellone{ flex-direction:column; align-items:center; justify-content:flex-start; padding: 75px 20px 40px; }
   .board{
     width:100%; max-width: 900px; background: var(--pitch-mid);
@@ -158,7 +202,7 @@
   .tv-footer{ margin-top: 22px; color: var(--chalk-dim); font-size: 13px; text-align:center; }
   .tv-footer b{ color: var(--gold); }
 
-  /* PARTECIPANTE */
+  /* ---------- PARTECIPANTE ---------- */
   .bid-hero{ text-align:center; margin-bottom: 26px; }
   .bid-hero .label{ font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
   .bid-hero .player{ font-family: var(--font-display); font-size: clamp(24px,7vw,32px); margin-bottom: 6px; }
@@ -186,7 +230,7 @@
 
   .you-are{ text-align:center; font-size: 12.5px; color: var(--chalk-dim); margin-top: 18px; margin-bottom: 20px; }
 
-  /* TABELLE & ROSE */
+  /* ---------- TABELLE & ROSE ---------- */
   .section-divider{ height: 1px; background: var(--pitch-line); margin: 24px 0 16px; }
   .section-header{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 12px; }
   .section-title{ font-family: var(--font-display); font-size: 16px; color: var(--chalk); }
@@ -205,7 +249,7 @@
   .team-card-name{ font-family: var(--font-display); font-size: 15px; color: var(--gold); }
   .team-card-stats{ font-size: 12px; color: var(--chalk-dim); }
 
-  /* LISTONE UI */
+  /* ---------- LISTONE UI ---------- */
   .listone-box{
     background: var(--pitch-mid); border: 1px solid var(--pitch-line); border-radius: var(--radius);
     padding: 16px; margin-top: 16px;
@@ -234,7 +278,7 @@
   .btn-select-player:hover{ background:#eec25c; }
   .badge-assigned{ font-size: 11px; color: var(--brick); font-style: italic; font-weight: 600; }
 
-  /* ADMIN */
+  /* ---------- ADMIN ---------- */
   .admin-current{
     background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius);
     padding: 16px 18px; margin-bottom: 16px; font-size: 14px;
@@ -251,7 +295,8 @@
   .quick-assign-box label{ display: block; font-size: 12px; color: var(--chalk-dim); margin-bottom: 6px; }
   .quick-assign-row{ display: flex; gap: 8px; }
 
-  @media (max-width: 480px){
+  @media (max-width: 580px){
+    .lobby-actions{ grid-template-columns: 1fr; }
     .role-grid{ flex-direction:column; align-items:stretch; }
     .role-card{ width:100%; flex-direction:row; text-align:left; justify-content:flex-start; }
     .quick-assign-row{ flex-direction: column; }
@@ -262,11 +307,83 @@
 
 <div id="app">
 
-  <!-- HOME -->
-  <div id="screen-home" class="screen active">
+  <!-- ==================== LOBBY STANZE ==================== -->
+  <div id="screen-lobby" class="screen active">
+    <div class="lobby-title">Fanta<span>Asta</span> Live</div>
+    <div class="lobby-sub">Crea la tua stanza d'asta o unisciti a una già attiva</div>
+
+    <div class="lobby-actions">
+      <div class="lobby-card">
+        <h3>Nuova Asta</h3>
+        <p>Crea una stanza da zero per la tua lega, pubblica o protetta da PIN.</p>
+        <button class="btn-primary" onclick="openCreateModal()">+ Crea Asta</button>
+      </div>
+      <div class="lobby-card">
+        <h3>Asta con PIN</h3>
+        <p>Hai il codice segreto di una stanza privata? Entra direttamente.</p>
+        <button class="btn-secondary" onclick="openJoinPinModal()">Entra con PIN</button>
+      </div>
+    </div>
+
+    <div class="section-header" style="width: 100%;">
+      <span class="section-title">Aste Attive sul sito</span>
+      <span class="section-meta" id="lobby-room-count">0 stanze</span>
+    </div>
+    <div class="rooms-list" id="rooms-list-wrap">
+      <div class="team-empty">Nessuna asta pubblica al momento. Crea la prima!</div>
+    </div>
+  </div>
+
+  <!-- MODALE: CREA STANZA -->
+  <div class="modal-overlay" id="modal-create">
+    <div class="modal">
+      <h2>Crea la tua Asta</h2>
+      <p class="hint">Dai un nome alla lega e imposta la visibilità.</p>
+      <div class="field">
+        <label for="new-room-name">Nome dell'asta / Lega</label>
+        <input id="new-room-name" type="text" placeholder="Es. Lega Fantacalcio 2026" maxlength="32">
+      </div>
+      <div class="field">
+        <label for="new-room-type">Tipo di stanza</label>
+        <select id="new-room-type" onchange="togglePinField(this.value)">
+          <option value="public">Pubblica (visibile a tutti)</option>
+          <option value="private">Privata (serve un PIN per entrare)</option>
+        </select>
+      </div>
+      <div class="field" id="pin-field-wrap" style="display:none;">
+        <label for="new-room-pin">PIN di accesso (4 cifre o lettere)</label>
+        <input id="new-room-pin" type="text" placeholder="Es. 1234" maxlength="8">
+      </div>
+      <button class="btn-primary" onclick="submitCreateRoom()">Crea e Avvia</button>
+      <button class="btn-danger" style="margin-top:8px;" onclick="closeModal('modal-create')">Annulla</button>
+      <div class="msg error" id="create-room-msg"></div>
+    </div>
+  </div>
+
+  <!-- MODALE: ACCEDI CON PIN -->
+  <div class="modal-overlay" id="modal-join-pin">
+    <div class="modal">
+      <h2>Entra con PIN</h2>
+      <p class="hint">Inserisci il PIN della stanza privata a cui vuoi partecipare.</p>
+      <div class="field">
+        <label for="input-room-pin">PIN di accesso</label>
+        <input id="input-room-pin" type="text" placeholder="Es. 1234" maxlength="8">
+      </div>
+      <button class="btn-primary" onclick="submitJoinWithPin()">Entra nell'Asta</button>
+      <button class="btn-danger" style="margin-top:8px;" onclick="closeModal('modal-join-pin')">Annulla</button>
+      <div class="msg error" id="join-pin-msg"></div>
+    </div>
+  </div>
+
+  <!-- ==================== HOME RUOLI NELLA STANZA ==================== -->
+  <div id="screen-home" class="screen">
+    <div class="topbar">
+      <span id="room-topbar-title">Stanza: —</span>
+      <button class="link-btn" onclick="exitToLobby()">⬅ Esci dall'asta</button>
+    </div>
     <div>
-      <div class="home-title">Asta <span>Fantacalcio</span> Live</div>
-      <p class="home-sub">Scegli come vuoi entrare. Tutti vedono le stesse offerte in tempo reale, senza mai ricaricare la pagina.</p>
+      <div class="home-title" id="room-home-title">Asta <span>Fantacalcio</span> Live</div>
+      <p class="home-sub">Scegli come vuoi entrare in questa stanza. Tutti vedono le stesse offerte in tempo reale.</p>
     </div>
     <div class="role-grid">
       <button class="role-card" onclick="goHome('tabellone')">
@@ -287,17 +404,20 @@
     </div>
   </div>
 
-  <!-- TABELLONE (TV) -->
+  <!-- ==================== TABELLONE (TV) ==================== -->
   <div id="screen-tabellone" class="screen">
-    <div class="topbar"><span>Tabellone Live</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
+    <div class="topbar">
+      <span>Tabellone Live · <b id="tabellone-room-name" style="color:var(--gold)"></b></span>
+      <button class="link-btn" onclick="goHome('home')">cambia ruolo</button>
+    </div>
     <div class="board" id="board-content"></div>
     <div class="tv-footer">Aggiornamento automatico · offri da smartphone su <b id="tv-hint-url"></b></div>
     <div class="teams-grid" id="tv-teams-grid"></div>
   </div>
 
-  <!-- PARTECIPANTE: JOIN -->
+  <!-- ==================== PARTECIPANTE: JOIN ==================== -->
   <div id="screen-join" class="screen">
-    <div class="topbar"><span>Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
+    <div class="topbar"><span>Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia ruolo</button></div>
     <div class="panel-wrap">
       <div class="panel">
         <h2>Entra all'asta</h2>
@@ -312,9 +432,9 @@
     </div>
   </div>
 
-  <!-- PARTECIPANTE: BID & ROSA -->
+  <!-- ==================== PARTECIPANTE: BID & ROSA ==================== -->
   <div id="screen-bid" class="screen">
-    <div class="topbar"><span id="bid-topbar-name">Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
+    <div class="topbar"><span id="bid-topbar-name">Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia ruolo</button></div>
     <div class="panel-wrap">
       <div class="panel">
         <div class="status-banner idle" id="bid-status-banner">In attesa che il banditore apra l'asta…</div>
@@ -373,9 +493,9 @@
     </div>
   </div>
 
-  <!-- ADMIN -->
+  <!-- ==================== ADMIN ==================== -->
   <div id="screen-admin" class="screen">
-    <div class="topbar"><span>Banditore</span><button class="link-btn" onclick="goHome('home')">cambia schermata</button></div>
+    <div class="topbar"><span>Banditore</span><button class="link-btn" onclick="goHome('home')">cambia ruolo</button></div>
     <div class="panel-wrap">
       <div class="panel">
         <h2>Gestisci l'asta</h2>
@@ -456,16 +576,29 @@
 </div>
 
 <script>
-  // ---------- storage keys ----------
-  var STATE_KEY = 'fanta_auction_state';
-  var LOG_KEY = 'fanta_auction_log';
-  var USER_KEY = 'fanta_saved_username';
-  var LISTONE_KEY = 'fanta_auction_listone';
-  var PARTICIPANTS_KEY = 'fanta_auction_known_participants';
+  // ---------- CONFIGURAZIONE FIREBASE INTEGRATA ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyCgSlZK95LvLrGDHHWnf5BHZBVlB8E_R9I",
+    authDomain: "fanta-asta-dafef.firebaseapp.com",
+    databaseURL: "https://fanta-asta-dafef-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "fanta-asta-dafef",
+    storageBucket: "fanta-asta-dafef.firebasestorage.app",
+    messagingSenderId: "706558170939",
+    appId: "1:706558170939:web:f255d809294a7dc503491e"
+  };
 
-  // ---------- in-memory session ----------
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ---------- CHIAVI E SESSIONE ----------
+  var ROOMS_INDEX_KEY = 'rooms_index';
+  var USER_KEY = 'fanta_saved_username';
+  var ACTIVE_ROOM_KEY = 'fanta_active_room_id';
+
+  var currentRoomId = localStorage.getItem(ACTIVE_ROOM_KEY) || null;
+  var currentRoomData = null;
   var myName = localStorage.getItem(USER_KEY) || '';
-  var currentRoute = 'home';
+  var currentRoute = 'lobby';
   var lastKnownPrice = null;
   var pollTimer = null;
   var cachedListone = [];
@@ -475,39 +608,44 @@
 
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
 
-  // ---------- storage layer ----------
+  // ---------- UNIVERSAL CLOUD STORAGE LAYER ----------
+  function getRoomPath(keySuffix){
+    return currentRoomId ? ('rooms/' + currentRoomId + '/' + keySuffix) : keySuffix;
+  }
+
   var store = {
-    get: async function(key){
-      if(window.storage && typeof window.storage.get === 'function'){
-        try {
-          var res = await window.storage.get(key, true);
-          if(res && res.value !== undefined) return JSON.parse(res.value);
-        } catch(e){}
+    get: async function(path){
+      try {
+        const snap = await db.ref(path).get();
+        return snap.exists() ? snap.val() : null;
+      } catch(e) {
+        console.warn("Lettura Firebase non riuscita, fallback su cache locale:", e);
+        var raw = localStorage.getItem(path);
+        return raw ? JSON.parse(raw) : null;
       }
-      var raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : null;
     },
-    set: async function(key, val){
-      var str = JSON.stringify(val);
-      localStorage.setItem(key, str);
-      if(window.storage && typeof window.storage.set === 'function'){
-        try {
-          await window.storage.set(key, str, true);
-        } catch(e){}
+    set: async function(path, val){
+      try {
+        localStorage.setItem(path, JSON.stringify(val));
+        await db.ref(path).set(val);
+        return true;
+      } catch(e) {
+        console.error("Scrittura Firebase non riuscita:", e);
+        return false;
       }
-      return true;
     }
   };
 
-  async function loadState(){ return await store.get(STATE_KEY); }
-  async function saveState(s){ return await store.set(STATE_KEY, s); }
-  async function loadLog(){ var l = await store.get(LOG_KEY); return Array.isArray(l) ? l : []; }
-  async function saveLog(l){ return await store.set(LOG_KEY, l); }
-  async function loadListone(){ var l = await store.get(LISTONE_KEY); return Array.isArray(l) ? l : []; }
-  async function saveListone(l){ return await store.set(LISTONE_KEY, l); }
+  // Metodi stanza
+  async function loadState(){ return await store.get(getRoomPath('state')); }
+  async function saveState(s){ return await store.set(getRoomPath('state'), s); }
+  async function loadLog(){ var l = await store.get(getRoomPath('log')); return Array.isArray(l) ? l : []; }
+  async function saveLog(l){ return await store.set(getRoomPath('log'), l); }
+  async function loadListone(){ var l = await store.get(getRoomPath('listone')); return Array.isArray(l) ? l : []; }
+  async function saveListone(l){ return await store.set(getRoomPath('listone'), l); }
 
   async function loadParticipants(){
-    var p = await store.get(PARTICIPANTS_KEY);
+    var p = await store.get(getRoomPath('participants'));
     return Array.isArray(p) ? p : [];
   }
   async function registerParticipant(name){
@@ -515,11 +653,158 @@
     var list = await loadParticipants();
     if(!list.includes(name)){
       list.push(name);
-      await store.set(PARTICIPANTS_KEY, list);
+      await store.set(getRoomPath('participants'), list);
     }
   }
 
-  async function ensureInit(){
+  // Metodi elenco stanze
+  async function loadRoomsIndex(){
+    var r = await store.get(ROOMS_INDEX_KEY);
+    return Array.isArray(r) ? r : [];
+  }
+  async function saveRoomsIndex(rooms){
+    return await store.set(ROOMS_INDEX_KEY, rooms);
+  }
+
+  // ---------- GESTIONE LOBBY & STANZE ----------
+  function openCreateModal(){
+    document.getElementById('modal-create').classList.add('active');
+    document.getElementById('new-room-name').value = '';
+    document.getElementById('new-room-type').value = 'public';
+    document.getElementById('pin-field-wrap').style.display = 'none';
+    document.getElementById('new-room-pin').value = '';
+  }
+
+  function openJoinPinModal(){
+    document.getElementById('modal-join-pin').classList.add('active');
+    document.getElementById('input-room-pin').value = '';
+  }
+
+  function closeModal(id){
+    document.getElementById(id).classList.remove('active');
+  }
+
+  function togglePinField(type){
+    document.getElementById('pin-field-wrap').style.display = (type === 'private') ? 'block' : 'none';
+  }
+
+  async function submitCreateRoom(){
+    var name = document.getElementById('new-room-name').value.trim();
+    var type = document.getElementById('new-room-type').value;
+    var pin = document.getElementById('new-room-pin').value.trim();
+
+    if(!name){
+      showMsg('create-room-msg', 'Inserisci un nome per la stanza.', 'error');
+      return;
+    }
+    if(type === 'private' && !pin){
+      showMsg('create-room-msg', 'Inserisci un PIN per la stanza privata.', 'error');
+      return;
+    }
+
+    var roomId = 'room_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+    var newRoom = {
+      id: roomId,
+      name: name,
+      isPrivate: (type === 'private'),
+      pin: pin || null,
+      createdAt: Date.now()
+    };
+
+    var rooms = await loadRoomsIndex();
+    rooms.unshift(newRoom);
+    await saveRoomsIndex(rooms);
+
+    closeModal('modal-create');
+    enterRoom(newRoom);
+  }
+
+  async function submitJoinWithPin(){
+    var pin = document.getElementById('input-room-pin').value.trim();
+    if(!pin){
+      showMsg('join-pin-msg', 'Inserisci il PIN.', 'error');
+      return;
+    }
+
+    var rooms = await loadRoomsIndex();
+    var found = rooms.find(function(r){ return r.isPrivate && r.pin === pin; });
+
+    if(!found){
+      showMsg('join-pin-msg', 'Nessuna stanza trovata con questo PIN.', 'error');
+      return;
+    }
+
+    closeModal('modal-join-pin');
+    enterRoom(found);
+  }
+
+  async function enterRoom(room){
+    currentRoomId = room.id;
+    currentRoomData = room;
+    localStorage.setItem(ACTIVE_ROOM_KEY, room.id);
+
+    document.getElementById('room-topbar-title').textContent = 'Lega: ' + room.name;
+    document.getElementById('room-home-title').innerHTML = escapeHtml(room.name);
+    document.getElementById('tabellone-room-name').textContent = room.name;
+
+    await ensureInitRoom();
+    goHome('home');
+  }
+
+  function exitToLobby(){
+    currentRoomId = null;
+    currentRoomData = null;
+    localStorage.removeItem(ACTIVE_ROOM_KEY);
+    goHome('lobby');
+    renderLobbyRooms();
+  }
+
+  async function renderLobbyRooms(){
+    var rooms = await loadRoomsIndex();
+    var wrap = document.getElementById('rooms-list-wrap');
+    document.getElementById('lobby-room-count').textContent = rooms.length + ' stanze create';
+
+    if(rooms.length === 0){
+      wrap.innerHTML = '<div class="team-empty">Nessuna asta attiva al momento. Clicca "+ Crea Asta" per crearne una!</div>';
+      return;
+    }
+
+    var html = '';
+    for(var i = 0; i < rooms.length; i++){
+      var r = rooms[i];
+      html += '<div class="room-item">';
+      html += '  <div class="room-info">';
+      html += '    <h4>' + escapeHtml(r.name) + (r.isPrivate ? '<span class="room-badge badge-private">PRIVATA</span>' : '<span class="room-badge badge-public">PUBBLICA</span>') + '</h4>';
+      html += '    <span>Creata il ' + new Date(r.createdAt).toLocaleDateString('it-IT') + '</span>';
+      html += '  </div>';
+      if(r.isPrivate){
+        html += '  <button class="btn-secondary" style="width:auto; padding:8px 14px; font-size:12px;" onclick="promptPinForRoom(\'' + r.id + '\', \'' + r.pin + '\')">Accedi con PIN</button>';
+      } else {
+        html += '  <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" onclick="enterRoomById(\'' + r.id + '\')">Partecipa</button>';
+      }
+      html += '</div>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  async function enterRoomById(id){
+    var rooms = await loadRoomsIndex();
+    var found = rooms.find(function(r){ return r.id === id; });
+    if(found) enterRoom(found);
+  }
+
+  async function promptPinForRoom(id, realPin){
+    var entered = prompt('Inserisci il PIN di questa stanza:');
+    if(entered === null) return;
+    if(entered.trim() === realPin){
+      enterRoomById(id);
+    } else {
+      alert('PIN errato!');
+    }
+  }
+
+  // ---------- INIZIALIZZAZIONE STANZA ----------
+  async function ensureInitRoom(){
     var s = await loadState();
     if(!s){
       s = { player:'', role:'', team:'', qt:0, basePrice:0, price:0, bidder:'', status:'idle', updatedAt: Date.now() };
@@ -528,11 +813,13 @@
     cachedListone = await loadListone();
     if(cachedListone.length > 0){
       document.getElementById('admin-listone-box').style.display = 'block';
+    } else {
+      document.getElementById('admin-listone-box').style.display = 'none';
     }
     return s;
   }
 
-  // ---------- router ----------
+  // ---------- ROUTER ----------
   function checkParticipantEntry(){
     if(myName){ goHome('bid'); } else { goHome('join'); }
   }
@@ -540,8 +827,15 @@
   function goHome(route){
     currentRoute = route;
     document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
-    var map = { home:'screen-home', tabellone:'screen-tabellone', join:'screen-join', bid:'screen-bid', admin:'screen-admin' };
-    var targetId = map[route] || 'screen-home';
+    var map = {
+      lobby:'screen-lobby',
+      home:'screen-home',
+      tabellone:'screen-tabellone',
+      join:'screen-join',
+      bid:'screen-bid',
+      admin:'screen-admin'
+    };
+    var targetId = map[route] || 'screen-lobby';
     document.getElementById(targetId).classList.add('active');
     
     if(route === 'bid'){
@@ -552,6 +846,9 @@
     if(route === 'admin'){
       renderListoneTable('admin');
       updateAdminParticipantSelect();
+    }
+    if(route === 'lobby'){
+      renderLobbyRooms();
     }
     refreshNow();
   }
@@ -573,7 +870,7 @@
     }
   }
 
-  // ---------- join ----------
+  // ---------- JOIN PARTECIPANTE ----------
   async function joinAsParticipant(){
     var v = document.getElementById('join-name').value.trim();
     if(!v){
@@ -587,7 +884,7 @@
     goHome('bid');
   }
 
-  // ---------- offerte con base da 0 crediti ----------
+  // ---------- OFFERTE ----------
   async function quickBid(amount){
     var s = await loadState();
     if(!s || s.status !== 'open'){
@@ -595,7 +892,6 @@
       return;
     }
     
-    // Se la base era a 0 e non ci sono ancora offerte, il primo rilancio a +1 porta l'asta a 1 credito
     var newPrice;
     if(s.price === 0 && !s.bidder){
       newPrice = amount;
@@ -673,7 +969,7 @@
     }
   }
 
-  // ---------- tabellone ----------
+  // ---------- TABELLONE ----------
   function renderTabellone(s){
     var el = document.getElementById('board-content');
     if(!s || s.status === 'idle'){
@@ -715,10 +1011,9 @@
     }
   }
 
-  // ---------- admin & asta ----------
+  // ---------- ADMIN ----------
   function selectFromListone(name, price, role, team){
     document.getElementById('admin-player').value = name;
-    // Lascia la base libera da personalizzare (default a 0 o alla qt)
     document.getElementById('admin-base').value = 0;
     
     pendingPlayer = { role: role, team: team, qt: price };
@@ -730,13 +1025,13 @@
       '<span class="player-qt-pill">Quotazione: ' + price + ' cfu</span>';
 
     document.getElementById('admin-base').focus();
-    showMsg('admin-msg', 'Selezionato! Imposta la base desiderata (anche 0) e avvia.', 'ok');
+    showMsg('admin-msg', 'Selezionato! Imposta la base desiderata e avvia.', 'ok');
   }
 
   async function startAuctionManually(){
     var player = document.getElementById('admin-player').value.trim();
     var base = parseInt(document.getElementById('admin-base').value, 10);
-    if(isNaN(base) || base < 0) base = 0; // Supporto base 0
+    if(isNaN(base) || base < 0) base = 0;
 
     if(!player){
       showMsg('admin-msg', 'Inserisci o seleziona il nome del calciatore.', 'error');
@@ -749,7 +1044,7 @@
     });
 
     if(alreadyAssigned){
-      showMsg('admin-msg', player + ' è già assegnato a ' + alreadyAssigned.bidder + '!', 'error');
+      showMsg('admin-msg', player + ' è già assegnato a ' + alreadyAssigned.bidder + ' in questa lega!', 'error');
       return;
     }
 
@@ -800,7 +1095,6 @@
     }
   }
 
-  // Assegnazione rapida a 1 credito
   async function assignDirectlyForOne(){
     var s = await loadState();
     if(!s || s.status !== 'open'){
@@ -891,7 +1185,6 @@
     var log = await loadLog();
     var groups = groupPurchasesByParticipant(log);
     
-    // Combina partecipanti registrati e chi ha già acquistato
     var allNames = Array.from(new Set(list.concat(Object.keys(groups))));
     
     var currentVal = select.value;
@@ -929,7 +1222,7 @@
         document.getElementById('admin-listone-box').style.display = 'block';
         renderListoneTable('admin');
         renderListoneTable('user');
-        alert('Listone caricato con successo: ' + parsed.length + ' calciatori pronti!');
+        alert('Listone caricato con successo per questa lega: ' + parsed.length + ' calciatori pronti!');
       } catch(err){
         console.error(err);
         alert('Errore nella lettura del file. Verifica che sia un file Excel o CSV valido.');
@@ -1046,7 +1339,7 @@
     tableBody.innerHTML = html;
   }
 
-  // ---------- rose & log ----------
+  // ---------- ROSE & LOG ----------
   function groupPurchasesByParticipant(log){
     var map = {};
     (log || []).forEach(function(item){
@@ -1165,8 +1458,13 @@
       .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
 
-  // ---------- polling loop ----------
+  // ---------- Sincronizzazione in tempo reale Firebase ----------
   async function refreshNow(){
+    if(!currentRoomId){
+      if(currentRoute === 'lobby') renderLobbyRooms();
+      return;
+    }
+
     var s = await loadState();
     var log = await loadLog();
     if(!s) return;
@@ -1188,14 +1486,23 @@
 
   function startPolling(){
     if(pollTimer) clearInterval(pollTimer);
-    pollTimer = setInterval(refreshNow, 1000);
+    // Refresh continuo a 800ms per allineare subito tutti i telefoni/PC
+    pollTimer = setInterval(refreshNow, 800);
   }
 
-  // ---------- boot ----------
+  // ---------- AVVIO ----------
   (async function init(){
-    await ensureInit();
     startPolling();
-    refreshNow();
+    var savedRoomId = localStorage.getItem(ACTIVE_ROOM_KEY);
+    if(savedRoomId){
+      var rooms = await loadRoomsIndex();
+      var found = rooms.find(function(r){ return r.id === savedRoomId; });
+      if(found){
+        enterRoom(found);
+        return;
+      }
+    }
+    goHome('lobby');
   })();
 </script>
 </body>
