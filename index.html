@@ -51,6 +51,24 @@
   .screen{ display:none; min-height:100vh; }
   .screen.active{ display:flex; }
 
+  /* ---------- STEMMI E LOGHI CIRCOLARI ---------- */
+  .team-crest{
+    width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+    border: 1px solid var(--gold-dim); background: var(--pitch-dark);
+    display: inline-block; vertical-align: middle; flex-shrink: 0;
+  }
+  .team-crest.lg{ width: 44px; height: 44px; border: 2px solid var(--gold); }
+  .team-crest.md{ width: 34px; height: 34px; }
+  .team-crest-fallback{
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: var(--pitch-mid-2); border: 1px solid var(--gold-dim);
+    color: var(--gold); font-weight: 800; font-size: 12px; flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  .team-crest-fallback.lg{ width: 44px; height: 44px; font-size: 16px; border-width: 2px; }
+  .team-crest-fallback.md{ width: 34px; height: 34px; font-size: 13px; }
+  .team-crest-fallback.sm{ width: 28px; height: 28px; font-size: 11px; }
+
   /* ---------- LOBBY PRINCIPALE ---------- */
   #screen-lobby{
     flex-direction:column; align-items:center; justify-content:flex-start;
@@ -193,12 +211,13 @@
   }
   .board-price.pulse{ transform: scale(1.06); }
   .board-price .unit{ font-family: var(--font-body); font-size: 0.28em; color: var(--chalk-dim); font-weight:700; margin-left: 10px; }
+  .board-bidder-wrap{ display: flex; align-items: center; gap: 12px; }
   .board-bidder{ font-family: var(--font-display); font-size: clamp(22px, 4vw, 42px); }
   .board-idle{ text-align:center; padding: 60px 20px; color: var(--chalk-dim); }
   .board-idle .big{ font-family: var(--font-display); font-size: clamp(22px,3.4vw,32px); color: var(--chalk); margin-bottom: 8px; }
   .board-closed-banner{
     background: var(--gold); color: #17240F; text-align:center; font-family: var(--font-display);
-    font-size: clamp(18px, 3vw, 28px); padding: 16px 20px;
+    font-size: clamp(18px, 3vw, 28px); padding: 16px 20px; display:flex; align-items:center; justify-content:center; gap:10px;
   }
   .tv-footer{ margin-top: 22px; color: var(--chalk-dim); font-size: 13px; text-align:center; }
   .tv-footer b{ color: var(--gold); }
@@ -208,7 +227,7 @@
   .bid-hero .label{ font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
   .bid-hero .player{ font-family: var(--font-display); font-size: clamp(24px,7vw,32px); margin-bottom: 6px; }
   .bid-hero .price{ font-family: var(--font-display); font-size: clamp(46px,16vw,64px); color: var(--gold); font-variant-numeric: tabular-nums; }
-  .bid-hero .bidder{ font-size: 14px; color: var(--chalk-dim); margin-top: 8px; }
+  .bid-hero .bidder{ font-size: 14px; color: var(--chalk-dim); margin-top: 8px; display:inline-flex; align-items:center; gap:6px; }
   .bid-hero .bidder b{ color: var(--chalk); }
 
   .quick-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
@@ -229,16 +248,17 @@
   .status-banner.closed{ background: var(--brick-soft); color: var(--brick); border:1px solid var(--brick-soft); }
   .status-banner.idle{ background: var(--pitch-mid); color: var(--chalk-dim); border:1px solid var(--pitch-line); }
 
-  .you-are{ text-align:center; font-size: 12.5px; color: var(--chalk-dim); margin-top: 18px; margin-bottom: 20px; }
+  .you-are{ text-align:center; font-size: 12.5px; color: var(--chalk-dim); margin-top: 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px; }
 
   /* ---------- PROFILI PARTECIPANTE ---------- */
   .profile-pick-list{ display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
   .profile-pick-btn{
-    padding: 12px 14px; background: var(--pitch-mid); border: 1px solid var(--pitch-line);
+    padding: 10px 14px; background: var(--pitch-mid); border: 1px solid var(--pitch-line);
     border-radius: var(--radius); color: var(--chalk); text-align:left; display:flex;
-    justify-content:space-between; align-items:center;
+    justify-content:space-between; align-items:center; gap: 10px;
   }
   .profile-pick-btn:hover{ border-color: var(--gold); }
+  .profile-pick-btn .p-left{ display:flex; align-items:center; gap:10px; }
   .profile-pick-btn .p-name{ font-weight:700; font-size:14px; }
   .profile-pick-btn .p-team{ font-size:12px; color: var(--gold); }
 
@@ -257,7 +277,8 @@
 
   .teams-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%; max-width: 900px; margin-top: 28px; }
   .team-card{ background: var(--pitch-mid); border: 1px solid var(--pitch-line); border-radius: var(--radius); padding: 16px; }
-  .team-card-header{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; border-bottom: 1px solid var(--pitch-line); padding-bottom: 8px; }
+  .team-card-header{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--pitch-line); padding-bottom: 8px; }
+  .team-card-title-wrap{ display: flex; align-items: center; gap: 8px; }
   .team-card-name{ font-family: var(--font-display); font-size: 15px; color: var(--gold); }
   .team-card-stats{ font-size: 12px; color: var(--chalk-dim); }
 
@@ -307,7 +328,7 @@
   .quick-assign-box label{ display: block; font-size: 12px; color: var(--chalk-dim); margin-bottom: 6px; }
   .quick-assign-row{ display: flex; gap: 8px; }
 
-  /* ---------- RESOCONTO FINALE (FINE ASTA) ---------- */
+  /* ---------- RESOCONTO FINALE ---------- */
   #screen-summary{
     flex-direction:column; align-items:center; justify-content:flex-start;
     padding: 70px 20px 40px; width:100%; max-width: 960px; margin: 0 auto;
@@ -336,7 +357,7 @@
   .stat-card .val{ font-family: var(--font-display); font-size: 20px; color: var(--gold); margin-top: 4px; }
   .stat-card .lbl{ font-size: 12px; color: var(--chalk-dim); }
 
-  /* ---------- GESTORE DEL SITO (SUPER ADMIN) ---------- */
+  /* ---------- SUPER ADMIN ---------- */
   #screen-super-admin{
     flex-direction:column; align-items:center; justify-content:flex-start;
     padding: 70px 20px 40px; width:100%; max-width: 800px; margin: 0 auto;
@@ -450,7 +471,7 @@
     </div>
   </div>
 
-  <!-- ==================== SUPER ADMIN (PANNELLO DIRETTORE) ==================== -->
+  <!-- ==================== SUPER ADMIN ==================== -->
   <div id="screen-super-admin" class="screen">
     <div class="topbar">
       <span>Pannello Gestore del Sito</span>
@@ -476,7 +497,7 @@
     </div>
   </div>
 
-  <!-- ==================== HOME RUOLI NELLA STANZA ==================== -->
+  <!-- ==================== HOME RUOLI ==================== -->
   <div id="screen-home" class="screen">
     <div class="topbar">
       <span id="room-topbar-title">Stanza: —</span>
@@ -516,13 +537,13 @@
     <div class="teams-grid" id="tv-teams-grid"></div>
   </div>
 
-  <!-- ==================== PARTECIPANTE: SELEZIONE / CREAZIONE PROFILO ==================== -->
+  <!-- ==================== PARTECIPANTE: PROFILO & STEMMA ==================== -->
   <div id="screen-join" class="screen">
     <div class="topbar"><span>Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia ruolo</button></div>
     <div class="panel-wrap">
       <div class="panel">
         <h2>Accedi o Crea Profilo</h2>
-        <p class="hint">Seleziona un profilo già registrato in questa stanza oppure creane uno nuovo inserendo nome e squadra.</p>
+        <p class="hint">Seleziona un profilo già registrato in questa stanza oppure creane uno nuovo con il tuo stemma.</p>
         
         <div id="existing-profiles-wrap" style="display:none;">
           <div class="section-header"><span class="section-title">Profili già registrati</span></div>
@@ -539,6 +560,16 @@
           <label for="join-team-name">Nome Squadra / Fantateam</label>
           <input id="join-team-name" type="text" placeholder="Es. Real Madrink" maxlength="32" autocomplete="off">
         </div>
+
+        <!-- UPLOAD STEMMA SQUADRA -->
+        <div class="field">
+          <label for="join-team-logo">Stemma Squadra (opzionale)</label>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div id="logo-preview-box" class="team-crest-fallback lg">⚽</div>
+            <input type="file" id="join-team-logo" accept="image/*" onchange="handleLogoPreview(event)" style="flex:1; padding:8px; font-size:12px;">
+          </div>
+        </div>
+
         <button class="btn-primary" onclick="createNewParticipantProfile()">Crea ed Entra</button>
         <div class="msg error" id="join-msg"></div>
       </div>
@@ -547,7 +578,13 @@
 
   <!-- ==================== PARTECIPANTE: BID & ROSA ==================== -->
   <div id="screen-bid" class="screen">
-    <div class="topbar"><span id="bid-topbar-name">Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia ruolo</button></div>
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="bid-topbar-crest"></span>
+        <span id="bid-topbar-name">Partecipante</span>
+      </div>
+      <button class="link-btn" onclick="goHome('home')">cambia ruolo</button>
+    </div>
     <div class="panel-wrap">
       <div class="panel">
         <div class="status-banner idle" id="bid-status-banner">In attesa che il banditore apra l'asta…</div>
@@ -569,9 +606,11 @@
           <button id="btn-custom" onclick="customBid()">Offri</button>
         </div>
         <div class="msg" id="bid-msg"></div>
+        
         <div class="you-are">
-          Profilo attivo: <b id="you-are-name" style="color:var(--chalk)"></b> (<span id="you-are-team" style="color:var(--gold)"></span>) · 
-          <button class="link-btn" onclick="switchProfile()" style="padding:0;">cambia profilo</button>
+          <span id="you-are-crest"></span>
+          <span>Profilo: <b id="you-are-name" style="color:var(--chalk)"></b> (<span id="you-are-team" style="color:var(--gold)"></span>)</span> · 
+          <button class="link-btn" onclick="switchProfile()" style="padding:0;">cambia</button>
         </div>
 
         <div class="section-divider"></div>
@@ -611,7 +650,7 @@
     <div class="topbar">
       <span>Banditore Ufficiale</span>
       <div>
-        <button class="link-btn" style="color:var(--brick); margin-right:8px;" onclick="releaseAdminClaim()">Cedi / Rilascia ruolo</button>
+        <button class="link-btn" style="color:var(--brick); margin-right:8px;" onclick="releaseAdminClaim()">Cedi ruolo</button>
         <button class="link-btn" onclick="goHome('home')">cambia ruolo</button>
       </div>
     </div>
@@ -696,7 +735,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCHERMATA: RESOCONTO FINALE (FINE ASTA) ==================== -->
+  <!-- ==================== SCHERMATA: RESOCONTO FINALE ==================== -->
   <div id="screen-summary" class="screen">
     <div class="topbar">
       <span>Resoconto Finale Asta</span>
@@ -708,7 +747,6 @@
       <p class="home-sub">L'asta è ufficialmente conclusa! Esporta le rose per caricarle direttamente su Leghe Fantacalcio.</p>
     </div>
 
-    <!-- AZIONI DI ESPORTAZIONE FILE -->
     <div class="export-actions">
       <button class="btn-export" onclick="exportRostersToExcel()">
         <span>📊 Scarica Excel Rose (.xlsx)</span>
@@ -761,10 +799,9 @@
   // ---------- CHIAVI E COSTANTI ----------
   var ROOMS_INDEX_KEY = 'rooms_index';
   var ACTIVE_ROOM_KEY = 'fanta_active_room_id';
-  var SUPER_ADMIN_USER = 'Chicco';
-  var SUPER_ADMIN_PASS = 'Fedoro03';
+  var SUPER_ADMIN_USER = 'admin';
+  var SUPER_ADMIN_PASS = 'fanta2026';
 
-  // Device Token unico per rivendicare il ruolo di banditore
   var DEVICE_TOKEN_KEY = 'fanta_device_token';
   var myDeviceToken = localStorage.getItem(DEVICE_TOKEN_KEY);
   if(!myDeviceToken){
@@ -782,6 +819,7 @@
   var cachedListone = [];
   var filterRoles = { admin: '', user: '' };
   var pendingPlayer = { role: '', team: '', qt: 1 };
+  var tempLogoBase64 = '';
 
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
 
@@ -854,6 +892,41 @@
     return await store.set(ROOMS_INDEX_KEY, rooms);
   }
 
+  // ---------- GESTIONE STEMMA E IMMAGINI ----------
+  function handleLogoPreview(e){
+    var file = e.target.files[0];
+    if(!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      var img = new Image();
+      img.onload = function(){
+        // Ridimensionamento su canvas a 96x96 per leggerezza
+        var canvas = document.createElement('canvas');
+        canvas.width = 96;
+        canvas.height = 96;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 96, 96);
+        tempLogoBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+        var box = document.getElementById('logo-preview-box');
+        box.className = '';
+        box.innerHTML = '<img src="' + tempLogoBase64 + '" class="team-crest lg" alt="Preview">';
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function getCrestHtml(logoUrl, teamName, sizeClass){
+    sizeClass = sizeClass || 'sm';
+    if(logoUrl){
+      return '<img src="' + logoUrl + '" class="team-crest ' + sizeClass + '" alt="' + escapeHtml(teamName || '') + '">';
+    }
+    var letter = (teamName && teamName.trim().length > 0) ? teamName.trim().charAt(0).toUpperCase() : '⚽';
+    return '<span class="team-crest-fallback ' + sizeClass + '">' + letter + '</span>';
+  }
+
   // ---------- GESTIONE ACCESSO BANDITORE PROTETTO ----------
   async function claimOrEnterAdmin(){
     if(currentRoomData && currentRoomData.ended){
@@ -863,20 +936,17 @@
 
     var claim = await loadAdminClaim();
 
-    // Caso 1: Nessun banditore ha ancora preso il controllo -> Lo diventa questo dispositivo
     if(!claim){
       await saveAdminClaim(myDeviceToken);
       goHome('admin');
       return;
     }
 
-    // Caso 2: È lo stesso dispositivo/browser (anche se ha chiuso la scheda o ricaricato)
     if(claim === myDeviceToken){
       goHome('admin');
       return;
     }
 
-    // Caso 3: Un altro dispositivo è già il banditore attivo
     alert('⚠️ Accesso negato: questa asta ha già un Banditore attivo designato. Solo lui può gestire i calciatori e le offerte.');
   }
 
@@ -1094,7 +1164,7 @@
   async function ensureInitRoom(){
     var s = await loadState();
     if(!s){
-      s = { player:'', role:'', team:'', qt:0, basePrice:0, price:0, bidder:'', bidderTeam:'', status:'idle', updatedAt: Date.now() };
+      s = { player:'', role:'', team:'', qt:0, basePrice:0, price:0, bidder:'', bidderTeam:'', bidderLogo:'', status:'idle', updatedAt: Date.now() };
       await saveState(s);
     }
     cachedListone = await loadListone();
@@ -1138,16 +1208,19 @@
     wrap.style.display = 'block';
     var html = '';
     profiles.forEach(function(p){
-      html += '<button class="profile-pick-btn" onclick="selectExistingProfile(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', \'' + escapeHtml(p.teamName).replace(/'/g, "\\'") + '\')">';
-      html += '  <span class="p-name">👤 ' + escapeHtml(p.name) + '</span>';
+      html += '<button class="profile-pick-btn" onclick="selectExistingProfile(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', \'' + escapeHtml(p.teamName).replace(/'/g, "\\'") + '\', \'' + (p.logoUrl || '').replace(/'/g, "\\'") + '\')">';
+      html += '  <div class="p-left">';
+      html +=      getCrestHtml(p.logoUrl, p.teamName, 'sm');
+      html += '    <span class="p-name">' + escapeHtml(p.name) + '</span>';
+      html += '  </div>';
       html += '  <span class="p-team">⚽ ' + escapeHtml(p.teamName) + '</span>';
       html += '</button>';
     });
     container.innerHTML = html;
   }
 
-  function selectExistingProfile(name, teamName){
-    myProfile = { name: name, teamName: teamName };
+  function selectExistingProfile(name, teamName, logoUrl){
+    myProfile = { name: name, teamName: teamName, logoUrl: logoUrl || '' };
     localStorage.setItem('fanta_profile_' + currentRoomId, JSON.stringify(myProfile));
     goHome('bid');
   }
@@ -1169,11 +1242,17 @@
       return;
     }
 
-    myProfile = { name: name, teamName: teamName };
+    myProfile = { name: name, teamName: teamName, logoUrl: tempLogoBase64 || '' };
     await saveProfile(myProfile);
     localStorage.setItem('fanta_profile_' + currentRoomId, JSON.stringify(myProfile));
+    
     document.getElementById('join-name').value = '';
     document.getElementById('join-team-name').value = '';
+    document.getElementById('join-team-logo').value = '';
+    tempLogoBase64 = '';
+    document.getElementById('logo-preview-box').innerHTML = '⚽';
+    document.getElementById('logo-preview-box').className = 'team-crest-fallback lg';
+
     goHome('bid');
   }
 
@@ -1202,6 +1281,8 @@
     if(route === 'bid' && myProfile){
       document.getElementById('you-are-name').textContent = myProfile.name;
       document.getElementById('you-are-team').textContent = myProfile.teamName;
+      document.getElementById('you-are-crest').innerHTML = getCrestHtml(myProfile.logoUrl, myProfile.teamName, 'sm');
+      document.getElementById('bid-topbar-crest').innerHTML = getCrestHtml(myProfile.logoUrl, myProfile.teamName, 'sm');
       document.getElementById('bid-topbar-name').textContent = myProfile.teamName + ' (' + myProfile.name + ')';
       renderListoneTable('user');
     }
@@ -1240,6 +1321,7 @@
       price: newPrice,
       bidder: myProfile.name,
       bidderTeam: myProfile.teamName,
+      bidderLogo: myProfile.logoUrl || '',
       updatedAt: Date.now()
     });
     var ok = await saveState(newState);
@@ -1265,6 +1347,7 @@
       price: val,
       bidder: myProfile.name,
       bidderTeam: myProfile.teamName,
+      bidderLogo: myProfile.logoUrl || '',
       updatedAt: Date.now()
     });
     var ok = await saveState(newState);
@@ -1291,7 +1374,12 @@
 
     document.getElementById('bid-price').innerHTML = (s.status === 'idle' ? '0' : s.price) + '<span style="font-size:0.4em;color:var(--chalk-dim);"> cfu</span>';
     
-    var bidderLabel = s.bidder ? ('Offerta più alta: <b>' + escapeHtml(s.bidder) + '</b> <span style="color:var(--gold);">(' + escapeHtml(s.bidderTeam || '') + ')</span>') : (s.status === 'open' ? '<i>Nessuna offerta (base ' + s.basePrice + ')</i>' : '');
+    var bidderLabel = '';
+    if(s.bidder){
+      bidderLabel = 'Offerta più alta: ' + getCrestHtml(s.bidderLogo, s.bidderTeam, 'sm') + ' <b>' + escapeHtml(s.bidder) + '</b> <span style="color:var(--gold);">(' + escapeHtml(s.bidderTeam || '') + ')</span>';
+    } else if(s.status === 'open'){
+      bidderLabel = '<i>Nessuna offerta (base ' + s.basePrice + ')</i>';
+    }
     document.getElementById('bid-bidder').innerHTML = bidderLabel;
 
     var banner = document.getElementById('bid-status-banner');
@@ -1331,7 +1419,7 @@
     var html = '';
     if(s.status === 'closed'){
       html += '<div class="board-closed-banner">' +
-        (s.bidder ? ('AGGIUDICATO A ' + escapeHtml(s.bidder).toUpperCase() + ' (' + escapeHtml(s.bidderTeam || '').toUpperCase() + ')') : 'ASTA CHIUSA SENZA OFFERTE') +
+        (s.bidder ? (getCrestHtml(s.bidderLogo, s.bidderTeam, 'sm') + ' AGGIUDICATO A ' + escapeHtml(s.bidder).toUpperCase() + ' (' + escapeHtml(s.bidderTeam || '').toUpperCase() + ')') : 'ASTA CHIUSA SENZA OFFERTE') +
       '</div>';
     }
 
@@ -1349,9 +1437,18 @@
     html += '</div>';
 
     html += '<div class="board-row"><div class="board-label">Prezzo attuale</div><div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div></div>';
-    html += '<div class="board-row"><div class="board-label">Ultimo offerente</div><div class="board-bidder">' + 
-      (s.bidder ? (escapeHtml(s.bidder) + ' <span style="font-size:0.6em;color:var(--gold);">(' + escapeHtml(s.bidderTeam || '') + ')</span>') : '— nessuna offerta (base ' + s.basePrice + ') —') + 
-    '</div></div>';
+    
+    // RIGA 3: ULTIMO OFFERENTE CON STEMMA GRANDE
+    html += '<div class="board-row"><div class="board-label">Ultimo offerente</div>';
+    if(s.bidder){
+      html += '<div class="board-bidder-wrap">';
+      html +=    getCrestHtml(s.bidderLogo, s.bidderTeam, 'lg');
+      html += '  <div class="board-bidder">' + escapeHtml(s.bidder) + ' <span style="font-size:0.6em;color:var(--gold);">(' + escapeHtml(s.bidderTeam || '') + ')</span></div>';
+      html += '</div>';
+    } else {
+      html += '<div class="board-bidder">— nessuna offerta (base ' + s.basePrice + ') —</div>';
+    }
+    html += '</div>';
     el.innerHTML = html;
 
     if(priceChanged){
@@ -1430,6 +1527,7 @@
       price: base,
       bidder: '',
       bidderTeam: '',
+      bidderLogo: '',
       status: 'open',
       updatedAt: Date.now()
     };
@@ -1463,8 +1561,9 @@
     var parts = target.split('|');
     var pName = parts[0];
     var pTeam = parts[1] || pName;
+    var pLogo = parts[2] || '';
 
-    var newState = Object.assign({}, s, { price: 1, bidder: pName, bidderTeam: pTeam, status: 'closed', updatedAt: Date.now() });
+    var newState = Object.assign({}, s, { price: 1, bidder: pName, bidderTeam: pTeam, bidderLogo: pLogo, status: 'closed', updatedAt: Date.now() });
     var ok = await saveState(newState);
     if(ok){
       var log = await loadLog();
@@ -1476,6 +1575,7 @@
         price: 1,
         bidder: pName,
         bidderTeam: pTeam,
+        bidderLogo: pLogo,
         ts: Date.now()
       });
       await saveLog(log);
@@ -1503,6 +1603,7 @@
         price: s.bidder ? s.price : null,
         bidder: s.bidder || null,
         bidderTeam: s.bidderTeam || null,
+        bidderLogo: s.bidderLogo || null,
         ts: Date.now()
       });
       await saveLog(log);
@@ -1560,7 +1661,7 @@
     select.innerHTML = '<option value="">Seleziona profilo squadra...</option>';
     profiles.forEach(function(p){
       var opt = document.createElement('option');
-      opt.value = p.name + '|' + p.teamName;
+      opt.value = p.name + '|' + p.teamName + '|' + (p.logoUrl || '');
       opt.textContent = p.teamName + ' (' + p.name + ')';
       if(opt.value === currentVal) opt.selected = true;
       select.appendChild(opt);
@@ -1700,7 +1801,7 @@
           html += '<td><button class="btn-select-player" onclick="selectFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ', \'' + p.role + '\', \'' + escapeHtml(p.team).replace(/'/g, "\\'") + '\')">Seleziona</button></td>';
         }
       } else {
-        html += '<td>' + (isSold ? ('<span class="badge-assigned">' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
+        html += '<td>' + (isSold ? ('<span class="badge-assigned">Preso da ' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
       }
       html += '</tr>';
     });
@@ -1718,10 +1819,14 @@
         map[teamKey] = {
           teamName: teamKey,
           ownerName: item.bidder,
+          logoUrl: item.bidderLogo || '',
           items: [],
           totalSpent: 0,
           totalListValue: 0
         };
+      }
+      if(!map[teamKey].logoUrl && item.bidderLogo){
+        map[teamKey].logoUrl = item.bidderLogo;
       }
       map[teamKey].items.push(item);
       map[teamKey].totalSpent += item.price;
@@ -1770,9 +1875,12 @@
       var data = groups[tName];
       html += '<div class="team-card">';
       html += '  <div class="team-card-header">';
-      html += '    <div>';
-      html += '      <span class="team-card-name">' + escapeHtml(data.teamName) + '</span>';
-      html += '      <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div>';
+      html += '    <div class="team-card-title-wrap">';
+      html +=        getCrestHtml(data.logoUrl, data.teamName, 'md');
+      html += '      <div>';
+      html += '        <span class="team-card-name">' + escapeHtml(data.teamName) + '</span>';
+      html += '        <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div>';
+      html += '      </div>';
       html += '    </div>';
       html += '    <span class="team-card-stats">' + data.items.length + ' giog. · <b>' + data.totalSpent + ' cfu</b></span>';
       html += '  </div>';
@@ -1803,7 +1911,13 @@
       var data = groups[tName];
       html += '<div class="team-card">';
       html += '  <div class="team-card-header">';
-      html += '    <div><span class="team-card-name">' + escapeHtml(data.teamName) + '</span><div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div></div>';
+      html += '    <div class="team-card-title-wrap">';
+      html +=        getCrestHtml(data.logoUrl, data.teamName, 'md');
+      html += '      <div>';
+      html += '        <span class="team-card-name">' + escapeHtml(data.teamName) + '</span>';
+      html += '        <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div>';
+      html += '      </div>';
+      html += '    </div>';
       html += '    <span class="team-card-stats">' + data.items.length + ' acquisti · <b>' + data.totalSpent + ' cfu</b></span>';
       html += '  </div>';
       html += '  <table class="team-table"><tbody>';
@@ -1826,7 +1940,8 @@
     }
     var html = '<table class="team-table"><thead><tr><th>Calciatore</th><th>Squadra</th><th class="price-head">Prezzo</th></tr></thead><tbody>';
     log.forEach(function(entry){
-      html += '<tr><td>' + escapeHtml(entry.player) + '</td><td>' + (entry.bidder ? (escapeHtml(entry.bidderTeam || entry.bidder)) : '—') + '</td><td class="price-cell">' + (entry.price !== null ? entry.price + ' cfu' : '—') + '</td></tr>';
+      var teamHtml = entry.bidder ? ('<div style="display:inline-flex;align-items:center;gap:6px;">' + getCrestHtml(entry.bidderLogo, entry.bidderTeam, 'sm') + escapeHtml(entry.bidderTeam || entry.bidder) + '</div>') : '—';
+      html += '<tr><td>' + escapeHtml(entry.player) + '</td><td>' + teamHtml + '</td><td class="price-cell">' + (entry.price !== null ? entry.price + ' cfu' : '—') + '</td></tr>';
     });
     html += '</tbody></table>';
     wrap.innerHTML = html;
@@ -1843,30 +1958,30 @@
     var teams = Object.values(groups);
 
     var totalSpent = 0;
-    var topSpender = { name: '—', spent: 0 };
-    var topValueTeam = { name: '—', value: 0 };
-    var topPlayer = { name: '—', price: 0, buyer: '—' };
+    var topSpender = { name: '—', spent: 0, logo: '' };
+    var topValueTeam = { name: '—', value: 0, logo: '' };
+    var topPlayer = { name: '—', price: 0, buyer: '—', logo: '' };
 
     teams.forEach(function(t){
       totalSpent += t.totalSpent;
       if(t.totalSpent > topSpender.spent){
-        topSpender = { name: t.teamName, spent: t.totalSpent };
+        topSpender = { name: t.teamName, spent: t.totalSpent, logo: t.logoUrl };
       }
       if(t.totalListValue > topValueTeam.value){
-        topValueTeam = { name: t.teamName, value: t.totalListValue };
+        topValueTeam = { name: t.teamName, value: t.totalListValue, logo: t.logoUrl };
       }
     });
 
     log.forEach(function(p){
       if(p.price && p.price > topPlayer.price){
-        topPlayer = { name: p.player, price: p.price, buyer: p.bidderTeam || p.bidder };
+        topPlayer = { name: p.player, price: p.price, buyer: p.bidderTeam || p.bidder, logo: p.bidderLogo };
       }
     });
 
     document.getElementById('sum-total-spent').textContent = totalSpent + ' cfu';
-    document.getElementById('sum-top-spender').textContent = topSpender.spent > 0 ? (topSpender.name + ' (' + topSpender.spent + ' cfu)') : '—';
-    document.getElementById('sum-top-value').textContent = topValueTeam.value > 0 ? (topValueTeam.name + ' (' + topValueTeam.value + ' qt)') : '—';
-    document.getElementById('sum-top-player').textContent = topPlayer.price > 0 ? (topPlayer.name + ' (' + topPlayer.price + ' cfu a ' + topPlayer.buyer + ')') : '—';
+    document.getElementById('sum-top-spender').innerHTML = topSpender.spent > 0 ? (getCrestHtml(topSpender.logo, topSpender.name, 'sm') + ' ' + escapeHtml(topSpender.name) + ' (' + topSpender.spent + ' cfu)') : '—';
+    document.getElementById('sum-top-value').innerHTML = topValueTeam.value > 0 ? (getCrestHtml(topValueTeam.logo, topValueTeam.name, 'sm') + ' ' + escapeHtml(topValueTeam.name) + ' (' + topValueTeam.value + ' qt)') : '—';
+    document.getElementById('sum-top-player').innerHTML = topPlayer.price > 0 ? (escapeHtml(topPlayer.name) + ' (' + topPlayer.price + ' cfu a ' + escapeHtml(topPlayer.buyer) + ')') : '—';
 
     var grid = document.getElementById('summary-teams-grid');
     if(teams.length === 0){
@@ -1878,7 +1993,13 @@
     teams.forEach(function(t){
       html += '<div class="team-card">';
       html += '  <div class="team-card-header">';
-      html += '    <div><span class="team-card-name">' + escapeHtml(t.teamName) + '</span><div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(t.ownerName) + ')</div></div>';
+      html += '    <div class="team-card-title-wrap">';
+      html +=        getCrestHtml(t.logoUrl, t.teamName, 'md');
+      html += '      <div>';
+      html += '        <span class="team-card-name">' + escapeHtml(t.teamName) + '</span>';
+      html += '        <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(t.ownerName) + ')</div>';
+      html += '      </div>';
+      html += '    </div>';
       html += '    <div style="text-align:right;"><span class="team-card-stats">Spesa: <b>' + t.totalSpent + ' cfu</b></span><div style="font-size:11px; color:var(--gold);">Valore Listone: ' + t.totalListValue + '</div></div>';
       html += '  </div>';
       html += '  <table class="team-table"><thead><tr><th>R</th><th>Calciatore</th><th class="price-head">Prezzo</th></tr></thead><tbody>';
@@ -1988,7 +2109,6 @@
       return;
     }
 
-    // Aggiorna stato visuale del pulsante banditore nella home della stanza
     if(currentRoute === 'home'){
       var claim = await loadAdminClaim();
       var descEl = document.getElementById('role-admin-desc');
