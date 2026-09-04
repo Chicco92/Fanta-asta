@@ -497,10 +497,10 @@
         <div class="label">Partecipante</div>
         <div class="desc">Scegli o crea il tuo profilo squadra e fai offerte.</div>
       </button>
-      <button class="role-card" onclick="openScreenWithCheck('admin')">
+      <button class="role-card" onclick="claimOrEnterAdmin()">
         <div class="icon">⚙️</div>
         <div class="label">Banditore</div>
-        <div class="desc">Carica il listone, batti l'asta o concludila.</div>
+        <div class="desc" id="role-admin-desc">Gestisci e batti i calciatori all'asta.</div>
       </button>
     </div>
   </div>
@@ -608,7 +608,13 @@
 
   <!-- ==================== ADMIN (BANDITORE) ==================== -->
   <div id="screen-admin" class="screen">
-    <div class="topbar"><span>Banditore</span><button class="link-btn" onclick="goHome('home')">cambia ruolo</button></div>
+    <div class="topbar">
+      <span>Banditore Ufficiale</span>
+      <div>
+        <button class="link-btn" style="color:var(--brick); margin-right:8px;" onclick="releaseAdminClaim()">Cedi / Rilascia ruolo</button>
+        <button class="link-btn" onclick="goHome('home')">cambia ruolo</button>
+      </div>
+    </div>
     <div class="panel-wrap">
       <div class="panel">
         <h2>Gestisci l'asta</h2>
@@ -758,6 +764,14 @@
   var SUPER_ADMIN_USER = 'admin';
   var SUPER_ADMIN_PASS = 'fanta2026';
 
+  // Device Token unico per rivendicare il ruolo di banditore
+  var DEVICE_TOKEN_KEY = 'fanta_device_token';
+  var myDeviceToken = localStorage.getItem(DEVICE_TOKEN_KEY);
+  if(!myDeviceToken){
+    myDeviceToken = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem(DEVICE_TOKEN_KEY, myDeviceToken);
+  }
+
   // ---------- SESSIONE LOCALE ----------
   var currentRoomId = localStorage.getItem(ACTIVE_ROOM_KEY) || null;
   var currentRoomData = null;
@@ -816,6 +830,9 @@
   async function loadListone(){ var l = await store.get(getRoomPath('listone')); return Array.isArray(l) ? l : []; }
   async function saveListone(l){ return await store.set(getRoomPath('listone'), l); }
 
+  async function loadAdminClaim(){ return await store.get(getRoomPath('adminClaim')); }
+  async function saveAdminClaim(token){ return await store.set(getRoomPath('adminClaim'), token); }
+
   async function loadProfiles(){
     var p = await store.get(getRoomPath('profiles'));
     return Array.isArray(p) ? p : [];
@@ -835,6 +852,39 @@
   }
   async function saveRoomsIndex(rooms){
     return await store.set(ROOMS_INDEX_KEY, rooms);
+  }
+
+  // ---------- GESTIONE ACCESSO BANDITORE PROTETTO ----------
+  async function claimOrEnterAdmin(){
+    if(currentRoomData && currentRoomData.ended){
+      goHome('summary');
+      return;
+    }
+
+    var claim = await loadAdminClaim();
+
+    // Caso 1: Nessun banditore ha ancora preso il controllo -> Lo diventa questo dispositivo
+    if(!claim){
+      await saveAdminClaim(myDeviceToken);
+      goHome('admin');
+      return;
+    }
+
+    // Caso 2: È lo stesso dispositivo/browser (anche se ha chiuso la scheda o ricaricato)
+    if(claim === myDeviceToken){
+      goHome('admin');
+      return;
+    }
+
+    // Caso 3: Un altro dispositivo è già il banditore attivo
+    alert('⚠️ Accesso negato: questa asta ha già un Banditore attivo designato. Solo lui può gestire i calciatori e le offerte.');
+  }
+
+  async function releaseAdminClaim(){
+    if(!confirm('Vuoi davvero cedere il ruolo da Banditore? Il prossimo utente che cliccherà su Banditore prenderà il controllo dell\'asta.')) return;
+    await store.remove(getRoomPath('adminClaim'));
+    alert('Hai rilasciato il ruolo di banditore.');
+    goHome('home');
   }
 
   // ---------- LOBBY & STANZE ----------
@@ -1841,7 +1891,7 @@
     grid.innerHTML = html;
   }
 
-  // ---------- ESPORTAZIONE COMPATIBILE LEGHE FANTACALCIO ----------
+  // ---------- ESPORTAZIONE COMPATIBILE UNIVERSALE ----------
   async function exportRostersToExcel(){
     var log = await loadLog();
     if(!log || log.length === 0){
@@ -1867,12 +1917,28 @@
       return;
     }
 
-    var ws = XLSX.utils.json_to_sheet(exportRows);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rose");
+    try {
+      var ws = XLSX.utils.json_to_sheet(exportRows);
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Rose");
 
-    var fileName = 'Rose_' + (currentRoomData ? currentRoomData.name.replace(/[^a-zA-Z0-9_-]/g, '_') : 'FantaAsta') + '.xlsx';
-    XLSX.writeFile(wb, fileName);
+      var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      var blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = 'Rose_' + (currentRoomData ? currentRoomData.name.replace(/[^a-zA-Z0-9_-]/g, '_') : 'FantaAsta') + '.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch(err) {
+      console.error("Errore esportazione:", err);
+      exportRostersToCsv();
+    }
   }
 
   async function exportRostersToCsv(){
@@ -1920,6 +1986,21 @@
     if(s.status === 'ended' && currentRoute !== 'summary' && currentRoute !== 'home' && currentRoute !== 'super-admin'){
       goHome('summary');
       return;
+    }
+
+    // Aggiorna stato visuale del pulsante banditore nella home della stanza
+    if(currentRoute === 'home'){
+      var claim = await loadAdminClaim();
+      var descEl = document.getElementById('role-admin-desc');
+      if(descEl){
+        if(!claim){
+          descEl.textContent = "Disponibile: clicca per assumere il ruolo.";
+        } else if(claim === myDeviceToken){
+          descEl.textContent = "Sei il Banditore attivo (clicca per entrare).";
+        } else {
+          descEl.textContent = "🔒 Ruolo occupato da un altro utente.";
+        }
+      }
     }
 
     if(currentRoute === 'tabellone'){
