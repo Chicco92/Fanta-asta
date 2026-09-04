@@ -273,7 +273,7 @@
     padding-bottom: 14px; margin-top: 28px;
   }
   .team-slot-column{
-    min-width: 260px; width: 260px; flex-shrink: 0; background: var(--pitch-mid);
+    min-width: 285px; width: 285px; flex-shrink: 0; background: var(--pitch-mid);
     border: 1px solid var(--pitch-line); border-radius: var(--radius); display: flex;
     flex-direction: column; overflow: hidden;
   }
@@ -281,11 +281,12 @@
     width: 100%; min-width: 100%;
   }
   .team-slot-header{
-    padding: 12px 14px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.22);
-    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 10px 12px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.22);
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; min-height: 54px;
   }
   .team-slot-header-info{ overflow: hidden; }
-  .team-slot-name{ font-family: var(--font-display); font-size: 14px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .team-slot-name{ font-family: var(--font-display); font-size: 13.5px; color: var(--gold);
+    line-height: 1.2; word-break: break-word; white-space: normal; }
   .team-slot-owner{ font-size: 11px; color: var(--chalk-dim); }
   .team-slot-stats{ font-size: 12px; font-weight: 700; color: var(--chalk); text-align: right; white-space: nowrap; line-height: 1.3; }
 
