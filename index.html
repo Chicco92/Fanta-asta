@@ -418,7 +418,7 @@
       <p class="hint">Accedi per gestire ed eliminare le aste create.</p>
       <div class="field">
         <label for="super-user">Username</label>
-        <input id="super-user" type="text" placeholder="admin">
+        <input id="super-user" type="text" placeholder="Chicco">
       </div>
       <div class="field">
         <label for="super-pass">Password</label>
@@ -471,14 +471,14 @@
     </div>
   </div>
 
-  <!-- MODALE: SBLOCCA PROFILO PARTECIPANTE CON PIN -->
+  <!-- MODALE: SBLOCCA PROFILO PARTECIPANTE CON PIN ALFANUMERICO -->
   <div class="modal-overlay" id="modal-unlock-profile">
     <div class="modal">
       <h2>Sblocca Profilo</h2>
-      <p class="hint" id="unlock-profile-hint">Inserisci il PIN di 6 cifre per accedere al profilo.</p>
+      <p class="hint" id="unlock-profile-hint">Inserisci il codice di accesso (max 6 caratteri).</p>
       <div class="field">
-        <label for="input-profile-pin">PIN di 6 cifre</label>
-        <input id="input-profile-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••">
+        <label for="input-profile-pin">Codice di accesso (max 6 lettere/numeri)</label>
+        <input id="input-profile-pin" type="password" maxlength="6" placeholder="••••••" autocomplete="off">
       </div>
       <button class="btn-primary" onclick="submitUnlockProfile()">Sblocca ed Entra</button>
       <button class="btn-danger" style="margin-top:8px;" onclick="closeModal('modal-unlock-profile')">Annulla</button>
@@ -558,7 +558,7 @@
     <div class="panel-wrap">
       <div class="panel">
         <h2>Accedi o Crea Profilo</h2>
-        <p class="hint">Seleziona il tuo profilo esistente inserendo il tuo PIN segreto oppure registrati da zero.</p>
+        <p class="hint">Seleziona il tuo profilo esistente inserendo il tuo codice segreto oppure registrati da zero.</p>
         
         <div id="existing-profiles-wrap" style="display:none;">
           <div class="section-header"><span class="section-title">Profili già registrati (protetti da PIN)</span></div>
@@ -576,10 +576,10 @@
           <input id="join-team-name" type="text" placeholder="Es. Real Madrink" maxlength="32" autocomplete="off">
         </div>
 
-        <!-- PIN DI 6 CIFRE -->
+        <!-- CODICE ALFANUMERICO FINO A 6 CARATTERI -->
         <div class="field">
-          <label for="join-pin">Crea un PIN personale di 6 cifre</label>
-          <input id="join-pin" type="password" inputmode="numeric" placeholder="Es. 123456" maxlength="6" autocomplete="off">
+          <label for="join-pin">Crea un codice di accesso (alfanumerico, max 6 caratteri)</label>
+          <input id="join-pin" type="password" placeholder="Es. 1234, roma, fanta1" maxlength="6" autocomplete="off">
         </div>
 
         <!-- UPLOAD STEMMA SQUADRA -->
@@ -1242,14 +1242,14 @@
     container.innerHTML = html;
   }
 
-  // Avvia modale sblocco con PIN a 6 cifre
+  // Avvia modale sblocco con codice alfanumerico (max 6)
   async function startUnlockProfile(name){
     var profiles = await loadProfiles();
     var found = profiles.find(function(p){ return p.name.toLowerCase() === name.toLowerCase(); });
     if(!found) return;
 
     pendingProfileToUnlock = found;
-    document.getElementById('unlock-profile-hint').textContent = 'Inserisci il PIN di 6 cifre per accedere a ' + found.teamName + ' (' + found.name + ').';
+    document.getElementById('unlock-profile-hint').textContent = 'Inserisci il codice di accesso per ' + found.teamName + ' (' + found.name + ').';
     document.getElementById('input-profile-pin').value = '';
     document.getElementById('unlock-profile-msg').textContent = '';
     document.getElementById('modal-unlock-profile').classList.add('active');
@@ -1266,7 +1266,7 @@
       pendingProfileToUnlock = null;
       goHome('bid');
     } else {
-      showMsg('unlock-profile-msg', 'PIN di 6 cifre errato!', 'error');
+      showMsg('unlock-profile-msg', 'Codice di accesso errato!', 'error');
     }
   }
 
@@ -1279,8 +1279,8 @@
       showMsg('join-msg', 'Inserisci sia il tuo nome sia il nome della squadra.', 'error');
       return;
     }
-    if(!pin || pin.length !== 6 || isNaN(pin)){
-      showMsg('join-msg', 'Il PIN deve essere esattamente di 6 cifre numeriche.', 'error');
+    if(!pin || pin.length > 6){
+      showMsg('join-msg', 'Il codice di accesso deve avere da 1 a 6 caratteri.', 'error');
       return;
     }
 
@@ -1310,7 +1310,7 @@
 
   // Disconnessione sicura dal profilo
   function logoutParticipantProfile(){
-    if(!confirm('Vuoi disconnetterti dal profilo? Per rientrare sarà necessario inserire il tuo PIN di 6 cifre.')) return;
+    if(!confirm('Vuoi disconnetterti dal profilo? Per rientrare sarà necessario inserire il tuo codice di accesso.')) return;
     localStorage.removeItem('fanta_profile_' + currentRoomId);
     myProfile = null;
     openParticipantFlow();
