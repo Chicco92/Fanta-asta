@@ -79,6 +79,7 @@
   .room-badge{ display:inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight:700; margin-left: 6px; }
   .badge-public{ background: rgba(31,92,60,0.5); color: #7fe1a8; border: 1px solid rgba(127,225,168,0.3); }
   .badge-private{ background: rgba(193,90,69,0.3); color: #f09581; border: 1px solid rgba(240,149,129,0.3); }
+  .badge-ended{ background: rgba(227,178,60,0.25); color: var(--gold); border: 1px solid var(--gold-dim); }
 
   /* ---------- MODALI CREA / ACCEDI ---------- */
   .modal-overlay{
@@ -88,7 +89,7 @@
   .modal-overlay.active{ display:flex; }
   .modal{
     background: var(--pitch-dark); border: 1px solid var(--pitch-line); border-radius: var(--radius);
-    padding: 24px; width: 100%; max-width: 400px;
+    padding: 24px; width: 100%; max-width: 420px;
   }
 
   /* ---------- HOME RUOLI NELLA STANZA ---------- */
@@ -230,6 +231,17 @@
 
   .you-are{ text-align:center; font-size: 12.5px; color: var(--chalk-dim); margin-top: 18px; margin-bottom: 20px; }
 
+  /* ---------- PROFILI PARTECIPANTE ---------- */
+  .profile-pick-list{ display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
+  .profile-pick-btn{
+    padding: 12px 14px; background: var(--pitch-mid); border: 1px solid var(--pitch-line);
+    border-radius: var(--radius); color: var(--chalk); text-align:left; display:flex;
+    justify-content:space-between; align-items:center;
+  }
+  .profile-pick-btn:hover{ border-color: var(--gold); }
+  .profile-pick-btn .p-name{ font-weight:700; font-size:14px; }
+  .profile-pick-btn .p-team{ font-size:12px; color: var(--gold); }
+
   /* ---------- TABELLE & ROSE ---------- */
   .section-divider{ height: 1px; background: var(--pitch-line); margin: 24px 0 16px; }
   .section-header{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 12px; }
@@ -278,7 +290,7 @@
   .btn-select-player:hover{ background:#eec25c; }
   .badge-assigned{ font-size: 11px; color: var(--brick); font-style: italic; font-weight: 600; }
 
-  /* ---------- ADMIN ---------- */
+  /* ---------- ADMIN & ASSEGNAZIONE RAPIDA ---------- */
   .admin-current{
     background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius);
     padding: 16px 18px; margin-bottom: 16px; font-size: 14px;
@@ -295,6 +307,33 @@
   .quick-assign-box label{ display: block; font-size: 12px; color: var(--chalk-dim); margin-bottom: 6px; }
   .quick-assign-row{ display: flex; gap: 8px; }
 
+  /* ---------- RESOCONTO FINALE (FINE ASTA) ---------- */
+  #screen-summary{
+    flex-direction:column; align-items:center; justify-content:flex-start;
+    padding: 70px 20px 40px; width:100%; max-width: 960px; margin: 0 auto;
+  }
+  .summary-hero{ text-align:center; margin-bottom: 24px; }
+  .summary-hero h1{ font-family: var(--font-display); font-size: clamp(24px, 5vw, 36px); color: var(--gold); margin:0 0 6px; }
+  .summary-stats-grid{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+    width: 100%; margin-bottom: 24px;
+  }
+  .stat-card{
+    background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius:var(--radius);
+    padding: 14px 16px; text-align:center;
+  }
+  .stat-card .val{ font-family: var(--font-display); font-size: 20px; color: var(--gold); margin-top: 4px; }
+  .stat-card .lbl{ font-size: 12px; color: var(--chalk-dim); }
+
+  /* ---------- GESTORE DEL SITO (SUPER ADMIN) ---------- */
+  #screen-super-admin{
+    flex-direction:column; align-items:center; justify-content:flex-start;
+    padding: 70px 20px 40px; width:100%; max-width: 800px; margin: 0 auto;
+  }
+  .super-table{ width:100%; border-collapse:collapse; background: var(--pitch-mid); border-radius:var(--radius); overflow:hidden; border:1px solid var(--pitch-line); }
+  .super-table th, .super-table td{ padding: 12px 14px; text-align:left; border-bottom:1px solid var(--pitch-line); font-size: 13.5px; }
+  .super-table th{ color: var(--chalk-dim); font-size:12px; background: rgba(0,0,0,0.25); }
+
   @media (max-width: 580px){
     .lobby-actions{ grid-template-columns: 1fr; }
     .role-grid{ flex-direction:column; align-items:stretch; }
@@ -309,6 +348,10 @@
 
   <!-- ==================== LOBBY STANZE ==================== -->
   <div id="screen-lobby" class="screen active">
+    <div class="topbar">
+      <span>FantaAsta Live Platform</span>
+      <button class="link-btn" onclick="openSuperAdminLogin()">🔒 Area Gestore</button>
+    </div>
     <div class="lobby-title">Fanta<span>Asta</span> Live</div>
     <div class="lobby-sub">Crea la tua stanza d'asta o unisciti a una già attiva</div>
 
@@ -330,7 +373,26 @@
       <span class="section-meta" id="lobby-room-count">0 stanze</span>
     </div>
     <div class="rooms-list" id="rooms-list-wrap">
-      <div class="team-empty">Nessuna asta pubblica al momento. Crea la prima!</div>
+      <div class="team-empty">Nessuna asta attiva al momento. Clicca "+ Crea Asta" per crearne una!</div>
+    </div>
+  </div>
+
+  <!-- MODALE: LOGIN SUPER ADMIN GESTORE -->
+  <div class="modal-overlay" id="modal-super-login">
+    <div class="modal">
+      <h2>Accesso Gestore Sito</h2>
+      <p class="hint">Accedi per gestire ed eliminare le aste create.</p>
+      <div class="field">
+        <label for="super-user">Username</label>
+        <input id="super-user" type="text" placeholder="admin">
+      </div>
+      <div class="field">
+        <label for="super-pass">Password</label>
+        <input id="super-pass" type="password" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" onclick="submitSuperAdminLogin()">Accedi</button>
+      <button class="btn-danger" style="margin-top:8px;" onclick="closeModal('modal-super-login')">Annulla</button>
+      <div class="msg error" id="super-login-msg"></div>
     </div>
   </div>
 
@@ -375,6 +437,32 @@
     </div>
   </div>
 
+  <!-- ==================== SUPER ADMIN (PANNELLO DIRETTORE) ==================== -->
+  <div id="screen-super-admin" class="screen">
+    <div class="topbar">
+      <span>Pannello Gestore del Sito</span>
+      <button class="link-btn" onclick="exitSuperAdmin()">Esci</button>
+    </div>
+    <div class="section-header" style="width:100%;">
+      <span class="section-title">Tutte le Aste nel Database</span>
+      <span class="section-meta" id="super-room-count">0 stanze</span>
+    </div>
+    <div style="width:100%; overflow-x:auto;">
+      <table class="super-table" id="super-table-rooms">
+        <thead>
+          <tr>
+            <th>Nome Lega</th>
+            <th>Tipo</th>
+            <th>Creata il</th>
+            <th>Stato</th>
+            <th>Azione</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- ==================== HOME RUOLI NELLA STANZA ==================== -->
   <div id="screen-home" class="screen">
     <div class="topbar">
@@ -386,20 +474,20 @@
       <p class="home-sub">Scegli come vuoi entrare in questa stanza. Tutti vedono le stesse offerte in tempo reale.</p>
     </div>
     <div class="role-grid">
-      <button class="role-card" onclick="goHome('tabellone')">
+      <button class="role-card" onclick="openScreenWithCheck('tabellone')">
         <div class="icon">📺</div>
         <div class="label">Tabellone</div>
         <div class="desc">Mostra calciatore, dettagli e rose in tempo reale.</div>
       </button>
-      <button class="role-card" onclick="checkParticipantEntry()">
+      <button class="role-card" onclick="openParticipantFlow()">
         <div class="icon">📱</div>
         <div class="label">Partecipante</div>
-        <div class="desc">Entra con il tuo nome e fai le tue offerte.</div>
+        <div class="desc">Scegli o crea il tuo profilo squadra e fai offerte.</div>
       </button>
-      <button class="role-card" onclick="goHome('admin')">
+      <button class="role-card" onclick="openScreenWithCheck('admin')">
         <div class="icon">⚙️</div>
         <div class="label">Banditore</div>
-        <div class="desc">Carica il listone, prepara la base e batti l'asta.</div>
+        <div class="desc">Carica il listone, batti l'asta o concludila.</div>
       </button>
     </div>
   </div>
@@ -415,18 +503,31 @@
     <div class="teams-grid" id="tv-teams-grid"></div>
   </div>
 
-  <!-- ==================== PARTECIPANTE: JOIN ==================== -->
+  <!-- ==================== PARTECIPANTE: SELEZIONE / CREAZIONE PROFILO ==================== -->
   <div id="screen-join" class="screen">
     <div class="topbar"><span>Partecipante</span><button class="link-btn" onclick="goHome('home')">cambia ruolo</button></div>
     <div class="panel-wrap">
       <div class="panel">
-        <h2>Entra all'asta</h2>
-        <p class="hint">Inserisci il nome con cui vuoi essere riconosciuto. Se ti disconnetti potrai rientrare sotto questo nome.</p>
+        <h2>Accedi o Crea Profilo</h2>
+        <p class="hint">Seleziona un profilo già registrato in questa stanza oppure creane uno nuovo inserendo nome e squadra.</p>
+        
+        <!-- Profili Esistenti -->
+        <div id="existing-profiles-wrap" style="display:none;">
+          <div class="section-header"><span class="section-title">Profili già registrati</span></div>
+          <div class="profile-pick-list" id="profiles-pick-container"></div>
+          <div class="section-divider"></div>
+        </div>
+
+        <h2>Nuovo Profilo</h2>
         <div class="field">
-          <label for="join-name">Il tuo nome</label>
+          <label for="join-name">Nome partecipante</label>
           <input id="join-name" type="text" placeholder="Es. Marco" maxlength="24" autocomplete="off">
         </div>
-        <button class="btn-primary" onclick="joinAsParticipant()">Entra</button>
+        <div class="field">
+          <label for="join-team-name">Nome Squadra / Fantateam</label>
+          <input id="join-team-name" type="text" placeholder="Es. Real Madrink" maxlength="32" autocomplete="off">
+        </div>
+        <button class="btn-primary" onclick="createNewParticipantProfile()">Crea ed Entra</button>
         <div class="msg error" id="join-msg"></div>
       </div>
     </div>
@@ -457,8 +558,8 @@
         </div>
         <div class="msg" id="bid-msg"></div>
         <div class="you-are">
-          Stai partecipando come <b id="you-are-name" style="color:var(--chalk)"></b> · 
-          <button class="link-btn" onclick="logoutParticipant()" style="padding:0;">non sei tu?</button>
+          Profilo attivo: <b id="you-are-name" style="color:var(--chalk)"></b> (<span id="you-are-team" style="color:var(--gold)"></span>) · 
+          <button class="link-btn" onclick="switchProfile()" style="padding:0;">cambia profilo</button>
         </div>
 
         <div class="section-divider"></div>
@@ -493,13 +594,13 @@
     </div>
   </div>
 
-  <!-- ==================== ADMIN ==================== -->
+  <!-- ==================== ADMIN (BANDITORE) ==================== -->
   <div id="screen-admin" class="screen">
     <div class="topbar"><span>Banditore</span><button class="link-btn" onclick="goHome('home')">cambia ruolo</button></div>
     <div class="panel-wrap">
       <div class="panel">
         <h2>Gestisci l'asta</h2>
-        <p class="hint">Carica il listone, scegli la base (anche da 0 crediti) oppure assegna direttamente a 1 credito.</p>
+        <p class="hint">Carica il listone, scegli la base oppure assegna direttamente a 1 credito.</p>
 
         <!-- CARICAMENTO FILE LISTONE -->
         <div class="field">
@@ -534,7 +635,7 @@
         <div id="admin-selected-meta" class="player-meta-badges" style="margin-top:-8px; margin-bottom:14px; min-height: 24px;"></div>
 
         <div class="field">
-          <label for="admin-base">Base d'asta (crediti) — impostabile da 0</label>
+          <label for="admin-base">Base d'asta (crediti)</label>
           <input id="admin-base" type="number" inputmode="numeric" value="0" min="0">
         </div>
         
@@ -554,13 +655,17 @@
           <label>Oppure assegna direttamente a 1 credito a:</label>
           <div class="quick-assign-row">
             <select id="admin-quick-participant" style="flex:1; padding: 9px 10px; background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius:var(--radius); color:var(--chalk); font-size:13px;">
-              <option value="">Seleziona partecipante...</option>
+              <option value="">Seleziona profilo...</option>
             </select>
             <button class="btn-secondary" style="width: auto; padding: 9px 14px; font-size:13px;" onclick="assignDirectlyForOne()">Assegna a 1</button>
           </div>
         </div>
 
         <button class="btn-danger" id="btn-close-auction" onclick="closeAuction()" style="display:none; margin-top: 10px;">Chiudi e assegna</button>
+
+        <!-- CONCLUSIONE FINALE ASTA -->
+        <div class="divider"></div>
+        <button class="btn-danger" style="border-color:var(--brick); color:var(--chalk); background:rgba(193,90,69,0.35);" onclick="concludeWholeAuction()">🏁 Concludi definitivamente l'asta</button>
 
         <div class="divider"></div>
         <div class="section-header"><span class="section-title">Rose partecipanti</span></div>
@@ -571,6 +676,41 @@
         <div id="log-wrap"><div class="team-empty">Ancora nessun calciatore assegnato.</div></div>
       </div>
     </div>
+  </div>
+
+  <!-- ==================== SCHERMATA: RESOCONTO FINALE (FINE ASTA) ==================== -->
+  <div id="screen-summary" class="screen">
+    <div class="topbar">
+      <span>Resoconto Finale Asta</span>
+      <button class="link-btn" onclick="exitToLobby()">Torna alla Lobby</button>
+    </div>
+
+    <div class="summary-hero">
+      <h1 id="summary-league-title">Lega Fantacalcio</h1>
+      <p class="home-sub">L'asta è ufficialmente conclusa! Ecco il riepilogo dettagliato delle rose e le statistiche finali.</p>
+    </div>
+
+    <div class="summary-stats-grid">
+      <div class="stat-card">
+        <div class="lbl">Spesa Complessiva Lega</div>
+        <div class="val" id="sum-total-spent">0 cfu</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Chi ha speso di più</div>
+        <div class="val" id="sum-top-spender">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Miglior Valore Listone</div>
+        <div class="val" id="sum-top-value">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Top Player dell'Asta</div>
+        <div class="val" id="sum-top-player">—</div>
+      </div>
+    </div>
+
+    <div class="section-header" style="width:100%;"><span class="section-title">Tutte le Rose Finali</span></div>
+    <div class="teams-grid" id="summary-teams-grid" style="margin-top:0;"></div>
   </div>
 
 </div>
@@ -590,25 +730,26 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // ---------- CHIAVI E SESSIONE ----------
+  // ---------- CHIAVI E COSTANTI ----------
   var ROOMS_INDEX_KEY = 'rooms_index';
-  var USER_KEY = 'fanta_saved_username';
   var ACTIVE_ROOM_KEY = 'fanta_active_room_id';
+  var SUPER_ADMIN_USER = 'admin';
+  var SUPER_ADMIN_PASS = 'fanta2026';
 
+  // ---------- SESSIONE LOCALE ----------
   var currentRoomId = localStorage.getItem(ACTIVE_ROOM_KEY) || null;
   var currentRoomData = null;
-  var myName = localStorage.getItem(USER_KEY) || '';
+  var myProfile = null; // { name: '', teamName: '' }
   var currentRoute = 'lobby';
   var lastKnownPrice = null;
   var pollTimer = null;
   var cachedListone = [];
   var filterRoles = { admin: '', user: '' };
-
   var pendingPlayer = { role: '', team: '', qt: 1 };
 
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
 
-  // ---------- UNIVERSAL CLOUD STORAGE LAYER ----------
+  // ---------- STORAGE LAYER FIREBASE ----------
   function getRoomPath(keySuffix){
     return currentRoomId ? ('rooms/' + currentRoomId + '/' + keySuffix) : keySuffix;
   }
@@ -619,7 +760,7 @@
         const snap = await db.ref(path).get();
         return snap.exists() ? snap.val() : null;
       } catch(e) {
-        console.warn("Lettura Firebase non riuscita, fallback su cache locale:", e);
+        console.warn("Errore lettura Firebase:", e);
         var raw = localStorage.getItem(path);
         return raw ? JSON.parse(raw) : null;
       }
@@ -630,13 +771,23 @@
         await db.ref(path).set(val);
         return true;
       } catch(e) {
-        console.error("Scrittura Firebase non riuscita:", e);
+        console.error("Errore scrittura Firebase:", e);
+        return false;
+      }
+    },
+    remove: async function(path){
+      try {
+        localStorage.removeItem(path);
+        await db.ref(path).remove();
+        return true;
+      } catch(e) {
+        console.error("Errore rimozione Firebase:", e);
         return false;
       }
     }
   };
 
-  // Metodi stanza
+  // Helper Stanza Corrente
   async function loadState(){ return await store.get(getRoomPath('state')); }
   async function saveState(s){ return await store.set(getRoomPath('state'), s); }
   async function loadLog(){ var l = await store.get(getRoomPath('log')); return Array.isArray(l) ? l : []; }
@@ -644,20 +795,21 @@
   async function loadListone(){ var l = await store.get(getRoomPath('listone')); return Array.isArray(l) ? l : []; }
   async function saveListone(l){ return await store.set(getRoomPath('listone'), l); }
 
-  async function loadParticipants(){
-    var p = await store.get(getRoomPath('participants'));
+  // Profili Partecipanti [{name, teamName}]
+  async function loadProfiles(){
+    var p = await store.get(getRoomPath('profiles'));
     return Array.isArray(p) ? p : [];
   }
-  async function registerParticipant(name){
-    if(!name) return;
-    var list = await loadParticipants();
-    if(!list.includes(name)){
-      list.push(name);
-      await store.set(getRoomPath('participants'), list);
+  async function saveProfile(profileObj){
+    var list = await loadProfiles();
+    var exists = list.find(function(p){ return p.name.toLowerCase() === profileObj.name.toLowerCase(); });
+    if(!exists){
+      list.push(profileObj);
+      await store.set(getRoomPath('profiles'), list);
     }
   }
 
-  // Metodi elenco stanze
+  // Stanze Globali
   async function loadRoomsIndex(){
     var r = await store.get(ROOMS_INDEX_KEY);
     return Array.isArray(r) ? r : [];
@@ -708,6 +860,7 @@
       name: name,
       isPrivate: (type === 'private'),
       pin: pin || null,
+      ended: false,
       createdAt: Date.now()
     };
 
@@ -743,12 +896,21 @@
     currentRoomData = room;
     localStorage.setItem(ACTIVE_ROOM_KEY, room.id);
 
+    // Carica profilo locale salvato per questa stanza specifica
+    var savedP = localStorage.getItem('fanta_profile_' + room.id);
+    myProfile = savedP ? JSON.parse(savedP) : null;
+
     document.getElementById('room-topbar-title').textContent = 'Lega: ' + room.name;
     document.getElementById('room-home-title').innerHTML = escapeHtml(room.name);
     document.getElementById('tabellone-room-name').textContent = room.name;
 
     await ensureInitRoom();
-    goHome('home');
+
+    if(room.ended){
+      goHome('summary');
+    } else {
+      goHome('home');
+    }
   }
 
   function exitToLobby(){
@@ -762,7 +924,7 @@
   async function renderLobbyRooms(){
     var rooms = await loadRoomsIndex();
     var wrap = document.getElementById('rooms-list-wrap');
-    document.getElementById('lobby-room-count').textContent = rooms.length + ' stanze create';
+    document.getElementById('lobby-room-count').textContent = rooms.length + ' stanze';
 
     if(rooms.length === 0){
       wrap.innerHTML = '<div class="team-empty">Nessuna asta attiva al momento. Clicca "+ Crea Asta" per crearne una!</div>';
@@ -774,10 +936,14 @@
       var r = rooms[i];
       html += '<div class="room-item">';
       html += '  <div class="room-info">';
-      html += '    <h4>' + escapeHtml(r.name) + (r.isPrivate ? '<span class="room-badge badge-private">PRIVATA</span>' : '<span class="room-badge badge-public">PUBBLICA</span>') + '</h4>';
+      html += '    <h4>' + escapeHtml(r.name) + 
+                   (r.ended ? '<span class="room-badge badge-ended">CONCLUSA</span>' : (r.isPrivate ? '<span class="room-badge badge-private">PRIVATA</span>' : '<span class="room-badge badge-public">PUBBLICA</span>')) + 
+                   '</h4>';
       html += '    <span>Creata il ' + new Date(r.createdAt).toLocaleDateString('it-IT') + '</span>';
       html += '  </div>';
-      if(r.isPrivate){
+      if(r.ended){
+        html += '  <button class="btn-secondary" style="width:auto; padding:8px 14px; font-size:12px;" onclick="enterRoomById(\'' + r.id + '\')">Vedi Resoconto</button>';
+      } else if(r.isPrivate){
         html += '  <button class="btn-secondary" style="width:auto; padding:8px 14px; font-size:12px;" onclick="promptPinForRoom(\'' + r.id + '\', \'' + r.pin + '\')">Accedi con PIN</button>';
       } else {
         html += '  <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" onclick="enterRoomById(\'' + r.id + '\')">Partecipa</button>';
@@ -803,11 +969,64 @@
     }
   }
 
+  // ---------- AREA GESTORE SITO (SUPER ADMIN) ----------
+  function openSuperAdminLogin(){
+    document.getElementById('modal-super-login').classList.add('active');
+    document.getElementById('super-user').value = '';
+    document.getElementById('super-pass').value = '';
+  }
+
+  function submitSuperAdminLogin(){
+    var u = document.getElementById('super-user').value.trim();
+    var p = document.getElementById('super-pass').value.trim();
+    if(u === SUPER_ADMIN_USER && p === SUPER_ADMIN_PASS){
+      closeModal('modal-super-login');
+      goHome('super-admin');
+      renderSuperAdminTable();
+    } else {
+      showMsg('super-login-msg', 'Credenziali errate!', 'error');
+    }
+  }
+
+  function exitSuperAdmin(){
+    goHome('lobby');
+  }
+
+  async function renderSuperAdminTable(){
+    var rooms = await loadRoomsIndex();
+    document.getElementById('super-room-count').textContent = rooms.length + ' stanze totali';
+    var tbody = document.querySelector('#super-table-rooms tbody');
+    if(rooms.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--chalk-dim);">Nessuna stanza salvata.</td></tr>';
+      return;
+    }
+    var html = '';
+    rooms.forEach(function(r){
+      html += '<tr>';
+      html += '  <td><b>' + escapeHtml(r.name) + '</b></td>';
+      html += '  <td>' + (r.isPrivate ? 'Privata (PIN: ' + r.pin + ')' : 'Pubblica') + '</td>';
+      html += '  <td>' + new Date(r.createdAt).toLocaleDateString('it-IT') + '</td>';
+      html += '  <td>' + (r.ended ? '<span style="color:var(--gold);">Conclusa</span>' : 'In corso') + '</td>';
+      html += '  <td><button class="btn-danger" style="width:auto; padding:6px 10px; font-size:11px;" onclick="deleteRoomAsSuperAdmin(\'' + r.id + '\')">Elimina</button></td>';
+      html += '</tr>';
+    });
+    tbody.innerHTML = html;
+  }
+
+  async function deleteRoomAsSuperAdmin(roomId){
+    if(!confirm('Sei sicuro di voler eliminare questa stanza e tutti i suoi dati dal database?')) return;
+    var rooms = await loadRoomsIndex();
+    var filtered = rooms.filter(function(r){ return r.id !== roomId; });
+    await saveRoomsIndex(filtered);
+    await store.remove('rooms/' + roomId);
+    renderSuperAdminTable();
+  }
+
   // ---------- INIZIALIZZAZIONE STANZA ----------
   async function ensureInitRoom(){
     var s = await loadState();
     if(!s){
-      s = { player:'', role:'', team:'', qt:0, basePrice:0, price:0, bidder:'', status:'idle', updatedAt: Date.now() };
+      s = { player:'', role:'', team:'', qt:0, basePrice:0, price:0, bidder:'', bidderTeam:'', status:'idle', updatedAt: Date.now() };
       await saveState(s);
     }
     cachedListone = await loadListone();
@@ -819,9 +1038,82 @@
     return s;
   }
 
-  // ---------- ROUTER ----------
-  function checkParticipantEntry(){
-    if(myName){ goHome('bid'); } else { goHome('join'); }
+  // ---------- ROUTER & CHECK RUOLI ----------
+  function openScreenWithCheck(screen){
+    if(currentRoomData && currentRoomData.ended){
+      goHome('summary');
+      return;
+    }
+    goHome(screen);
+  }
+
+  async function openParticipantFlow(){
+    if(currentRoomData && currentRoomData.ended){
+      goHome('summary');
+      return;
+    }
+    if(myProfile){
+      goHome('bid');
+    } else {
+      await renderExistingProfilesScreen();
+      goHome('join');
+    }
+  }
+
+  async function renderExistingProfilesScreen(){
+    var profiles = await loadProfiles();
+    var wrap = document.getElementById('existing-profiles-wrap');
+    var container = document.getElementById('profiles-pick-container');
+    if(!profiles || profiles.length === 0){
+      wrap.style.display = 'none';
+      return;
+    }
+    wrap.style.display = 'block';
+    var html = '';
+    profiles.forEach(function(p){
+      html += '<button class="profile-pick-btn" onclick="selectExistingProfile(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', \'' + escapeHtml(p.teamName).replace(/'/g, "\\'") + '\')">';
+      html += '  <span class="p-name">👤 ' + escapeHtml(p.name) + '</span>';
+      html += '  <span class="p-team">⚽ ' + escapeHtml(p.teamName) + '</span>';
+      html += '</button>';
+    });
+    container.innerHTML = html;
+  }
+
+  function selectExistingProfile(name, teamName){
+    myProfile = { name: name, teamName: teamName };
+    localStorage.setItem('fanta_profile_' + currentRoomId, JSON.stringify(myProfile));
+    goHome('bid');
+  }
+
+  async function createNewParticipantProfile(){
+    var name = document.getElementById('join-name').value.trim();
+    var teamName = document.getElementById('join-team-name').value.trim();
+    if(!name || !teamName){
+      showMsg('join-msg', 'Inserisci sia il tuo nome sia il nome della squadra.', 'error');
+      return;
+    }
+
+    var profiles = await loadProfiles();
+    var conflict = profiles.find(function(p){
+      return p.name.toLowerCase() === name.toLowerCase() || p.teamName.toLowerCase() === teamName.toLowerCase();
+    });
+    if(conflict){
+      showMsg('join-msg', 'Nome partecipante o nome squadra già esistente!', 'error');
+      return;
+    }
+
+    myProfile = { name: name, teamName: teamName };
+    await saveProfile(myProfile);
+    localStorage.setItem('fanta_profile_' + currentRoomId, JSON.stringify(myProfile));
+    document.getElementById('join-name').value = '';
+    document.getElementById('join-team-name').value = '';
+    goHome('bid');
+  }
+
+  function switchProfile(){
+    localStorage.removeItem('fanta_profile_' + currentRoomId);
+    myProfile = null;
+    openParticipantFlow();
   }
 
   function goHome(route){
@@ -829,18 +1121,21 @@
     document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
     var map = {
       lobby:'screen-lobby',
+      'super-admin':'screen-super-admin',
       home:'screen-home',
       tabellone:'screen-tabellone',
       join:'screen-join',
       bid:'screen-bid',
-      admin:'screen-admin'
+      admin:'screen-admin',
+      summary:'screen-summary'
     };
     var targetId = map[route] || 'screen-lobby';
     document.getElementById(targetId).classList.add('active');
     
-    if(route === 'bid'){
-      document.getElementById('you-are-name').textContent = myName;
-      document.getElementById('bid-topbar-name').textContent = 'Ciao, ' + myName;
+    if(route === 'bid' && myProfile){
+      document.getElementById('you-are-name').textContent = myProfile.name;
+      document.getElementById('you-are-team').textContent = myProfile.teamName;
+      document.getElementById('bid-topbar-name').textContent = myProfile.teamName + ' (' + myProfile.name + ')';
       renderListoneTable('user');
     }
     if(route === 'admin'){
@@ -850,14 +1145,10 @@
     if(route === 'lobby'){
       renderLobbyRooms();
     }
+    if(route === 'summary'){
+      renderSummaryScreen();
+    }
     refreshNow();
-  }
-
-  function logoutParticipant(){
-    localStorage.removeItem(USER_KEY);
-    myName = '';
-    document.getElementById('join-name').value = '';
-    goHome('join');
   }
 
   function showMsg(id, text, cls){
@@ -870,36 +1161,20 @@
     }
   }
 
-  // ---------- JOIN PARTECIPANTE ----------
-  async function joinAsParticipant(){
-    var v = document.getElementById('join-name').value.trim();
-    if(!v){
-      showMsg('join-msg', 'Inserisci il tuo nome per continuare.', 'error');
-      return;
-    }
-    myName = v;
-    localStorage.setItem(USER_KEY, myName);
-    await registerParticipant(myName);
-    document.getElementById('join-name').value = '';
-    goHome('bid');
-  }
-
-  // ---------- OFFERTE ----------
+  // ---------- OFFERTE CON PROFILO ----------
   async function quickBid(amount){
     var s = await loadState();
     if(!s || s.status !== 'open'){
       showMsg('bid-msg', 'L\'asta non è aperta al momento.', 'error');
       return;
     }
-    
-    var newPrice;
-    if(s.price === 0 && !s.bidder){
-      newPrice = amount;
-    } else {
-      newPrice = s.price + amount;
-    }
-
-    var newState = Object.assign({}, s, { price:newPrice, bidder: myName, updatedAt: Date.now() });
+    var newPrice = (s.price === 0 && !s.bidder) ? amount : (s.price + amount);
+    var newState = Object.assign({}, s, {
+      price: newPrice,
+      bidder: myProfile.name,
+      bidderTeam: myProfile.teamName,
+      updatedAt: Date.now()
+    });
     var ok = await saveState(newState);
     if(ok){
       renderBidScreen(newState);
@@ -916,10 +1191,15 @@
       return;
     }
     if(isNaN(val) || val <= s.price || val < 1){
-      showMsg('bid-msg', 'La tua offerta deve essere superiore a ' + s.price + ' crediti.', 'error');
+      showMsg('bid-msg', 'La tua offerta deve superare ' + s.price + ' crediti.', 'error');
       return;
     }
-    var newState = Object.assign({}, s, { price:val, bidder: myName, updatedAt: Date.now() });
+    var newState = Object.assign({}, s, {
+      price: val,
+      bidder: myProfile.name,
+      bidderTeam: myProfile.teamName,
+      updatedAt: Date.now()
+    });
     var ok = await saveState(newState);
     if(ok){
       input.value = '';
@@ -943,7 +1223,9 @@
     }
 
     document.getElementById('bid-price').innerHTML = (s.status === 'idle' ? '0' : s.price) + '<span style="font-size:0.4em;color:var(--chalk-dim);"> cfu</span>';
-    document.getElementById('bid-bidder').innerHTML = s.bidder ? ('Offerta più alta: <b>' + escapeHtml(s.bidder) + '</b>') : (s.status === 'open' ? '<i>Ancora nessuna offerta (base: ' + s.basePrice + ')</i>' : '');
+    
+    var bidderLabel = s.bidder ? ('Offerta più alta: <b>' + escapeHtml(s.bidder) + '</b> <span style="color:var(--gold);">(' + escapeHtml(s.bidderTeam || '') + ')</span>') : (s.status === 'open' ? '<i>Nessuna offerta (base ' + s.basePrice + ')</i>' : '');
+    document.getElementById('bid-bidder').innerHTML = bidderLabel;
 
     var banner = document.getElementById('bid-status-banner');
     var quickBtns = [document.getElementById('btn-plus1'), document.getElementById('btn-plus5'), document.getElementById('btn-plus10')];
@@ -957,8 +1239,8 @@
     } else if(s.status === 'closed'){
       banner.className = 'status-banner closed';
       banner.textContent = s.bidder
-        ? ('Asta chiusa — ' + s.player + ' assegnato a ' + s.bidder + ' per ' + s.price + ' crediti')
-        : ('Asta chiusa — nessuna offerta ricevuta per ' + s.player);
+        ? ('Asta chiusa — ' + s.player + ' assegnato a ' + s.bidder + ' (' + (s.bidderTeam || '') + ') per ' + s.price + ' crediti')
+        : ('Asta chiusa — nessuna offerta per ' + s.player);
       quickBtns.forEach(function(b){ b.disabled = true; });
       customBtn.disabled = true;
     } else {
@@ -982,7 +1264,7 @@
     var html = '';
     if(s.status === 'closed'){
       html += '<div class="board-closed-banner">' +
-        (s.bidder ? ('AGGIUDICATO A ' + escapeHtml(s.bidder).toUpperCase()) : 'ASTA CHIUSA SENZA OFFERTE') +
+        (s.bidder ? ('AGGIUDICATO A ' + escapeHtml(s.bidder).toUpperCase() + ' (' + escapeHtml(s.bidderTeam || '').toUpperCase() + ')') : 'ASTA CHIUSA SENZA OFFERTE') +
       '</div>';
     }
 
@@ -1000,7 +1282,9 @@
     html += '</div>';
 
     html += '<div class="board-row"><div class="board-label">Prezzo attuale</div><div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div></div>';
-    html += '<div class="board-row"><div class="board-label">Ultimo offerente</div><div class="board-bidder">' + (s.bidder ? escapeHtml(s.bidder) : '— nessuna offerta (base ' + s.basePrice + ') —') + '</div></div>';
+    html += '<div class="board-row"><div class="board-label">Ultimo offerente</div><div class="board-bidder">' + 
+      (s.bidder ? (escapeHtml(s.bidder) + ' <span style="font-size:0.6em;color:var(--gold);">(' + escapeHtml(s.bidderTeam || '') + ')</span>') : '— nessuna offerta (base ' + s.basePrice + ') —') + 
+    '</div></div>';
     el.innerHTML = html;
 
     if(priceChanged){
@@ -1011,11 +1295,10 @@
     }
   }
 
-  // ---------- ADMIN ----------
+  // ---------- BANDITORE ----------
   function selectFromListone(name, price, role, team){
     document.getElementById('admin-player').value = name;
     document.getElementById('admin-base').value = 0;
-    
     pendingPlayer = { role: role, team: team, qt: price };
     
     var metaBox = document.getElementById('admin-selected-meta');
@@ -1025,7 +1308,7 @@
       '<span class="player-qt-pill">Quotazione: ' + price + ' cfu</span>';
 
     document.getElementById('admin-base').focus();
-    showMsg('admin-msg', 'Selezionato! Imposta la base desiderata e avvia.', 'ok');
+    showMsg('admin-msg', 'Selezionato! Imposta la base e avvia.', 'ok');
   }
 
   async function startAuctionManually(){
@@ -1044,7 +1327,7 @@
     });
 
     if(alreadyAssigned){
-      showMsg('admin-msg', player + ' è già assegnato a ' + alreadyAssigned.bidder + ' in questa lega!', 'error');
+      showMsg('admin-msg', player + ' è già assegnato a ' + alreadyAssigned.bidderTeam + ' (' + alreadyAssigned.bidder + ')!', 'error');
       return;
     }
 
@@ -1079,6 +1362,7 @@
       basePrice: base,
       price: base,
       bidder: '',
+      bidderTeam: '',
       status: 'open',
       updatedAt: Date.now()
     };
@@ -1089,7 +1373,7 @@
       document.getElementById('admin-base').value = '0';
       document.getElementById('admin-selected-meta').innerHTML = '';
       pendingPlayer = { role: '', team: '', qt: 1 };
-      showMsg('admin-msg', 'Asta aperta per ' + player + ' (base ' + base + ' crediti)!', 'ok');
+      showMsg('admin-msg', 'Asta aperta per ' + player + ' (base ' + base + ' cfu)!', 'ok');
       renderAdmin(newState);
       updateAdminParticipantSelect();
     }
@@ -1103,14 +1387,17 @@
     }
 
     var select = document.getElementById('admin-quick-participant');
-    var targetUser = select.value.trim();
-
-    if(!targetUser){
-      showMsg('admin-msg', 'Seleziona un partecipante a cui assegnare il giocatore.', 'error');
+    var target = select.value.trim(); // "NomePartecipante|NomeSquadra"
+    if(!target){
+      showMsg('admin-msg', 'Seleziona una squadra a cui assegnare il giocatore.', 'error');
       return;
     }
 
-    var newState = Object.assign({}, s, { price: 1, bidder: targetUser, status: 'closed', updatedAt: Date.now() });
+    var parts = target.split('|');
+    var pName = parts[0];
+    var pTeam = parts[1] || pName;
+
+    var newState = Object.assign({}, s, { price: 1, bidder: pName, bidderTeam: pTeam, status: 'closed', updatedAt: Date.now() });
     var ok = await saveState(newState);
     if(ok){
       var log = await loadLog();
@@ -1118,15 +1405,16 @@
         player: s.player,
         role: s.role || '',
         team: s.team || '',
+        qt: s.qt || 1,
         price: 1,
-        bidder: targetUser,
+        bidder: pName,
+        bidderTeam: pTeam,
         ts: Date.now()
       });
       await saveLog(log);
-      await registerParticipant(targetUser);
       renderAdmin(newState);
       refreshNow();
-      showMsg('admin-msg', s.player + ' assegnato direttamente a ' + targetUser + ' per 1 credito!', 'ok');
+      showMsg('admin-msg', s.player + ' assegnato a ' + pTeam + ' (' + pName + ') per 1 credito!', 'ok');
     }
   }
 
@@ -1144,16 +1432,37 @@
         player: s.player,
         role: s.role || '',
         team: s.team || '',
+        qt: s.qt || 1,
         price: s.bidder ? s.price : null,
         bidder: s.bidder || null,
+        bidderTeam: s.bidderTeam || null,
         ts: Date.now()
       });
       await saveLog(log);
-      if(s.bidder) await registerParticipant(s.bidder);
       renderAdmin(newState);
       refreshNow();
-      showMsg('admin-msg', s.bidder ? (s.player + ' assegnato a ' + s.bidder + '.') : (s.player + ' chiuso senza offerte (svincolato).'), 'ok');
+      showMsg('admin-msg', s.bidder ? (s.player + ' assegnato a ' + s.bidderTeam + '.') : (s.player + ' chiuso senza offerte.'), 'ok');
     }
+  }
+
+  // Conclusione definitiva asta
+  async function concludeWholeAuction(){
+    if(!confirm('Attenzione: sei sicuro di voler concludere definitivamente l\'asta? Da questo momento non sarà più possibile rilanciare e tutti gli utenti verranno reindirizzati al Resoconto Finale.')) return;
+    
+    // Aggiorna stato globale della stanza
+    var rooms = await loadRoomsIndex();
+    var cur = rooms.find(function(r){ return r.id === currentRoomId; });
+    if(cur) cur.ended = true;
+    await saveRoomsIndex(rooms);
+
+    var s = await loadState();
+    if(s){
+      s.status = 'ended';
+      await saveState(s);
+    }
+
+    if(currentRoomData) currentRoomData.ended = true;
+    goHome('summary');
   }
 
   function renderAdmin(s){
@@ -1170,7 +1479,7 @@
     currentBox.style.display = 'block';
     document.getElementById('ac-player').textContent = s.player + (s.role ? ' (' + s.role + ' - ' + s.team + ')' : '');
     document.getElementById('ac-price').textContent = s.price + ' crediti';
-    document.getElementById('ac-bidder').textContent = s.bidder || '—';
+    document.getElementById('ac-bidder').textContent = s.bidder ? (s.bidder + ' (' + (s.bidderTeam||'') + ')') : '—';
     document.getElementById('ac-status').textContent = s.status === 'open' ? 'Aperta' : 'Chiusa';
     
     closeBtn.style.display = s.status === 'open' ? 'block' : 'none';
@@ -1181,19 +1490,14 @@
     var select = document.getElementById('admin-quick-participant');
     if(!select) return;
     
-    var list = await loadParticipants();
-    var log = await loadLog();
-    var groups = groupPurchasesByParticipant(log);
-    
-    var allNames = Array.from(new Set(list.concat(Object.keys(groups))));
-    
+    var profiles = await loadProfiles();
     var currentVal = select.value;
-    select.innerHTML = '<option value="">Seleziona partecipante...</option>';
-    allNames.forEach(function(name){
+    select.innerHTML = '<option value="">Seleziona profilo squadra...</option>';
+    profiles.forEach(function(p){
       var opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      if(name === currentVal) opt.selected = true;
+      opt.value = p.name + '|' + p.teamName;
+      opt.textContent = p.teamName + ' (' + p.name + ')';
+      if(opt.value === currentVal) opt.selected = true;
       select.appendChild(opt);
     });
   }
@@ -1294,7 +1598,7 @@
     var log = await loadLog();
     var soldMap = {};
     log.forEach(function(item){
-      if(item.player && item.bidder) soldMap[item.player.toLowerCase()] = item.bidder;
+      if(item.player && item.bidder) soldMap[item.player.toLowerCase()] = item.bidderTeam || item.bidder;
     });
 
     var q = (document.getElementById(context + '-search-player').value || '').toLowerCase().trim();
@@ -1331,7 +1635,7 @@
           html += '<td><button class="btn-select-player" onclick="selectFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ', \'' + p.role + '\', \'' + escapeHtml(p.team).replace(/'/g, "\\'") + '\')">Seleziona</button></td>';
         }
       } else {
-        html += '<td>' + (isSold ? ('<span class="badge-assigned">Preso da ' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
+        html += '<td>' + (isSold ? ('<span class="badge-assigned">' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
       }
       html += '</tr>';
     });
@@ -1339,16 +1643,24 @@
     tableBody.innerHTML = html;
   }
 
-  // ---------- ROSE & LOG ----------
-  function groupPurchasesByParticipant(log){
+  // ---------- ROSE E GRUPPI SQUADRE ----------
+  function groupPurchasesByTeam(log){
     var map = {};
     (log || []).forEach(function(item){
       if(!item.bidder || item.price === null) return;
-      if(!map[item.bidder]){
-        map[item.bidder] = { items: [], totalSpent: 0 };
+      var teamKey = item.bidderTeam || item.bidder;
+      if(!map[teamKey]){
+        map[teamKey] = {
+          teamName: teamKey,
+          ownerName: item.bidder,
+          items: [],
+          totalSpent: 0,
+          totalListValue: 0
+        };
       }
-      map[item.bidder].items.push(item);
-      map[item.bidder].totalSpent += item.price;
+      map[teamKey].items.push(item);
+      map[teamKey].totalSpent += item.price;
+      map[teamKey].totalListValue += (item.qt || item.price);
     });
     return map;
   }
@@ -1356,10 +1668,10 @@
   function renderParticipantRoster(log){
     var wrap = document.getElementById('my-team-wrap');
     var statsEl = document.getElementById('my-team-stats');
-    if(!wrap || !statsEl) return;
+    if(!wrap || !statsEl || !myProfile) return;
 
-    var groups = groupPurchasesByParticipant(log);
-    var myData = groups[myName] || { items: [], totalSpent: 0 };
+    var groups = groupPurchasesByTeam(log);
+    var myData = groups[myProfile.teamName] || groups[myProfile.name] || { items: [], totalSpent: 0 };
 
     statsEl.textContent = myData.items.length + ' giocator' + (myData.items.length === 1 ? 'e' : 'i') + ' · ' + myData.totalSpent + ' crediti';
 
@@ -1380,20 +1692,23 @@
     var grid = document.getElementById('tv-teams-grid');
     if(!grid) return;
 
-    var groups = groupPurchasesByParticipant(log);
-    var names = Object.keys(groups);
+    var groups = groupPurchasesByTeam(log);
+    var teams = Object.keys(groups);
 
-    if(names.length === 0){
+    if(teams.length === 0){
       grid.innerHTML = '';
       return;
     }
 
     var html = '';
-    names.forEach(function(name){
-      var data = groups[name];
+    teams.forEach(function(tName){
+      var data = groups[tName];
       html += '<div class="team-card">';
       html += '  <div class="team-card-header">';
-      html += '    <span class="team-card-name">' + escapeHtml(name) + '</span>';
+      html += '    <div>';
+      html += '      <span class="team-card-name">' + escapeHtml(data.teamName) + '</span>';
+      html += '      <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div>';
+      html += '    </div>';
       html += '    <span class="team-card-stats">' + data.items.length + ' giog. · <b>' + data.totalSpent + ' cfu</b></span>';
       html += '  </div>';
       html += '  <table class="team-table"><tbody>';
@@ -1410,21 +1725,21 @@
     var wrap = document.getElementById('admin-teams-wrap');
     if(!wrap) return;
 
-    var groups = groupPurchasesByParticipant(log);
-    var names = Object.keys(groups);
+    var groups = groupPurchasesByTeam(log);
+    var teams = Object.keys(groups);
 
-    if(names.length === 0){
+    if(teams.length === 0){
       wrap.innerHTML = '<div class="team-empty">Nessuna rosa compilata al momento.</div>';
       return;
     }
 
     var html = '<div class="teams-grid" style="margin-top:0;">';
-    names.forEach(function(name){
-      var data = groups[name];
+    teams.forEach(function(tName){
+      var data = groups[tName];
       html += '<div class="team-card">';
       html += '  <div class="team-card-header">';
-      html += '    <span class="team-card-name">' + escapeHtml(name) + '</span>';
-      html += '    <span class="team-card-stats">' + data.items.length + ' acquisti · <b>' + data.totalSpent + ' crediti</b></span>';
+      html += '    <div><span class="team-card-name">' + escapeHtml(data.teamName) + '</span><div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div></div>';
+      html += '    <span class="team-card-stats">' + data.items.length + ' acquisti · <b>' + data.totalSpent + ' cfu</b></span>';
       html += '  </div>';
       html += '  <table class="team-table"><tbody>';
       data.items.forEach(function(p){
@@ -1444,12 +1759,72 @@
       wrap.innerHTML = '<div class="team-empty">Ancora nessun calciatore assegnato.</div>';
       return;
     }
-    var html = '<table class="team-table"><thead><tr><th>Calciatore</th><th>Assegnato a</th><th class="price-head">Prezzo</th></tr></thead><tbody>';
+    var html = '<table class="team-table"><thead><tr><th>Calciatore</th><th>Squadra</th><th class="price-head">Prezzo</th></tr></thead><tbody>';
     log.forEach(function(entry){
-      html += '<tr><td>' + escapeHtml(entry.player) + '</td><td>' + (entry.bidder ? escapeHtml(entry.bidder) : '—') + '</td><td class="price-cell">' + (entry.price !== null ? entry.price + ' cfu' : '—') + '</td></tr>';
+      html += '<tr><td>' + escapeHtml(entry.player) + '</td><td>' + (entry.bidder ? (escapeHtml(entry.bidderTeam || entry.bidder)) : '—') + '</td><td class="price-cell">' + (entry.price !== null ? entry.price + ' cfu' : '—') + '</td></tr>';
     });
     html += '</tbody></table>';
     wrap.innerHTML = html;
+  }
+
+  // ---------- SCHERMATA RESOCONTO FINALE ----------
+  async function renderSummaryScreen(){
+    var log = await loadLog();
+    if(currentRoomData){
+      document.getElementById('summary-league-title').textContent = currentRoomData.name;
+    }
+
+    var groups = groupPurchasesByTeam(log);
+    var teams = Object.values(groups);
+
+    var totalSpent = 0;
+    var topSpender = { name: '—', spent: 0 };
+    var topValueTeam = { name: '—', value: 0 };
+    var topPlayer = { name: '—', price: 0, buyer: '—' };
+
+    teams.forEach(function(t){
+      totalSpent += t.totalSpent;
+      if(t.totalSpent > topSpender.spent){
+        topSpender = { name: t.teamName, spent: t.totalSpent };
+      }
+      if(t.totalListValue > topValueTeam.value){
+        topValueTeam = { name: t.teamName, value: t.totalListValue };
+      }
+    });
+
+    log.forEach(function(p){
+      if(p.price && p.price > topPlayer.price){
+        topPlayer = { name: p.player, price: p.price, buyer: p.bidderTeam || p.bidder };
+      }
+    });
+
+    document.getElementById('sum-total-spent').textContent = totalSpent + ' cfu';
+    document.getElementById('sum-top-spender').textContent = topSpender.spent > 0 ? (topSpender.name + ' (' + topSpender.spent + ' cfu)') : '—';
+    document.getElementById('sum-top-value').textContent = topValueTeam.value > 0 ? (topValueTeam.name + ' (' + topValueTeam.value + ' qt)') : '—';
+    document.getElementById('sum-top-player').textContent = topPlayer.price > 0 ? (topPlayer.name + ' (' + topPlayer.price + ' cfu a ' + topPlayer.buyer + ')') : '—';
+
+    // Griglia Rose Complete
+    var grid = document.getElementById('summary-teams-grid');
+    if(teams.length === 0){
+      grid.innerHTML = '<div class="team-empty">Nessun calciatore assegnato in questa lega.</div>';
+      return;
+    }
+
+    var html = '';
+    teams.forEach(function(t){
+      html += '<div class="team-card">';
+      html += '  <div class="team-card-header">';
+      html += '    <div><span class="team-card-name">' + escapeHtml(t.teamName) + '</span><div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(t.ownerName) + ')</div></div>';
+      html += '    <div style="text-align:right;"><span class="team-card-stats">Spesa: <b>' + t.totalSpent + ' cfu</b></span><div style="font-size:11px; color:var(--gold);">Valore Listone: ' + t.totalListValue + '</div></div>';
+      html += '  </div>';
+      html += '  <table class="team-table"><thead><tr><th>R</th><th>Calciatore</th><th class="price-head">Prezzo</th></tr></thead><tbody>';
+      t.items.forEach(function(p){
+        html += '<tr><td>' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
+      });
+      html += '  </tbody></table>';
+      html += '</div>';
+    });
+    grid.innerHTML = html;
   }
 
   function escapeHtml(str){
@@ -1458,7 +1833,7 @@
       .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
 
-  // ---------- Sincronizzazione in tempo reale Firebase ----------
+  // ---------- Sincronizzazione in tempo reale ----------
   async function refreshNow(){
     if(!currentRoomId){
       if(currentRoute === 'lobby') renderLobbyRooms();
@@ -1468,6 +1843,12 @@
     var s = await loadState();
     var log = await loadLog();
     if(!s) return;
+
+    // Se l'asta è stata conclusa e l'utente non è già sul resoconto, reindirizzalo
+    if(s.status === 'ended' && currentRoute !== 'summary' && currentRoute !== 'home' && currentRoute !== 'super-admin'){
+      goHome('summary');
+      return;
+    }
 
     if(currentRoute === 'tabellone'){
       renderTabellone(s);
@@ -1486,11 +1867,10 @@
 
   function startPolling(){
     if(pollTimer) clearInterval(pollTimer);
-    // Refresh continuo a 800ms per allineare subito tutti i telefoni/PC
     pollTimer = setInterval(refreshNow, 800);
   }
 
-  // ---------- AVVIO ----------
+  // ---------- BOOT ----------
   (async function init(){
     startPolling();
     var savedRoomId = localStorage.getItem(ACTIVE_ROOM_KEY);
