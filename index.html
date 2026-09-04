@@ -6,7 +6,7 @@
 <title>Asta Fantacalcio Live</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<!-- SheetJS per leggere file Excel/CSV di Fantacalcio -->
+<!-- SheetJS per leggere e scrivere file Excel/CSV -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <!-- Firebase SDK compatibile -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -314,6 +314,17 @@
   }
   .summary-hero{ text-align:center; margin-bottom: 24px; }
   .summary-hero h1{ font-family: var(--font-display); font-size: clamp(24px, 5vw, 36px); color: var(--gold); margin:0 0 6px; }
+  
+  .export-actions{
+    display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom: 26px;
+  }
+  .btn-export{
+    padding: 12px 20px; background: var(--gold); color: #17240F; border:none;
+    border-radius: var(--radius); font-weight:800; font-size: 14px; display:inline-flex;
+    align-items:center; gap:8px;
+  }
+  .btn-export:hover{ background: #eec25c; }
+
   .summary-stats-grid{
     display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
     width: 100%; margin-bottom: 24px;
@@ -339,6 +350,8 @@
     .role-grid{ flex-direction:column; align-items:stretch; }
     .role-card{ width:100%; flex-direction:row; text-align:left; justify-content:flex-start; }
     .quick-assign-row{ flex-direction: column; }
+    .export-actions{ flex-direction: column; width: 100%; }
+    .btn-export{ width: 100%; justify-content: center; }
   }
 </style>
 </head>
@@ -511,7 +524,6 @@
         <h2>Accedi o Crea Profilo</h2>
         <p class="hint">Seleziona un profilo già registrato in questa stanza oppure creane uno nuovo inserendo nome e squadra.</p>
         
-        <!-- Profili Esistenti -->
         <div id="existing-profiles-wrap" style="display:none;">
           <div class="section-header"><span class="section-title">Profili già registrati</span></div>
           <div class="profile-pick-list" id="profiles-pick-container"></div>
@@ -687,7 +699,17 @@
 
     <div class="summary-hero">
       <h1 id="summary-league-title">Lega Fantacalcio</h1>
-      <p class="home-sub">L'asta è ufficialmente conclusa! Ecco il riepilogo dettagliato delle rose e le statistiche finali.</p>
+      <p class="home-sub">L'asta è ufficialmente conclusa! Esporta le rose per caricarle direttamente su Leghe Fantacalcio.</p>
+    </div>
+
+    <!-- AZIONI DI ESPORTAZIONE FILE -->
+    <div class="export-actions">
+      <button class="btn-export" onclick="exportRostersToExcel()">
+        <span>📊 Scarica Excel Rose (.xlsx)</span>
+      </button>
+      <button class="btn-export" style="background:var(--pitch-mid-2); color:var(--gold); border:1px solid var(--gold-dim);" onclick="exportRostersToCsv()">
+        <span>📄 Scarica CSV Rose (.csv)</span>
+      </button>
     </div>
 
     <div class="summary-stats-grid">
@@ -739,7 +761,7 @@
   // ---------- SESSIONE LOCALE ----------
   var currentRoomId = localStorage.getItem(ACTIVE_ROOM_KEY) || null;
   var currentRoomData = null;
-  var myProfile = null; // { name: '', teamName: '' }
+  var myProfile = null;
   var currentRoute = 'lobby';
   var lastKnownPrice = null;
   var pollTimer = null;
@@ -787,7 +809,6 @@
     }
   };
 
-  // Helper Stanza Corrente
   async function loadState(){ return await store.get(getRoomPath('state')); }
   async function saveState(s){ return await store.set(getRoomPath('state'), s); }
   async function loadLog(){ var l = await store.get(getRoomPath('log')); return Array.isArray(l) ? l : []; }
@@ -795,7 +816,6 @@
   async function loadListone(){ var l = await store.get(getRoomPath('listone')); return Array.isArray(l) ? l : []; }
   async function saveListone(l){ return await store.set(getRoomPath('listone'), l); }
 
-  // Profili Partecipanti [{name, teamName}]
   async function loadProfiles(){
     var p = await store.get(getRoomPath('profiles'));
     return Array.isArray(p) ? p : [];
@@ -809,7 +829,6 @@
     }
   }
 
-  // Stanze Globali
   async function loadRoomsIndex(){
     var r = await store.get(ROOMS_INDEX_KEY);
     return Array.isArray(r) ? r : [];
@@ -818,7 +837,7 @@
     return await store.set(ROOMS_INDEX_KEY, rooms);
   }
 
-  // ---------- GESTIONE LOBBY & STANZE ----------
+  // ---------- LOBBY & STANZE ----------
   function openCreateModal(){
     document.getElementById('modal-create').classList.add('active');
     document.getElementById('new-room-name').value = '';
@@ -896,7 +915,6 @@
     currentRoomData = room;
     localStorage.setItem(ACTIVE_ROOM_KEY, room.id);
 
-    // Carica profilo locale salvato per questa stanza specifica
     var savedP = localStorage.getItem('fanta_profile_' + room.id);
     myProfile = savedP ? JSON.parse(savedP) : null;
 
@@ -969,7 +987,7 @@
     }
   }
 
-  // ---------- AREA GESTORE SITO (SUPER ADMIN) ----------
+  // ---------- SUPER ADMIN ----------
   function openSuperAdminLogin(){
     document.getElementById('modal-super-login').classList.add('active');
     document.getElementById('super-user').value = '';
@@ -1038,7 +1056,6 @@
     return s;
   }
 
-  // ---------- ROUTER & CHECK RUOLI ----------
   function openScreenWithCheck(screen){
     if(currentRoomData && currentRoomData.ended){
       goHome('summary');
@@ -1161,7 +1178,7 @@
     }
   }
 
-  // ---------- OFFERTE CON PROFILO ----------
+  // ---------- OFFERTE ----------
   async function quickBid(amount){
     var s = await loadState();
     if(!s || s.status !== 'open'){
@@ -1387,7 +1404,7 @@
     }
 
     var select = document.getElementById('admin-quick-participant');
-    var target = select.value.trim(); // "NomePartecipante|NomeSquadra"
+    var target = select.value.trim();
     if(!target){
       showMsg('admin-msg', 'Seleziona una squadra a cui assegnare il giocatore.', 'error');
       return;
@@ -1445,11 +1462,9 @@
     }
   }
 
-  // Conclusione definitiva asta
   async function concludeWholeAuction(){
     if(!confirm('Attenzione: sei sicuro di voler concludere definitivamente l\'asta? Da questo momento non sarà più possibile rilanciare e tutti gli utenti verranno reindirizzati al Resoconto Finale.')) return;
     
-    // Aggiorna stato globale della stanza
     var rooms = await loadRoomsIndex();
     var cur = rooms.find(function(r){ return r.id === currentRoomId; });
     if(cur) cur.ended = true;
@@ -1803,7 +1818,6 @@
     document.getElementById('sum-top-value').textContent = topValueTeam.value > 0 ? (topValueTeam.name + ' (' + topValueTeam.value + ' qt)') : '—';
     document.getElementById('sum-top-player').textContent = topPlayer.price > 0 ? (topPlayer.name + ' (' + topPlayer.price + ' cfu a ' + topPlayer.buyer + ')') : '—';
 
-    // Griglia Rose Complete
     var grid = document.getElementById('summary-teams-grid');
     if(teams.length === 0){
       grid.innerHTML = '<div class="team-empty">Nessun calciatore assegnato in questa lega.</div>';
@@ -1827,13 +1841,72 @@
     grid.innerHTML = html;
   }
 
+  // ---------- ESPORTAZIONE COMPATIBILE LEGHE FANTACALCIO ----------
+  async function exportRostersToExcel(){
+    var log = await loadLog();
+    if(!log || log.length === 0){
+      alert('Nessun acquisto registrato da esportare.');
+      return;
+    }
+
+    var exportRows = [];
+    log.forEach(function(item){
+      if(!item.bidder || item.price === null) return;
+      exportRows.push({
+        'Squadra': item.bidderTeam || item.bidder,
+        'Allenatore': item.bidder,
+        'Ruolo': item.role || '',
+        'Calciatore': item.player,
+        'Club Serie A': item.team || '',
+        'Prezzo': item.price
+      });
+    });
+
+    if(exportRows.length === 0){
+      alert('Nessun calciatore valido da esportare.');
+      return;
+    }
+
+    var ws = XLSX.utils.json_to_sheet(exportRows);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Rose");
+
+    var fileName = 'Rose_' + (currentRoomData ? currentRoomData.name.replace(/[^a-zA-Z0-9_-]/g, '_') : 'FantaAsta') + '.xlsx';
+    XLSX.writeFile(wb, fileName);
+  }
+
+  async function exportRostersToCsv(){
+    var log = await loadLog();
+    if(!log || log.length === 0){
+      alert('Nessun acquisto registrato da esportare.');
+      return;
+    }
+
+    var csvContent = "Squadra,Calciatore,Prezzo,Ruolo\n";
+    log.forEach(function(item){
+      if(!item.bidder || item.price === null) return;
+      var team = (item.bidderTeam || item.bidder).replace(/"/g, '""');
+      var player = item.player.replace(/"/g, '""');
+      csvContent += '"' + team + '","' + player + '",' + item.price + ',"' + (item.role || '') + '"\n';
+    });
+
+    var blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement("a");
+    var url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", 'Rose_' + (currentRoomData ? currentRoomData.name.replace(/[^a-zA-Z0-9_-]/g, '_') : 'FantaAsta') + '.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   function escapeHtml(str){
     return String(str)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
 
-  // ---------- Sincronizzazione in tempo reale ----------
+  // ---------- SINCRONIZZAZIONE REALTIME ----------
   async function refreshNow(){
     if(!currentRoomId){
       if(currentRoute === 'lobby') renderLobbyRooms();
@@ -1844,7 +1917,6 @@
     var log = await loadLog();
     if(!s) return;
 
-    // Se l'asta è stata conclusa e l'utente non è già sul resoconto, reindirizzalo
     if(s.status === 'ended' && currentRoute !== 'summary' && currentRoute !== 'home' && currentRoute !== 'super-admin'){
       goHome('summary');
       return;
