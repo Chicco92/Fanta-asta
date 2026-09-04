@@ -99,7 +99,7 @@
   .badge-private{ background: rgba(193,90,69,0.3); color: #f09581; border: 1px solid rgba(240,149,129,0.3); }
   .badge-ended{ background: rgba(227,178,60,0.25); color: var(--gold); border: 1px solid var(--gold-dim); }
 
-  /* ---------- MODALI CREA / ACCEDI ---------- */
+  /* ---------- MODALI ---------- */
   .modal-overlay{
     position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7);
     display:none; align-items:center; justify-content:center; padding: 20px; z-index: 99;
@@ -456,7 +456,7 @@
     </div>
   </div>
 
-  <!-- MODALE: ACCEDI CON PIN -->
+  <!-- MODALE: ACCEDI CON PIN STANZA -->
   <div class="modal-overlay" id="modal-join-pin">
     <div class="modal">
       <h2>Entra con PIN</h2>
@@ -468,6 +468,21 @@
       <button class="btn-primary" onclick="submitJoinWithPin()">Entra nell'Asta</button>
       <button class="btn-danger" style="margin-top:8px;" onclick="closeModal('modal-join-pin')">Annulla</button>
       <div class="msg error" id="join-pin-msg"></div>
+    </div>
+  </div>
+
+  <!-- MODALE: SBLOCCA PROFILO PARTECIPANTE CON PIN -->
+  <div class="modal-overlay" id="modal-unlock-profile">
+    <div class="modal">
+      <h2>Sblocca Profilo</h2>
+      <p class="hint" id="unlock-profile-hint">Inserisci il PIN di 6 cifre per accedere al profilo.</p>
+      <div class="field">
+        <label for="input-profile-pin">PIN di 6 cifre</label>
+        <input id="input-profile-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••">
+      </div>
+      <button class="btn-primary" onclick="submitUnlockProfile()">Sblocca ed Entra</button>
+      <button class="btn-danger" style="margin-top:8px;" onclick="closeModal('modal-unlock-profile')">Annulla</button>
+      <div class="msg error" id="unlock-profile-msg"></div>
     </div>
   </div>
 
@@ -516,7 +531,7 @@
       <button class="role-card" onclick="openParticipantFlow()">
         <div class="icon">📱</div>
         <div class="label">Partecipante</div>
-        <div class="desc">Scegli o crea il tuo profilo squadra e fai offerte.</div>
+        <div class="desc">Accedi al tuo profilo con PIN o creane uno nuovo.</div>
       </button>
       <button class="role-card" onclick="claimOrEnterAdmin()">
         <div class="icon">⚙️</div>
@@ -543,10 +558,10 @@
     <div class="panel-wrap">
       <div class="panel">
         <h2>Accedi o Crea Profilo</h2>
-        <p class="hint">Seleziona un profilo già registrato in questa stanza oppure creane uno nuovo con il tuo stemma.</p>
+        <p class="hint">Seleziona il tuo profilo esistente inserendo il tuo PIN segreto oppure registrati da zero.</p>
         
         <div id="existing-profiles-wrap" style="display:none;">
-          <div class="section-header"><span class="section-title">Profili già registrati</span></div>
+          <div class="section-header"><span class="section-title">Profili già registrati (protetti da PIN)</span></div>
           <div class="profile-pick-list" id="profiles-pick-container"></div>
           <div class="section-divider"></div>
         </div>
@@ -559,6 +574,12 @@
         <div class="field">
           <label for="join-team-name">Nome Squadra / Fantateam</label>
           <input id="join-team-name" type="text" placeholder="Es. Real Madrink" maxlength="32" autocomplete="off">
+        </div>
+
+        <!-- PIN DI 6 CIFRE -->
+        <div class="field">
+          <label for="join-pin">Crea un PIN personale di 6 cifre</label>
+          <input id="join-pin" type="password" inputmode="numeric" placeholder="Es. 123456" maxlength="6" autocomplete="off">
         </div>
 
         <!-- UPLOAD STEMMA SQUADRA -->
@@ -583,7 +604,10 @@
         <span id="bid-topbar-crest"></span>
         <span id="bid-topbar-name">Partecipante</span>
       </div>
-      <button class="link-btn" onclick="goHome('home')">cambia ruolo</button>
+      <div>
+        <button class="link-btn" style="color:var(--brick); margin-right:8px;" onclick="logoutParticipantProfile()">Disconnetti profilo</button>
+        <button class="link-btn" onclick="goHome('home')">cambia ruolo</button>
+      </div>
     </div>
     <div class="panel-wrap">
       <div class="panel">
@@ -609,8 +633,7 @@
         
         <div class="you-are">
           <span id="you-are-crest"></span>
-          <span>Profilo: <b id="you-are-name" style="color:var(--chalk)"></b> (<span id="you-are-team" style="color:var(--gold)"></span>)</span> · 
-          <button class="link-btn" onclick="switchProfile()" style="padding:0;">cambia</button>
+          <span>Profilo attivo: <b id="you-are-name" style="color:var(--chalk)"></b> (<span id="you-are-team" style="color:var(--gold)"></span>)</span>
         </div>
 
         <div class="section-divider"></div>
@@ -812,7 +835,7 @@
   // ---------- SESSIONE LOCALE ----------
   var currentRoomId = localStorage.getItem(ACTIVE_ROOM_KEY) || null;
   var currentRoomData = null;
-  var myProfile = null;
+  var myProfile = null; // { name, teamName, logoUrl, pin }
   var currentRoute = 'lobby';
   var lastKnownPrice = null;
   var pollTimer = null;
@@ -820,6 +843,7 @@
   var filterRoles = { admin: '', user: '' };
   var pendingPlayer = { role: '', team: '', qt: 1 };
   var tempLogoBase64 = '';
+  var pendingProfileToUnlock = null;
 
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
 
@@ -901,7 +925,6 @@
     reader.onload = function(evt){
       var img = new Image();
       img.onload = function(){
-        // Ridimensionamento su canvas a 96x96 per leggerezza
         var canvas = document.createElement('canvas');
         canvas.width = 96;
         canvas.height = 96;
@@ -1208,28 +1231,56 @@
     wrap.style.display = 'block';
     var html = '';
     profiles.forEach(function(p){
-      html += '<button class="profile-pick-btn" onclick="selectExistingProfile(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', \'' + escapeHtml(p.teamName).replace(/'/g, "\\'") + '\', \'' + (p.logoUrl || '').replace(/'/g, "\\'") + '\')">';
+      html += '<button class="profile-pick-btn" onclick="startUnlockProfile(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\')">';
       html += '  <div class="p-left">';
       html +=      getCrestHtml(p.logoUrl, p.teamName, 'sm');
       html += '    <span class="p-name">' + escapeHtml(p.name) + '</span>';
       html += '  </div>';
-      html += '  <span class="p-team">⚽ ' + escapeHtml(p.teamName) + '</span>';
+      html += '  <span class="p-team">🔒 ⚽ ' + escapeHtml(p.teamName) + '</span>';
       html += '</button>';
     });
     container.innerHTML = html;
   }
 
-  function selectExistingProfile(name, teamName, logoUrl){
-    myProfile = { name: name, teamName: teamName, logoUrl: logoUrl || '' };
-    localStorage.setItem('fanta_profile_' + currentRoomId, JSON.stringify(myProfile));
-    goHome('bid');
+  // Avvia modale sblocco con PIN a 6 cifre
+  async function startUnlockProfile(name){
+    var profiles = await loadProfiles();
+    var found = profiles.find(function(p){ return p.name.toLowerCase() === name.toLowerCase(); });
+    if(!found) return;
+
+    pendingProfileToUnlock = found;
+    document.getElementById('unlock-profile-hint').textContent = 'Inserisci il PIN di 6 cifre per accedere a ' + found.teamName + ' (' + found.name + ').';
+    document.getElementById('input-profile-pin').value = '';
+    document.getElementById('unlock-profile-msg').textContent = '';
+    document.getElementById('modal-unlock-profile').classList.add('active');
+  }
+
+  function submitUnlockProfile(){
+    var enteredPin = document.getElementById('input-profile-pin').value.trim();
+    if(!pendingProfileToUnlock) return;
+
+    if(enteredPin === String(pendingProfileToUnlock.pin)){
+      myProfile = pendingProfileToUnlock;
+      localStorage.setItem('fanta_profile_' + currentRoomId, JSON.stringify(myProfile));
+      closeModal('modal-unlock-profile');
+      pendingProfileToUnlock = null;
+      goHome('bid');
+    } else {
+      showMsg('unlock-profile-msg', 'PIN di 6 cifre errato!', 'error');
+    }
   }
 
   async function createNewParticipantProfile(){
     var name = document.getElementById('join-name').value.trim();
     var teamName = document.getElementById('join-team-name').value.trim();
+    var pin = document.getElementById('join-pin').value.trim();
+
     if(!name || !teamName){
       showMsg('join-msg', 'Inserisci sia il tuo nome sia il nome della squadra.', 'error');
+      return;
+    }
+    if(!pin || pin.length !== 6 || isNaN(pin)){
+      showMsg('join-msg', 'Il PIN deve essere esattamente di 6 cifre numeriche.', 'error');
       return;
     }
 
@@ -1242,12 +1293,13 @@
       return;
     }
 
-    myProfile = { name: name, teamName: teamName, logoUrl: tempLogoBase64 || '' };
+    myProfile = { name: name, teamName: teamName, logoUrl: tempLogoBase64 || '', pin: pin };
     await saveProfile(myProfile);
     localStorage.setItem('fanta_profile_' + currentRoomId, JSON.stringify(myProfile));
     
     document.getElementById('join-name').value = '';
     document.getElementById('join-team-name').value = '';
+    document.getElementById('join-pin').value = '';
     document.getElementById('join-team-logo').value = '';
     tempLogoBase64 = '';
     document.getElementById('logo-preview-box').innerHTML = '⚽';
@@ -1256,7 +1308,9 @@
     goHome('bid');
   }
 
-  function switchProfile(){
+  // Disconnessione sicura dal profilo
+  function logoutParticipantProfile(){
+    if(!confirm('Vuoi disconnetterti dal profilo? Per rientrare sarà necessario inserire il tuo PIN di 6 cifre.')) return;
     localStorage.removeItem('fanta_profile_' + currentRoomId);
     myProfile = null;
     openParticipantFlow();
@@ -1438,7 +1492,6 @@
 
     html += '<div class="board-row"><div class="board-label">Prezzo attuale</div><div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div></div>';
     
-    // RIGA 3: ULTIMO OFFERENTE CON STEMMA GRANDE
     html += '<div class="board-row"><div class="board-label">Ultimo offerente</div>';
     if(s.bidder){
       html += '<div class="board-bidder-wrap">';
@@ -1801,7 +1854,7 @@
           html += '<td><button class="btn-select-player" onclick="selectFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ', \'' + p.role + '\', \'' + escapeHtml(p.team).replace(/'/g, "\\'") + '\')">Seleziona</button></td>';
         }
       } else {
-        html += '<td>' + (isSold ? ('<span class="badge-assigned">Preso da ' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
+        html += '<td>' + (isSold ? ('<span class="badge-assigned">' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
       }
       html += '</tr>';
     });
