@@ -413,6 +413,19 @@
   .quick-assign-box label{ display: block; font-size: 12px; color: var(--chalk-dim); margin-bottom: 6px; }
   .quick-assign-row{ display: flex; gap: 8px; }
 
+  /* BOX CHIUSURA CON PREZZO MANUALE */
+  .close-override-box{
+    background: var(--pitch-mid-2); border: 1px solid var(--pitch-line);
+    border-radius: var(--radius); padding: 14px; margin-top: 12px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .close-override-row{ display: flex; gap: 10px; align-items: center; }
+  .close-override-row label{ font-size: 12.5px; color: var(--chalk-dim); font-weight: 600; min-width: 110px; }
+  .close-override-row input, .close-override-row select{
+    flex: 1; padding: 8px 10px; background: var(--pitch-dark); border: 1px solid var(--pitch-line);
+    border-radius: 4px; color: var(--chalk); font-size: 14px;
+  }
+  .close-override-row input{ max-width: 100px; font-weight: 800; color: var(--gold); text-align: center; }
+
   /* RESOCONTO FINALE */
   #screen-summary{
     flex-direction:column; align-items:center; justify-content:flex-start;
@@ -454,6 +467,9 @@
     .role-grid{ flex-direction:column; align-items:stretch; }
     .role-card{ width:100%; flex-direction:row; text-align:left; justify-content:flex-start; }
     .quick-assign-row{ flex-direction: column; }
+    .close-override-row{ flex-direction: column; align-items: stretch; gap: 4px; }
+    .close-override-row label{ min-width: auto; }
+    .close-override-row input{ max-width: 100%; }
     .export-actions{ flex-direction: column; width: 100%; }
     .btn-export{ width: 100%; justify-content: center; }
   }
@@ -826,7 +842,21 @@
           </div>
         </div>
 
-        <button class="btn-danger" id="btn-close-auction" onclick="closeAuction()" style="display:none; margin-top: 10px;">Chiudi e assegna</button>
+        <!-- BOX DI CHIUSURA ASTA CON PREZZO FINALE E SQUADRA MODIFICABILI A MANO -->
+        <div class="close-override-box" id="admin-close-override-box" style="display:none;">
+          <div class="close-override-row">
+            <label for="admin-close-final-price">Prezzo finale:</label>
+            <input id="admin-close-final-price" type="number" min="1" placeholder="Prezzo">
+            <span style="font-size:12px; color:var(--gold); font-weight:700;">cfu</span>
+          </div>
+          <div class="close-override-row">
+            <label for="admin-close-final-bidder">Assegna a:</label>
+            <select id="admin-close-final-bidder">
+              <option value="">Nessun offerente (invenduto)</option>
+            </select>
+          </div>
+          <button class="btn-danger" id="btn-close-auction" onclick="closeAuction()" style="margin-top: 4px;">Chiudi e assegna</button>
+        </div>
 
         <div class="divider"></div>
         <button class="btn-danger" style="border-color:var(--brick); color:var(--chalk); background:rgba(193,90,69,0.35);" onclick="concludeWholeAuction()">🏁 Concludi definitivamente l'asta</button>
@@ -943,7 +973,7 @@
   var tempLogoBase64 = '';
   var pendingProfileToUnlock = null;
   var currentInitialBudget = 500;
-  var selectedAdminTeamView = ''; // Memorizza la squadra selezionata nel menu a tendina del banditore
+  var selectedAdminTeamView = '';
 
   var liveState = null;
   var liveLog = [];
@@ -1026,7 +1056,6 @@
     showMsg('admin-msg', item.player + ' rimosso dalla squadra e tornato libero!', 'ok');
   }
 
-  // Cambio selezione squadra nel menu a tendina del banditore
   function onAdminTeamSelectChange(teamName){
     selectedAdminTeamView = teamName;
     renderAdminRosters(liveLog, liveProfiles);
@@ -1065,6 +1094,7 @@
       liveProfiles = snap.val() || [];
       updateAdminParticipantSelect();
       updateAdminTeamViewSelect();
+      updateAdminCloseBidderSelect();
       renderCurrentScreen();
     });
     activeListeners.push(profRef);
@@ -1493,6 +1523,7 @@
       renderListoneTable('admin');
       updateAdminParticipantSelect();
       updateAdminTeamViewSelect();
+      updateAdminCloseBidderSelect();
     }
     if(route === 'lobby'){
       renderLobbyRooms();
@@ -1756,22 +1787,62 @@
     showMsg('admin-msg', liveState.player + ' assegnato a ' + pTeam + ' per 1 credito!', 'ok');
   }
 
+  // Chiusura d'asta con possibilità di personalizzare prezzo finale e offerente vincente
   async function closeAuction(){
     if(!liveState || liveState.status !== 'open'){
       showMsg('admin-msg', 'Nessuna asta aperta da chiudere.', 'error'); return;
     }
-    var newState = Object.assign({}, liveState, { status:'closed', updatedAt: Date.now() });
+
+    // Prendi prezzo e offerente inseriti nei campi manuali
+    var priceInput = document.getElementById('admin-close-final-price');
+    var bidderSelect = document.getElementById('admin-close-final-bidder');
+
+    var finalPrice = parseInt(priceInput.value, 10);
+    if(isNaN(finalPrice) || finalPrice < 0){
+      finalPrice = liveState.price;
+    }
+
+    var chosenBidderVal = bidderSelect.value.trim();
+    var finalBidderName = null;
+    var finalBidderTeam = null;
+    var finalBidderLogo = null;
+
+    if(chosenBidderVal){
+      var parts = chosenBidderVal.split('|');
+      finalBidderName = parts[0];
+      finalBidderTeam = parts[1] || finalBidderName;
+      finalBidderLogo = parts[2] || '';
+    } else if(liveState.bidder){
+      finalBidderName = liveState.bidder;
+      finalBidderTeam = liveState.bidderTeam;
+      finalBidderLogo = liveState.bidderLogo || '';
+    }
+
+    var newState = Object.assign({}, liveState, {
+      status: 'closed',
+      price: finalBidderName ? finalPrice : 0,
+      bidder: finalBidderName || '',
+      bidderTeam: finalBidderTeam || '',
+      bidderLogo: finalBidderLogo || '',
+      updatedAt: Date.now()
+    });
     await saveState(newState);
 
     var updatedLog = liveLog.slice();
     updatedLog.unshift({
-      player: liveState.player, role: liveState.role || '', team: liveState.team || '',
-      qt: liveState.qt || 1, titPct: liveState.titPct || null, price: liveState.bidder ? liveState.price : null,
-      bidder: liveState.bidder || null, bidderTeam: liveState.bidderTeam || null, bidderLogo: liveState.bidderLogo || null,
+      player: liveState.player,
+      role: liveState.role || '',
+      team: liveState.team || '',
+      qt: liveState.qt || 1,
+      titPct: liveState.titPct || null,
+      price: finalBidderName ? finalPrice : null,
+      bidder: finalBidderName || null,
+      bidderTeam: finalBidderTeam || null,
+      bidderLogo: finalBidderLogo || null,
       ts: Date.now()
     });
     await saveLog(updatedLog);
-    showMsg('admin-msg', liveState.bidder ? (liveState.player + ' assegnato.') : (liveState.player + ' chiuso senza offerte.'), 'ok');
+    showMsg('admin-msg', finalBidderName ? (liveState.player + ' assegnato a ' + finalBidderTeam + ' per ' + finalPrice + ' crediti!') : (liveState.player + ' chiuso senza offerte.'), 'ok');
   }
 
   async function concludeWholeAuction(){
@@ -1786,12 +1857,12 @@
 
   function renderAdmin(s){
     var currentBox = document.getElementById('admin-current');
-    var closeBtn = document.getElementById('btn-close-auction');
+    var closeBox = document.getElementById('admin-close-override-box');
     var quickBox = document.getElementById('admin-quick-assign-box');
 
     if(!s || s.status === 'idle'){
       currentBox.style.display = 'none';
-      closeBtn.style.display = 'none';
+      closeBox.style.display = 'none';
       quickBox.style.display = 'none';
       return;
     }
@@ -1801,8 +1872,17 @@
     document.getElementById('ac-bidder').textContent = s.bidder ? (s.bidder + ' (' + (s.bidderTeam||'') + ')') : '—';
     document.getElementById('ac-status').textContent = s.status === 'open' ? 'Aperta' : 'Chiusa';
     
-    closeBtn.style.display = s.status === 'open' ? 'block' : 'none';
+    closeBox.style.display = s.status === 'open' ? 'flex' : 'none';
     quickBox.style.display = s.status === 'open' ? 'block' : 'none';
+
+    // Se l'asta è aperta, precompila il campo prezzo finale con il prezzo attuale se non è già stato digitato qualcosa
+    if(s.status === 'open'){
+      var priceInput = document.getElementById('admin-close-final-price');
+      if(document.activeElement !== priceInput){
+        priceInput.value = s.price;
+      }
+      updateAdminCloseBidderSelect();
+    }
   }
 
   function updateAdminParticipantSelect(){
@@ -1819,7 +1899,29 @@
     });
   }
 
-  // Popola il menu a tendina per scegliere la squadra da visualizzare nel Banditore
+  // Popola il menu a tendina per scegliere chi si aggiudica il giocatore al momento della chiusura
+  function updateAdminCloseBidderSelect(){
+    var select = document.getElementById('admin-close-final-bidder');
+    if(!select) return;
+
+    var currentVal = select.value;
+    select.innerHTML = '<option value="">Nessun offerente (invenduto)</option>';
+
+    liveProfiles.forEach(function(p){
+      var opt = document.createElement('option');
+      opt.value = p.name + '|' + p.teamName + '|' + (p.logoUrl || '');
+      opt.textContent = p.teamName + ' (' + p.name + ')';
+      
+      // Seleziona di default l'ultimo offerente registrato da Firebase, altrimenti mantieni la scelta del banditore
+      if(liveState && liveState.bidder && liveState.bidder.toLowerCase() === p.name.toLowerCase()){
+        opt.selected = true;
+      } else if(opt.value === currentVal){
+        opt.selected = true;
+      }
+      select.appendChild(opt);
+    });
+  }
+
   function updateAdminTeamViewSelect(){
     var select = document.getElementById('admin-select-team-view');
     if(!select) return;
@@ -2156,7 +2258,6 @@
     grid.innerHTML = html;
   }
 
-  // Scheda del Banditore: mostra esclusivamente la squadra scelta dal menu a tendina
   function renderAdminRosters(log, profiles){
     var wrap = document.getElementById('admin-teams-wrap');
     if(!wrap) return;
@@ -2169,7 +2270,6 @@
       return;
     }
 
-    // Se non è selezionata nessuna squadra nel menu a tendina
     if(!selectedAdminTeamView || !groups[selectedAdminTeamView]){
       wrap.innerHTML = '<div class="team-empty">Seleziona una squadra dal menu a tendina qui sopra per visualizzarne la rosa e le opzioni.</div>';
       return;
