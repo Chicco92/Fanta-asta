@@ -51,7 +51,7 @@
   .screen{ display:none; min-height:100vh; }
   .screen.active{ display:flex; }
 
-  /* ---------- STEMMI E LOGHI CIRCOLARI ---------- */
+  /* STEMMI */
   .team-crest{
     width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
     border: 1px solid var(--gold-dim); background: var(--pitch-dark);
@@ -69,7 +69,7 @@
   .team-crest-fallback.md{ width: 32px; height: 32px; font-size: 12px; }
   .team-crest-fallback.sm{ width: 28px; height: 28px; font-size: 11px; }
 
-  /* ---------- LOBBY PRINCIPALE ---------- */
+  /* LOBBY */
   #screen-lobby{
     flex-direction:column; align-items:center; justify-content:flex-start;
     padding: 60px 20px 40px; width:100%; max-width: 720px; margin: 0 auto;
@@ -99,7 +99,7 @@
   .badge-private{ background: rgba(193,90,69,0.3); color: #f09581; border: 1px solid rgba(240,149,129,0.3); }
   .badge-ended{ background: rgba(227,178,60,0.25); color: var(--gold); border: 1px solid var(--gold-dim); }
 
-  /* ---------- MODALI ---------- */
+  /* MODALI */
   .modal-overlay{
     position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7);
     display:none; align-items:center; justify-content:center; padding: 20px; z-index: 99;
@@ -110,17 +110,14 @@
     padding: 24px; width: 100%; max-width: 420px;
   }
 
-  /* ---------- HOME RUOLI NELLA STANZA ---------- */
+  /* HOME RUOLI */
   #screen-home{
     flex-direction:column; align-items:center; justify-content:center;
     padding: 32px 20px; text-align:center; gap: 36px;
   }
   .home-title{
-    font-family: var(--font-display);
-    font-size: clamp(28px, 6vw, 46px);
-    letter-spacing: 0.5px;
-    line-height: 1.05;
-    max-width: 640px;
+    font-family: var(--font-display); font-size: clamp(28px, 6vw, 46px);
+    letter-spacing: 0.5px; line-height: 1.05; max-width: 640px;
   }
   .home-title span{ color: var(--gold); }
   .home-sub{ color: var(--chalk-dim); max-width: 460px; font-size: 15px; line-height:1.5; margin-top: 14px; margin-bottom: 28px; }
@@ -129,15 +126,14 @@
     width: 190px; padding: 24px 18px; background: var(--pitch-mid);
     border: 1px solid var(--pitch-line); border-radius: var(--radius);
     display:flex; flex-direction:column; align-items:center; gap:10px;
-    transition: border-color .15s ease, transform .15s ease;
-    color: var(--chalk);
+    transition: border-color .15s ease, transform .15s ease; color: var(--chalk);
   }
   .role-card:hover{ border-color: var(--gold); transform: translateY(-2px); }
   .role-card .icon{ font-size: 30px; }
   .role-card .label{ font-weight:700; font-size:16px; }
   .role-card .desc{ font-size: 12.5px; color: var(--chalk-dim); line-height:1.4; }
 
-  /* ---------- SHARED ---------- */
+  /* SHARED */
   .topbar{
     position:fixed; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center;
     padding: 14px 18px; font-size: 13px; color: var(--chalk-dim); z-index: 5;
@@ -182,7 +178,7 @@
   .msg.error{ color: var(--brick); }
   .msg.ok{ color: var(--gold); }
 
-  /* ---------- TABELLONE (LAYOUT AMPIO FLUIDO) ---------- */
+  /* TABELLONE FLUIDO */
   #screen-tabellone{
     flex-direction:column; align-items:center; justify-content:flex-start;
     padding: 75px 12px 40px; width: 100%; max-width: 100vw;
@@ -229,7 +225,7 @@
   .tv-footer{ margin-top: 22px; color: var(--chalk-dim); font-size: 13px; text-align:center; }
   .tv-footer b{ color: var(--gold); }
 
-  /* ---------- PARTECIPANTE ---------- */
+  /* PARTECIPANTE */
   .bid-hero{ text-align:center; margin-bottom: 26px; }
   .bid-hero .label{ font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
   .bid-hero .player{ font-family: var(--font-display); font-size: clamp(24px,7vw,32px); margin-bottom: 6px; }
@@ -257,7 +253,7 @@
 
   .you-are{ text-align:center; font-size: 12.5px; color: var(--chalk-dim); margin-top: 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px; }
 
-  /* ---------- PROFILI PARTECIPANTE ---------- */
+  /* PROFILI */
   .profile-pick-list{ display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
   .profile-pick-btn{
     padding: 10px 14px; background: var(--pitch-mid); border: 1px solid var(--pitch-line);
@@ -269,7 +265,7 @@
   .profile-pick-btn .p-name{ font-weight:700; font-size:14px; }
   .profile-pick-btn .p-team{ font-size:12px; color: var(--gold); }
 
-  /* ---------- TABELLONE SLOT ROSE FLUIDO AL 100% ---------- */
+  /* TABELLONE SLOT ROSE FLUIDO AL 100% */
   .section-divider{ height: 1px; background: var(--pitch-line); margin: 24px 0 16px; }
   .section-header{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 12px; }
   .section-title{ font-family: var(--font-display); font-size: 16px; color: var(--chalk); }
@@ -277,29 +273,17 @@
 
   .teams-slots-grid{
     display: flex; gap: 6px; width: 100%; max-width: 100%;
-    margin-top: 24px; padding-bottom: 20px;
-    align-items: flex-start;
+    margin-top: 24px; padding-bottom: 20px; align-items: flex-start;
   }
   .teams-slots-grid .team-slot-column{
-    flex: 1 1 0;
-    min-width: 0;
-    width: auto;
-    background: var(--pitch-mid);
-    border: 1px solid var(--pitch-line);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    flex: 1 1 0; min-width: 0; width: auto; background: var(--pitch-mid);
+    border: 1px solid var(--pitch-line); border-radius: var(--radius);
+    display: flex; flex-direction: column; overflow: hidden;
   }
   .team-slot-column.single{
-    width: 100%;
-    min-width: 100%;
-    background: var(--pitch-mid);
-    border: 1px solid var(--pitch-line);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    width: 100%; min-width: 100%; background: var(--pitch-mid);
+    border: 1px solid var(--pitch-line); border-radius: var(--radius);
+    display: flex; flex-direction: column; overflow: hidden;
   }
 
   .teams-slots-grid .team-slot-header{
@@ -311,12 +295,8 @@
     font-family: var(--font-display); font-size: 12px; color: var(--gold);
     line-height: 1.15; word-break: break-word; white-space: normal;
   }
-  .teams-slots-grid .team-slot-owner{
-    font-size: 10.5px; color: var(--chalk-dim);
-  }
-  .teams-slots-grid .team-slot-stats{
-    font-size: 10.5px; font-weight: 700; color: var(--chalk); line-height: 1.2;
-  }
+  .teams-slots-grid .team-slot-owner{ font-size: 10.5px; color: var(--chalk-dim); }
+  .teams-slots-grid .team-slot-stats{ font-size: 10.5px; font-weight: 700; color: var(--chalk); line-height: 1.2; }
   .teams-slots-grid .role-section-title{
     background: rgba(255,255,255,0.03); padding: 3px 5px; font-size: 9.5px; font-weight: 800;
     letter-spacing: .4px; color: var(--chalk-dim); border-bottom: 1px solid rgba(233,230,219,0.06);
@@ -330,23 +310,15 @@
     font-weight: 600; color: var(--chalk); white-space: nowrap; overflow: hidden;
     text-overflow: ellipsis; max-width: 76%;
   }
-  .teams-slots-grid .slot-price{
-    color: var(--gold); font-weight: 700; font-size: 10.5px; flex-shrink: 0;
-  }
+  .teams-slots-grid .slot-price{ color: var(--gold); font-weight: 700; font-size: 10.5px; flex-shrink: 0; }
 
   .team-slot-column.single .team-slot-header{
     padding: 12px 14px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.22);
     display: flex; justify-content: space-between; align-items: center; gap: 8px;
   }
-  .team-slot-column.single .team-slot-name{
-    font-family: var(--font-display); font-size: 14px; color: var(--gold); line-height: 1.2;
-  }
-  .team-slot-column.single .team-slot-owner{
-    font-size: 11px; color: var(--chalk-dim);
-  }
-  .team-slot-column.single .team-slot-stats{
-    font-size: 12px; font-weight: 700; color: var(--chalk); text-align: right; line-height: 1.3;
-  }
+  .team-slot-column.single .team-slot-name{ font-family: var(--font-display); font-size: 14px; color: var(--gold); line-height: 1.2; }
+  .team-slot-column.single .team-slot-owner{ font-size: 11px; color: var(--chalk-dim); }
+  .team-slot-column.single .team-slot-stats{ font-size: 12px; font-weight: 700; color: var(--chalk); text-align: right; line-height: 1.3; }
   .team-slot-column.single .role-section-title{
     background: rgba(255,255,255,0.03); padding: 5px 10px; font-size: 11px; font-weight: 800;
     letter-spacing: .5px; color: var(--chalk-dim); border-bottom: 1px solid rgba(233,230,219,0.06);
@@ -359,14 +331,10 @@
   .team-slot-column.single .slot-player-name{
     font-weight: 600; color: var(--chalk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
   }
-  .team-slot-column.single .slot-price{
-    color: var(--gold); font-weight: 700; font-size: 11.5px;
-  }
-  .slot-row.empty{
-    color: rgba(231,227,212,0.25); font-style: italic;
-  }
+  .team-slot-column.single .slot-price{ color: var(--gold); font-weight: 700; font-size: 11.5px; }
+  .slot-row.empty{ color: rgba(231,227,212,0.25); font-style: italic; }
 
-  /* ---------- TABELLE NORMALI ---------- */
+  /* TABELLE NORMALI */
   .team-table{ width:100%; border-collapse: collapse; font-size: 13.5px; background: var(--pitch-mid); border-radius: var(--radius); overflow:hidden; border: 1px solid var(--pitch-line); }
   .team-table th, .team-table td{ text-align:left; padding: 9px 12px; border-bottom: 1px solid var(--pitch-line); }
   .team-table th{ color: var(--chalk-dim); font-weight:600; font-size:12px; background: rgba(0,0,0,0.18); }
@@ -381,11 +349,8 @@
   .team-card-name{ font-family: var(--font-display); font-size: 15px; color: var(--gold); }
   .team-card-stats{ font-size: 12px; color: var(--chalk-dim); }
 
-  /* ---------- LISTONE UI ---------- */
-  .listone-box{
-    background: var(--pitch-mid); border: 1px solid var(--pitch-line); border-radius: var(--radius);
-    padding: 16px; margin-top: 16px;
-  }
+  /* LISTONE UI */
+  .listone-box{ background: var(--pitch-mid); border: 1px solid var(--pitch-line); border-radius: var(--radius); padding: 16px; margin-top: 16px; }
   .listone-search{ width:100%; padding: 10px 12px; background: var(--pitch-dark); border:1px solid var(--pitch-line); border-radius: var(--radius); color: var(--chalk); font-size:14px; margin-bottom: 10px; }
   .role-filters{ display: flex; gap: 6px; margin-bottom: 12px; }
   .btn-filter{
@@ -403,9 +368,7 @@
   .role-D{ background: #2E8540; color: #fff; }
   .role-C{ background: #2B6CB0; color: #fff; }
   .role-A{ background: #C53030; color: #fff; }
-  .tit-badge{
-    display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 800;
-  }
+  .tit-badge{ display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 800; }
   .tit-high{ background: rgba(46,133,64,0.3); color: #7fe1a8; border: 1px solid rgba(127,225,168,0.3); }
   .tit-med{ background: rgba(227,178,60,0.25); color: var(--gold); border: 1px solid var(--gold-dim); }
   .tit-low{ background: rgba(193,90,69,0.25); color: #f09581; border: 1px solid rgba(240,149,129,0.3); }
@@ -417,7 +380,7 @@
   .btn-select-player:hover{ background:#eec25c; }
   .badge-assigned{ font-size: 11px; color: var(--brick); font-style: italic; font-weight: 600; }
 
-  /* ---------- ADMIN & SETUP BUDGET ---------- */
+  /* BUDGET & ADMIN */
   .budget-setup-box{
     background: var(--pitch-mid-2); border: 1px solid var(--gold-dim); border-radius: var(--radius);
     padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -441,7 +404,7 @@
   .quick-assign-box label{ display: block; font-size: 12px; color: var(--chalk-dim); margin-bottom: 6px; }
   .quick-assign-row{ display: flex; gap: 8px; }
 
-  /* ---------- RESOCONTO FINALE ---------- */
+  /* RESOCONTO FINALE */
   #screen-summary{
     flex-direction:column; align-items:center; justify-content:flex-start;
     padding: 70px 20px 40px; width:100%; max-width: 960px; margin: 0 auto;
@@ -449,9 +412,7 @@
   .summary-hero{ text-align:center; margin-bottom: 24px; }
   .summary-hero h1{ font-family: var(--font-display); font-size: clamp(24px, 5vw, 36px); color: var(--gold); margin:0 0 6px; }
   
-  .export-actions{
-    display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom: 26px;
-  }
+  .export-actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom: 26px; }
   .btn-export{
     padding: 12px 20px; background: var(--gold); color: #17240F; border:none;
     border-radius: var(--radius); font-weight:800; font-size: 14px; display:inline-flex;
@@ -470,7 +431,7 @@
   .stat-card .val{ font-family: var(--font-display); font-size: 20px; color: var(--gold); margin-top: 4px; }
   .stat-card .lbl{ font-size: 12px; color: var(--chalk-dim); }
 
-  /* ---------- SUPER ADMIN ---------- */
+  /* SUPER ADMIN */
   #screen-super-admin{
     flex-direction:column; align-items:center; justify-content:flex-start;
     padding: 70px 20px 40px; width:100%; max-width: 800px; margin: 0 auto;
@@ -524,7 +485,7 @@
     </div>
   </div>
 
-  <!-- MODALE: LOGIN SUPER ADMIN GESTORE -->
+  <!-- MODALE: LOGIN SUPER ADMIN -->
   <div class="modal-overlay" id="modal-super-login">
     <div class="modal">
       <h2>Accesso Gestore Sito</h2>
@@ -584,7 +545,7 @@
     </div>
   </div>
 
-  <!-- MODALE: SBLOCCA PROFILO PARTECIPANTE CON PIN ALFANUMERICO -->
+  <!-- MODALE: SBLOCCA PROFILO PARTECIPANTE CON PIN -->
   <div class="modal-overlay" id="modal-unlock-profile">
     <div class="modal">
       <h2>Sblocca Profilo</h2>
@@ -612,13 +573,7 @@
     <div style="width:100%; overflow-x:auto;">
       <table class="super-table" id="super-table-rooms">
         <thead>
-          <tr>
-            <th>Nome Lega</th>
-            <th>Tipo</th>
-            <th>Creata il</th>
-            <th>Stato</th>
-            <th>Azione</th>
-          </tr>
+          <tr><th>Nome Lega</th><th>Tipo</th><th>Creata il</th><th>Stato</th><th>Azione</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -654,16 +609,15 @@
     </div>
   </div>
 
-  <!-- ==================== TABELLONE (TV / PC CON SLOT FLUIDI) ==================== -->
+  <!-- ==================== TABELLONE ==================== -->
   <div id="screen-tabellone" class="screen">
     <div class="topbar">
       <span>Tabellone Live · <b id="tabellone-room-name" style="color:var(--gold)"></b></span>
       <button class="link-btn" onclick="goHome('home')">cambia ruolo</button>
     </div>
     <div class="board" id="board-content"></div>
-    <div class="tv-footer">Aggiornamento automatico · offri da smartphone su <b id="tv-hint-url"></b></div>
+    <div class="tv-footer">Aggiornamento istantaneo automatico · offri da smartphone su <b id="tv-hint-url"></b></div>
 
-    <!-- COLONNE ROSE CON SLOT FISSI P:3, D:8, C:8, A:6 E CREDITI RESIDUI -->
     <div class="teams-slots-grid" id="tv-teams-slots-grid"></div>
   </div>
 
@@ -749,7 +703,6 @@
           <span>Profilo attivo: <b id="you-are-name" style="color:var(--chalk)"></b> (<span id="you-are-team" style="color:var(--gold)"></span>)</span>
         </div>
 
-        <!-- SEZIONE SLOT SQUADRA PARTECIPANTE -->
         <div class="section-divider"></div>
         <div class="section-header">
           <span class="section-title">La tua rosa</span>
@@ -796,7 +749,7 @@
         <h2>Gestisci l'asta</h2>
         <p class="hint">Imposta il budget iniziale, carica uno o più listoni Excel e batti i calciatori all'asta.</p>
 
-        <!-- CONFIGURAZIONE BUDGET INIZIALE -->
+        <!-- SETUP BUDGET -->
         <div class="budget-setup-box">
           <div>
             <label for="admin-initial-budget">Budget crediti iniziale per squadra:</label>
@@ -805,13 +758,13 @@
           <input id="admin-initial-budget" type="number" value="500" min="1" step="10" onchange="updateInitialBudget(this.value)">
         </div>
 
-        <!-- CARICAMENTO FILE LISTONE (SUPPORTA SELEZIONE MULTIPLA DI PIÙ FILE EXCEL) -->
+        <!-- UPLOAD EXCEL MULTIPLO -->
         <div class="field">
-          <label>Carica Listone/i Excel (.xlsx o .xls) — <i>puoi selezionare anche 3 file contemporaneamente</i></label>
+          <label>Carica Listone/i Excel (.xlsx o .xls) — <i>puoi selezionare anche 3 file insieme</i></label>
           <input type="file" id="file-listone" accept=".xlsx, .xls, .csv" multiple onchange="handleFileUpload(event)">
         </div>
 
-        <!-- LISTONE BROWSER BANDITORE -->
+        <!-- BROWSER LISTONE -->
         <div class="listone-box" id="admin-listone-box" style="margin-bottom: 20px; display: none;">
           <input type="text" class="listone-search" id="admin-search-player" placeholder="Cerca per nome o squadra..." oninput="renderListoneTable('admin')">
           <div class="role-filters" id="admin-role-filters">
@@ -866,7 +819,6 @@
 
         <button class="btn-danger" id="btn-close-auction" onclick="closeAuction()" style="display:none; margin-top: 10px;">Chiudi e assegna</button>
 
-        <!-- CONCLUSIONE FINALE ASTA -->
         <div class="divider"></div>
         <button class="btn-danger" style="border-color:var(--brick); color:var(--chalk); background:rgba(193,90,69,0.35);" onclick="concludeWholeAuction()">🏁 Concludi definitivamente l'asta</button>
 
@@ -881,7 +833,7 @@
     </div>
   </div>
 
-  <!-- ==================== SCHERMATA: RESOCONTO FINALE ==================== -->
+  <!-- ==================== RESOCONTO FINALE ==================== -->
   <div id="screen-summary" class="screen">
     <div class="topbar">
       <span>Resoconto Finale Asta</span>
@@ -928,7 +880,7 @@
 </div>
 
 <script>
-  // ---------- CONFIGURAZIONE FIREBASE INTEGRATA ----------
+  // ---------- CONFIGURAZIONE FIREBASE ----------
   const firebaseConfig = {
     apiKey: "AIzaSyCgSlZK95LvLrGDHHWnf5BHZBVlB8E_R9I",
     authDomain: "fanta-asta-dafef.firebaseapp.com",
@@ -942,13 +894,11 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // ---------- CHIAVI E COSTANTI ----------
   var ROOMS_INDEX_KEY = 'rooms_index';
   var ACTIVE_ROOM_KEY = 'fanta_active_room_id';
   var SUPER_ADMIN_USER = 'Chicco';
   var SUPER_ADMIN_PASS = 'Fedoro03';
 
-  // Configurazione slot per ruolo (25 calciatori)
   var ROSTER_SLOTS_CONFIG = {
     P: { count: 3, label: 'PORTIERI (3)' },
     D: { count: 8, label: 'DIFENSORI (8)' },
@@ -963,13 +913,12 @@
     localStorage.setItem(DEVICE_TOKEN_KEY, myDeviceToken);
   }
 
-  // ---------- SESSIONE LOCALE ----------
+  // ---------- STATO IN MEMORIA LOCALE (ZERO RE-DOWNLOAD INUTILI) ----------
   var currentRoomId = localStorage.getItem(ACTIVE_ROOM_KEY) || null;
   var currentRoomData = null;
-  var myProfile = null; // { name, teamName, logoUrl, pin }
+  var myProfile = null;
   var currentRoute = 'lobby';
   var lastKnownPrice = null;
-  var pollTimer = null;
   var cachedListone = [];
   var filterRoles = { admin: '', user: '' };
   var pendingPlayer = { role: '', team: '', qt: 1, titPct: null };
@@ -977,70 +926,40 @@
   var pendingProfileToUnlock = null;
   var currentInitialBudget = 500;
 
+  // Dati attivi della stanza sincronizzati in push da Firebase
+  var liveState = null;
+  var liveLog = [];
+  var liveProfiles = [];
+  var liveAdminClaim = null;
+  var activeListeners = [];
+
   document.getElementById('tv-hint-url').textContent = window.location.href.replace(/^https?:\/\//,'');
 
-  // ---------- STORAGE LAYER FIREBASE ----------
   function getRoomPath(keySuffix){
     return currentRoomId ? ('rooms/' + currentRoomId + '/' + keySuffix) : keySuffix;
   }
 
+  // ---------- METODI SCRITTURA VELOCI (SENZA LAG) ----------
   var store = {
-    get: async function(path){
-      try {
-        const snap = await db.ref(path).get();
-        return snap.exists() ? snap.val() : null;
-      } catch(e) {
-        console.warn("Errore lettura Firebase:", e);
-        var raw = localStorage.getItem(path);
-        return raw ? JSON.parse(raw) : null;
-      }
+    set: function(path, val){
+      return db.ref(path).set(val);
     },
-    set: async function(path, val){
-      try {
-        localStorage.setItem(path, JSON.stringify(val));
-        await db.ref(path).set(val);
-        return true;
-      } catch(e) {
-        console.error("Errore scrittura Firebase:", e);
-        return false;
-      }
-    },
-    remove: async function(path){
-      try {
-        localStorage.removeItem(path);
-        await db.ref(path).remove();
-        return true;
-      } catch(e) {
-        console.error("Errore rimozione Firebase:", e);
-        return false;
-      }
+    remove: function(path){
+      return db.ref(path).remove();
     }
   };
 
-  async function loadState(){ return await store.get(getRoomPath('state')); }
   async function saveState(s){ return await store.set(getRoomPath('state'), s); }
-  async function loadLog(){ var l = await store.get(getRoomPath('log')); return Array.isArray(l) ? l : []; }
   async function saveLog(l){ return await store.set(getRoomPath('log'), l); }
-  async function loadListone(){ var l = await store.get(getRoomPath('listone')); return Array.isArray(l) ? l : []; }
-  async function saveListone(l){ return await store.set(getRoomPath('listone'), l); }
-
-  async function loadAdminClaim(){ return await store.get(getRoomPath('adminClaim')); }
+  async function saveListone(l){ 
+    localStorage.setItem('listone_' + currentRoomId, JSON.stringify(l));
+    return await store.set(getRoomPath('listone'), l); 
+  }
   async function saveAdminClaim(token){ return await store.set(getRoomPath('adminClaim'), token); }
+  async function saveBudget(b){ return await store.set(getRoomPath('initialBudget'), parseInt(b, 10)); }
 
-  async function loadBudget(){
-    var b = await store.get(getRoomPath('initialBudget'));
-    return (b !== null && !isNaN(b)) ? parseInt(b, 10) : 500;
-  }
-  async function saveBudget(b){
-    return await store.set(getRoomPath('initialBudget'), parseInt(b, 10));
-  }
-
-  async function loadProfiles(){
-    var p = await store.get(getRoomPath('profiles'));
-    return Array.isArray(p) ? p : [];
-  }
   async function saveProfile(profileObj){
-    var list = await loadProfiles();
+    var list = liveProfiles.slice();
     var exists = list.find(function(p){ return p.name.toLowerCase() === profileObj.name.toLowerCase(); });
     if(!exists){
       list.push(profileObj);
@@ -1049,24 +968,132 @@
   }
 
   async function loadRoomsIndex(){
-    var r = await store.get(ROOMS_INDEX_KEY);
-    return Array.isArray(r) ? r : [];
+    try {
+      var snap = await db.ref(ROOMS_INDEX_KEY).get();
+      return snap.exists() ? snap.val() : [];
+    } catch(e){
+      return [];
+    }
   }
   async function saveRoomsIndex(rooms){
     return await store.set(ROOMS_INDEX_KEY, rooms);
   }
 
-  // ---------- GESTIONE BUDGET BANDITORE ----------
+  // ---------- VERO LISTENER REALTIME FIREBASE (ADDIO POLL A 800MS!) ----------
+  function detachRealtimeListeners(){
+    activeListeners.forEach(function(ref){ ref.off(); });
+    activeListeners = [];
+  }
+
+  function attachRealtimeListeners(){
+    detachRealtimeListeners();
+    if(!currentRoomId) return;
+
+    // 1. Ascolto Stato Asta in corso (subito e solo quando cambia)
+    var stateRef = db.ref(getRoomPath('state'));
+    stateRef.on('value', function(snap){
+      liveState = snap.val() || { status: 'idle', price: 0, player: '', basePrice: 0 };
+      if(liveState.status === 'ended' && currentRoute !== 'summary' && currentRoute !== 'home' && currentRoute !== 'super-admin'){
+        goHome('summary');
+        return;
+      }
+      renderCurrentScreen();
+    });
+    activeListeners.push(stateRef);
+
+    // 2. Ascolto Cronologia Acquisti Log
+    var logRef = db.ref(getRoomPath('log'));
+    logRef.on('value', function(snap){
+      liveLog = snap.val() || [];
+      renderCurrentScreen();
+    });
+    activeListeners.push(logRef);
+
+    // 3. Ascolto Profili Partecipanti
+    var profRef = db.ref(getRoomPath('profiles'));
+    profRef.on('value', function(snap){
+      liveProfiles = snap.val() || [];
+      updateAdminParticipantSelect();
+      renderCurrentScreen();
+    });
+    activeListeners.push(profRef);
+
+    // 4. Ascolto Banditore Claim
+    var claimRef = db.ref(getRoomPath('adminClaim'));
+    claimRef.on('value', function(snap){
+      liveAdminClaim = snap.val();
+      updateAdminDescHome();
+    });
+    activeListeners.push(claimRef);
+
+    // 5. Ascolto Budget Iniziale
+    var bRef = db.ref(getRoomPath('initialBudget'));
+    bRef.on('value', function(snap){
+      currentInitialBudget = snap.exists() ? snap.val() : 500;
+      var el = document.getElementById('admin-initial-budget');
+      if(el) el.value = currentInitialBudget;
+      renderCurrentScreen();
+    });
+    activeListeners.push(bRef);
+
+    // 6. Listone caricato una volta sola
+    var cached = localStorage.getItem('listone_' + currentRoomId);
+    if(cached){
+      cachedListone = JSON.parse(cached);
+      document.getElementById('admin-listone-box').style.display = cachedListone.length ? 'block' : 'none';
+      renderListoneTable('admin');
+      renderListoneTable('user');
+    }
+    db.ref(getRoomPath('listone')).once('value').then(function(snap){
+      if(snap.exists()){
+        cachedListone = snap.val() || [];
+        localStorage.setItem('listone_' + currentRoomId, JSON.stringify(cachedListone));
+        document.getElementById('admin-listone-box').style.display = cachedListone.length ? 'block' : 'none';
+        renderListoneTable('admin');
+        renderListoneTable('user');
+      }
+    });
+  }
+
+  function updateAdminDescHome(){
+    var descEl = document.getElementById('role-admin-desc');
+    if(!descEl) return;
+    if(!liveAdminClaim){
+      descEl.textContent = "Disponibile: clicca per assumere il ruolo.";
+    } else if(liveAdminClaim === myDeviceToken){
+      descEl.textContent = "Sei il Banditore attivo (clicca per entrare).";
+    } else {
+      descEl.textContent = "🔒 Ruolo occupato da un altro utente.";
+    }
+  }
+
+  function renderCurrentScreen(){
+    if(!currentRoomId) return;
+    if(currentRoute === 'tabellone'){
+      renderTabellone(liveState);
+      renderTvFixedSlotsRosters(liveLog, liveProfiles);
+    } else if(currentRoute === 'bid'){
+      renderBidScreen(liveState);
+      renderParticipantRoster(liveLog, liveProfiles);
+    } else if(currentRoute === 'admin'){
+      renderAdmin(liveState);
+      renderAdminRosters(liveLog, liveProfiles);
+      renderLog(liveLog);
+    } else if(currentRoute === 'summary'){
+      renderSummaryScreen();
+    }
+  }
+
+  // ---------- BUDGET BANDITORE ----------
   async function updateInitialBudget(val){
     var num = parseInt(val, 10);
     if(isNaN(num) || num < 1) num = 500;
     currentInitialBudget = num;
     await saveBudget(num);
     showMsg('admin-msg', 'Budget impostato a ' + num + ' crediti!', 'ok');
-    refreshNow();
   }
 
-  // ---------- GESTIONE STEMMA E IMMAGINI ----------
+  // ---------- GESTIONE STEMMA E LOGHI ----------
   function handleLogoPreview(e){
     var file = e.target.files[0];
     if(!file) return;
@@ -1076,8 +1103,7 @@
       var img = new Image();
       img.onload = function(){
         var canvas = document.createElement('canvas');
-        canvas.width = 96;
-        canvas.height = 96;
+        canvas.width = 96; canvas.height = 96;
         var ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, 96, 96);
         tempLogoBase64 = canvas.toDataURL('image/jpeg', 0.85);
@@ -1100,26 +1126,21 @@
     return '<span class="team-crest-fallback ' + sizeClass + '">' + letter + '</span>';
   }
 
-  // ---------- GESTIONE ACCESSO BANDITORE PROTETTO ----------
+  // ---------- BANDITORE CLAIM ----------
   async function claimOrEnterAdmin(){
     if(currentRoomData && currentRoomData.ended){
       goHome('summary');
       return;
     }
-
-    var claim = await loadAdminClaim();
-
-    if(!claim){
+    if(!liveAdminClaim){
       await saveAdminClaim(myDeviceToken);
       goHome('admin');
       return;
     }
-
-    if(claim === myDeviceToken){
+    if(liveAdminClaim === myDeviceToken){
       goHome('admin');
       return;
     }
-
     alert('⚠️ Accesso negato: questa asta ha già un Banditore attivo designato. Solo lui può gestire i calciatori e le offerte.');
   }
 
@@ -1157,24 +1178,11 @@
     var type = document.getElementById('new-room-type').value;
     var pin = document.getElementById('new-room-pin').value.trim();
 
-    if(!name){
-      showMsg('create-room-msg', 'Inserisci un nome per la stanza.', 'error');
-      return;
-    }
-    if(type === 'private' && !pin){
-      showMsg('create-room-msg', 'Inserisci un PIN per la stanza privata.', 'error');
-      return;
-    }
+    if(!name){ showMsg('create-room-msg', 'Inserisci un nome per la stanza.', 'error'); return; }
+    if(type === 'private' && !pin){ showMsg('create-room-msg', 'Inserisci un PIN per la stanza privata.', 'error'); return; }
 
     var roomId = 'room_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-    var newRoom = {
-      id: roomId,
-      name: name,
-      isPrivate: (type === 'private'),
-      pin: pin || null,
-      ended: false,
-      createdAt: Date.now()
-    };
+    var newRoom = { id: roomId, name: name, isPrivate: (type === 'private'), pin: pin || null, ended: false, createdAt: Date.now() };
 
     var rooms = await loadRoomsIndex();
     rooms.unshift(newRoom);
@@ -1186,24 +1194,17 @@
 
   async function submitJoinWithPin(){
     var pin = document.getElementById('input-room-pin').value.trim();
-    if(!pin){
-      showMsg('join-pin-msg', 'Inserisci il PIN.', 'error');
-      return;
-    }
+    if(!pin){ showMsg('join-pin-msg', 'Inserisci il PIN.', 'error'); return; }
 
     var rooms = await loadRoomsIndex();
     var found = rooms.find(function(r){ return r.isPrivate && r.pin === pin; });
-
-    if(!found){
-      showMsg('join-pin-msg', 'Nessuna stanza trovata con questo PIN.', 'error');
-      return;
-    }
+    if(!found){ showMsg('join-pin-msg', 'Nessuna stanza trovata con questo PIN.', 'error'); return; }
 
     closeModal('modal-join-pin');
     enterRoom(found);
   }
 
-  async function enterRoom(room){
+  function enterRoom(room){
     currentRoomId = room.id;
     currentRoomData = room;
     localStorage.setItem(ACTIVE_ROOM_KEY, room.id);
@@ -1215,16 +1216,13 @@
     document.getElementById('room-home-title').innerHTML = escapeHtml(room.name);
     document.getElementById('tabellone-room-name').textContent = room.name;
 
-    await ensureInitRoom();
+    attachRealtimeListeners();
 
-    if(room.ended){
-      goHome('summary');
-    } else {
-      goHome('home');
-    }
+    if(room.ended){ goHome('summary'); } else { goHome('home'); }
   }
 
   function exitToLobby(){
+    detachRealtimeListeners();
     currentRoomId = null;
     currentRoomData = null;
     localStorage.removeItem(ACTIVE_ROOM_KEY);
@@ -1299,9 +1297,7 @@
     }
   }
 
-  function exitSuperAdmin(){
-    goHome('lobby');
-  }
+  function exitSuperAdmin(){ goHome('lobby'); }
 
   async function renderSuperAdminTable(){
     var rooms = await loadRoomsIndex();
@@ -1325,7 +1321,7 @@
   }
 
   async function deleteRoomAsSuperAdmin(roomId){
-    if(!confirm('Sei sicuro di voler eliminare questa stanza e tutti i suoi dati dal database?')) return;
+    if(!confirm('Sei sicuro di voler eliminare questa stanza dal database?')) return;
     var rooms = await loadRoomsIndex();
     var filtered = rooms.filter(function(r){ return r.id !== roomId; });
     await saveRoomsIndex(filtered);
@@ -1333,58 +1329,31 @@
     renderSuperAdminTable();
   }
 
-  // ---------- INIZIALIZZAZIONE STANZA ----------
-  async function ensureInitRoom(){
-    var s = await loadState();
-    if(!s){
-      s = { player:'', role:'', team:'', qt:0, titPct:null, basePrice:0, price:0, bidder:'', bidderTeam:'', bidderLogo:'', status:'idle', updatedAt: Date.now() };
-      await saveState(s);
-    }
-    currentInitialBudget = await loadBudget();
-    var budgetInput = document.getElementById('admin-initial-budget');
-    if(budgetInput) budgetInput.value = currentInitialBudget;
-
-    cachedListone = await loadListone();
-    if(cachedListone.length > 0){
-      document.getElementById('admin-listone-box').style.display = 'block';
-    } else {
-      document.getElementById('admin-listone-box').style.display = 'none';
-    }
-    return s;
-  }
-
   function openScreenWithCheck(screen){
-    if(currentRoomData && currentRoomData.ended){
-      goHome('summary');
-      return;
-    }
+    if(currentRoomData && currentRoomData.ended){ goHome('summary'); return; }
     goHome(screen);
   }
 
-  async function openParticipantFlow(){
-    if(currentRoomData && currentRoomData.ended){
-      goHome('summary');
-      return;
-    }
+  function openParticipantFlow(){
+    if(currentRoomData && currentRoomData.ended){ goHome('summary'); return; }
     if(myProfile){
       goHome('bid');
     } else {
-      await renderExistingProfilesScreen();
+      renderExistingProfilesScreen();
       goHome('join');
     }
   }
 
-  async function renderExistingProfilesScreen(){
-    var profiles = await loadProfiles();
+  function renderExistingProfilesScreen(){
     var wrap = document.getElementById('existing-profiles-wrap');
     var container = document.getElementById('profiles-pick-container');
-    if(!profiles || profiles.length === 0){
+    if(!liveProfiles || liveProfiles.length === 0){
       wrap.style.display = 'none';
       return;
     }
     wrap.style.display = 'block';
     var html = '';
-    profiles.forEach(function(p){
+    liveProfiles.forEach(function(p){
       html += '<button class="profile-pick-btn" onclick="startUnlockProfile(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\')">';
       html += '  <div class="p-left">';
       html +=      getCrestHtml(p.logoUrl, p.teamName, 'sm');
@@ -1396,9 +1365,8 @@
     container.innerHTML = html;
   }
 
-  async function startUnlockProfile(name){
-    var profiles = await loadProfiles();
-    var found = profiles.find(function(p){ return p.name.toLowerCase() === name.toLowerCase(); });
+  function startUnlockProfile(name){
+    var found = liveProfiles.find(function(p){ return p.name.toLowerCase() === name.toLowerCase(); });
     if(!found) return;
 
     pendingProfileToUnlock = found;
@@ -1428,23 +1396,13 @@
     var teamName = document.getElementById('join-team-name').value.trim();
     var pin = document.getElementById('join-pin').value.trim();
 
-    if(!name || !teamName){
-      showMsg('join-msg', 'Inserisci sia il tuo nome sia il nome della squadra.', 'error');
-      return;
-    }
-    if(!pin || pin.length > 6){
-      showMsg('join-msg', 'Il codice di accesso deve avere da 1 a 6 caratteri.', 'error');
-      return;
-    }
+    if(!name || !teamName){ showMsg('join-msg', 'Inserisci sia il tuo nome sia il nome della squadra.', 'error'); return; }
+    if(!pin || pin.length > 6){ showMsg('join-msg', 'Il codice di accesso deve avere da 1 a 6 caratteri.', 'error'); return; }
 
-    var profiles = await loadProfiles();
-    var conflict = profiles.find(function(p){
+    var conflict = liveProfiles.find(function(p){
       return p.name.toLowerCase() === name.toLowerCase() || p.teamName.toLowerCase() === teamName.toLowerCase();
     });
-    if(conflict){
-      showMsg('join-msg', 'Nome partecipante o nome squadra già esistente!', 'error');
-      return;
-    }
+    if(conflict){ showMsg('join-msg', 'Nome partecipante o nome squadra già esistente!', 'error'); return; }
 
     myProfile = { name: name, teamName: teamName, logoUrl: tempLogoBase64 || '', pin: pin };
     await saveProfile(myProfile);
@@ -1462,7 +1420,7 @@
   }
 
   function logoutParticipantProfile(){
-    if(!confirm('Vuoi disconnetterti dal profilo? Per rientrare sarà necessario inserire il tuo codice di accesso.')) return;
+    if(!confirm('Vuoi disconnetterti dal profilo?')) return;
     localStorage.removeItem('fanta_profile_' + currentRoomId);
     myProfile = null;
     openParticipantFlow();
@@ -1499,10 +1457,7 @@
     if(route === 'lobby'){
       renderLobbyRooms();
     }
-    if(route === 'summary'){
-      renderSummaryScreen();
-    }
-    refreshNow();
+    renderCurrentScreen();
   }
 
   function showMsg(id, text, cls){
@@ -1515,56 +1470,49 @@
     }
   }
 
-  // ---------- OFFERTE ----------
+  // ---------- OFFERTE ULTRA VELOCI SENZA LATENZA ----------
   async function quickBid(amount){
-    var s = await loadState();
-    if(!s || s.status !== 'open'){
+    if(!liveState || liveState.status !== 'open'){
       showMsg('bid-msg', 'L\'asta non è aperta al momento.', 'error');
       return;
     }
-    var newPrice = (s.price === 0 && !s.bidder) ? amount : (s.price + amount);
-    var newState = Object.assign({}, s, {
+    var newPrice = (liveState.price === 0 && !liveState.bidder) ? amount : (liveState.price + amount);
+    var newState = Object.assign({}, liveState, {
       price: newPrice,
       bidder: myProfile.name,
       bidderTeam: myProfile.teamName,
       bidderLogo: myProfile.logoUrl || '',
       updatedAt: Date.now()
     });
-    var ok = await saveState(newState);
-    if(ok){
-      renderBidScreen(newState);
-      showMsg('bid-msg', 'Offerta di ' + newPrice + ' crediti inviata!', 'ok');
-    }
+    await saveState(newState);
+    showMsg('bid-msg', 'Offerta inviata: ' + newPrice + ' cfu!', 'ok');
   }
 
   async function customBid(){
     var input = document.getElementById('custom-bid-input');
     var val = parseInt(input.value, 10);
-    var s = await loadState();
-    if(!s || s.status !== 'open'){
+    if(!liveState || liveState.status !== 'open'){
       showMsg('bid-msg', 'L\'asta non è aperta al momento.', 'error');
       return;
     }
-    if(isNaN(val) || val <= s.price || val < 1){
-      showMsg('bid-msg', 'La tua offerta deve superare ' + s.price + ' crediti.', 'error');
+    if(isNaN(val) || val <= liveState.price || val < 1){
+      showMsg('bid-msg', 'L\'offerta deve superare ' + liveState.price + ' crediti.', 'error');
       return;
     }
-    var newState = Object.assign({}, s, {
+    var newState = Object.assign({}, liveState, {
       price: val,
       bidder: myProfile.name,
       bidderTeam: myProfile.teamName,
       bidderLogo: myProfile.logoUrl || '',
       updatedAt: Date.now()
     });
-    var ok = await saveState(newState);
-    if(ok){
-      input.value = '';
-      renderBidScreen(newState);
-      showMsg('bid-msg', 'Offerta di ' + val + ' crediti inviata!', 'ok');
-    }
+    input.value = '';
+    await saveState(newState);
+    showMsg('bid-msg', 'Offerta inviata: ' + val + ' cfu!', 'ok');
   }
 
   function renderBidScreen(s){
+    if(!s) return;
     document.getElementById('bid-player').textContent = s.player || '—';
     
     var metaWrap = document.getElementById('bid-meta-badges');
@@ -1666,8 +1614,7 @@
     }
   }
 
-  // ---------- BANDITORE ----------
-  // Selezione sicura tramite indice dell'array per evitare bug con apostrofi
+  // ---------- BANDITORE CONTROLLI ----------
   function selectListonePlayer(idx){
     var p = cachedListone[idx];
     if(!p) return;
@@ -1691,18 +1638,14 @@
     var base = parseInt(document.getElementById('admin-base').value, 10);
     if(isNaN(base) || base < 0) base = 0;
 
-    if(!player){
-      showMsg('admin-msg', 'Inserisci o seleziona il nome del calciatore.', 'error');
-      return;
-    }
+    if(!player){ showMsg('admin-msg', 'Inserisci o seleziona il nome del calciatore.', 'error'); return; }
 
-    var log = await loadLog();
-    var alreadyAssigned = log.find(function(item){
+    var alreadyAssigned = liveLog.find(function(item){
       return item.bidder && item.player && item.player.toLowerCase() === player.toLowerCase();
     });
 
     if(alreadyAssigned){
-      showMsg('admin-msg', player + ' è già assegnato a ' + alreadyAssigned.bidderTeam + ' (' + alreadyAssigned.bidder + ')!', 'error');
+      showMsg('admin-msg', player + ' è già assegnato a ' + alreadyAssigned.bidderTeam + '!', 'error');
       return;
     }
 
@@ -1714,10 +1657,7 @@
     if(!role){
       var found = cachedListone.find(function(p){ return p.name.toLowerCase() === player.toLowerCase(); });
       if(found){
-        role = found.role;
-        team = found.team;
-        qt = found.price;
-        titPct = found.titPct;
+        role = found.role; team = found.team; qt = found.price; titPct = found.titPct;
       }
     }
 
@@ -1725,10 +1665,8 @@
   }
 
   async function launchAuction(player, base, role, team, qt, titPct){
-    var s = await loadState();
-    if(s && s.status === 'open'){
-      var confirmOverwrite = confirm('C\'è già un\'asta aperta per "' + s.player + '". Vuoi sostituirla con "' + player + '"?');
-      if(!confirmOverwrite) return;
+    if(liveState && liveState.status === 'open'){
+      if(!confirm('C\'è già un\'asta aperta per "' + liveState.player + '". Vuoi sostituirla con "' + player + '"?')) return;
     }
 
     var newState = {
@@ -1746,104 +1684,64 @@
       updatedAt: Date.now()
     };
 
-    var ok = await saveState(newState);
-    if(ok){
-      document.getElementById('admin-player').value = '';
-      document.getElementById('admin-base').value = '0';
-      document.getElementById('admin-selected-meta').innerHTML = '';
-      pendingPlayer = { role: '', team: '', qt: 1, titPct: null };
-      showMsg('admin-msg', 'Asta aperta per ' + player + ' (base ' + base + ' cfu)!', 'ok');
-      renderAdmin(newState);
-      updateAdminParticipantSelect();
-    }
+    await saveState(newState);
+    document.getElementById('admin-player').value = '';
+    document.getElementById('admin-base').value = '0';
+    document.getElementById('admin-selected-meta').innerHTML = '';
+    pendingPlayer = { role: '', team: '', qt: 1, titPct: null };
+    showMsg('admin-msg', 'Asta aperta per ' + player + '!', 'ok');
   }
 
   async function assignDirectlyForOne(){
-    var s = await loadState();
-    if(!s || s.status !== 'open'){
-      showMsg('admin-msg', 'Nessuna asta aperta da assegnare.', 'error');
-      return;
+    if(!liveState || liveState.status !== 'open'){
+      showMsg('admin-msg', 'Nessuna asta aperta da assegnare.', 'error'); return;
     }
 
     var select = document.getElementById('admin-quick-participant');
     var target = select.value.trim();
-    if(!target){
-      showMsg('admin-msg', 'Seleziona una squadra a cui assegnare il giocatore.', 'error');
-      return;
-    }
+    if(!target){ showMsg('admin-msg', 'Seleziona una squadra.', 'error'); return; }
 
     var parts = target.split('|');
-    var pName = parts[0];
-    var pTeam = parts[1] || pName;
-    var pLogo = parts[2] || '';
+    var pName = parts[0], pTeam = parts[1] || pName, pLogo = parts[2] || '';
 
-    var newState = Object.assign({}, s, { price: 1, bidder: pName, bidderTeam: pTeam, bidderLogo: pLogo, status: 'closed', updatedAt: Date.now() });
-    var ok = await saveState(newState);
-    if(ok){
-      var log = await loadLog();
-      log.unshift({
-        player: s.player,
-        role: s.role || '',
-        team: s.team || '',
-        qt: s.qt || 1,
-        titPct: s.titPct || null,
-        price: 1,
-        bidder: pName,
-        bidderTeam: pTeam,
-        bidderLogo: pLogo,
-        ts: Date.now()
-      });
-      await saveLog(log);
-      renderAdmin(newState);
-      refreshNow();
-      showMsg('admin-msg', s.player + ' assegnato a ' + pTeam + ' (' + pName + ') per 1 credito!', 'ok');
-    }
+    var newState = Object.assign({}, liveState, { price: 1, bidder: pName, bidderTeam: pTeam, bidderLogo: pLogo, status: 'closed', updatedAt: Date.now() });
+    await saveState(newState);
+
+    var updatedLog = liveLog.slice();
+    updatedLog.unshift({
+      player: liveState.player, role: liveState.role || '', team: liveState.team || '',
+      qt: liveState.qt || 1, titPct: liveState.titPct || null, price: 1,
+      bidder: pName, bidderTeam: pTeam, bidderLogo: pLogo, ts: Date.now()
+    });
+    await saveLog(updatedLog);
+    showMsg('admin-msg', liveState.player + ' assegnato a ' + pTeam + ' per 1 credito!', 'ok');
   }
 
   async function closeAuction(){
-    var s = await loadState();
-    if(!s || s.status !== 'open'){
-      showMsg('admin-msg', 'Non c\'è nessuna asta aperta da chiudere.', 'error');
-      return;
+    if(!liveState || liveState.status !== 'open'){
+      showMsg('admin-msg', 'Nessuna asta aperta da chiudere.', 'error'); return;
     }
-    var newState = Object.assign({}, s, { status:'closed', updatedAt: Date.now() });
-    var ok = await saveState(newState);
-    if(ok){
-      var log = await loadLog();
-      log.unshift({
-        player: s.player,
-        role: s.role || '',
-        team: s.team || '',
-        qt: s.qt || 1,
-        titPct: s.titPct || null,
-        price: s.bidder ? s.price : null,
-        bidder: s.bidder || null,
-        bidderTeam: s.bidderTeam || null,
-        bidderLogo: s.bidderLogo || null,
-        ts: Date.now()
-      });
-      await saveLog(log);
-      renderAdmin(newState);
-      refreshNow();
-      showMsg('admin-msg', s.bidder ? (s.player + ' assegnato a ' + s.bidderTeam + '.') : (s.player + ' chiuso senza offerte.'), 'ok');
-    }
+    var newState = Object.assign({}, liveState, { status:'closed', updatedAt: Date.now() });
+    await saveState(newState);
+
+    var updatedLog = liveLog.slice();
+    updatedLog.unshift({
+      player: liveState.player, role: liveState.role || '', team: liveState.team || '',
+      qt: liveState.qt || 1, titPct: liveState.titPct || null, price: liveState.bidder ? liveState.price : null,
+      bidder: liveState.bidder || null, bidderTeam: liveState.bidderTeam || null, bidderLogo: liveState.bidderLogo || null,
+      ts: Date.now()
+    });
+    await saveLog(updatedLog);
+    showMsg('admin-msg', liveState.bidder ? (liveState.player + ' assegnato.') : (liveState.player + ' chiuso senza offerte.'), 'ok');
   }
 
   async function concludeWholeAuction(){
-    if(!confirm('Attenzione: sei sicuro di voler concludere definitivamente l\'asta? Da questo momento non sarà più possibile rilanciare e tutti gli utenti verranno reindirizzati al Resoconto Finale.')) return;
-    
+    if(!confirm('Concludere definitivamente l\'asta? Tutti gli utenti vedranno il resoconto finale.')) return;
     var rooms = await loadRoomsIndex();
     var cur = rooms.find(function(r){ return r.id === currentRoomId; });
     if(cur) cur.ended = true;
     await saveRoomsIndex(rooms);
-
-    var s = await loadState();
-    if(s){
-      s.status = 'ended';
-      await saveState(s);
-    }
-
-    if(currentRoomData) currentRoomData.ended = true;
+    await saveState({ status: 'ended', updatedAt: Date.now() });
     goHome('summary');
   }
 
@@ -1868,14 +1766,12 @@
     quickBox.style.display = s.status === 'open' ? 'block' : 'none';
   }
 
-  async function updateAdminParticipantSelect(){
+  function updateAdminParticipantSelect(){
     var select = document.getElementById('admin-quick-participant');
     if(!select) return;
-    
-    var profiles = await loadProfiles();
     var currentVal = select.value;
     select.innerHTML = '<option value="">Seleziona profilo squadra...</option>';
-    profiles.forEach(function(p){
+    liveProfiles.forEach(function(p){
       var opt = document.createElement('option');
       opt.value = p.name + '|' + p.teamName + '|' + (p.logoUrl || '');
       opt.textContent = p.teamName + ' (' + p.name + ')';
@@ -1884,12 +1780,12 @@
     });
   }
 
-  // ---------- GESTIONE MULTI-FILE LISTONE CON MEDIA TITOLARITÀ ----------
+  // ---------- GESTIONE MULTI-FILE LISTONE ----------
   async function handleFileUpload(e){
     var files = e.target.files;
     if(!files || files.length === 0) return;
 
-    var playersMap = {}; // key: "name_role" -> { name, role, team, price, titList: [] }
+    var playersMap = {};
 
     var readPromises = Array.from(files).map(function(file){
       return new Promise(function(resolve, reject){
@@ -1898,8 +1794,6 @@
           try {
             var data = new Uint8Array(evt.target.result);
             var workbook = XLSX.read(data, { type: 'array' });
-            
-            // Itera su tutti i fogli del file Excel (es. P, D, C, A)
             workbook.SheetNames.forEach(function(sheetName){
               var sheet = workbook.Sheets[sheetName];
               var rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
@@ -1907,8 +1801,7 @@
             });
             resolve();
           } catch(err){
-            console.error("Errore lettura file:", file.name, err);
-            resolve(); // Non bloccare gli altri file
+            resolve();
           }
         };
         reader.onerror = reject;
@@ -1922,8 +1815,7 @@
       var avgPct = null;
       if(item.titList && item.titList.length > 0){
         var sum = item.titList.reduce(function(a, b){ return a + b; }, 0);
-        var rawAvg = sum / item.titList.length; // media da 1 a 5
-        // Se espressa su base 5 stelle (es. 5 = 100%, 4 = 80%, 3 = 60%, 2 = 40%, 1 = 20%)
+        var rawAvg = sum / item.titList.length;
         if(rawAvg <= 5.0 && rawAvg > 0){
           avgPct = Math.round((rawAvg / 5) * 100);
         } else if(rawAvg <= 1.0 && rawAvg > 0){
@@ -1933,17 +1825,12 @@
         }
       }
       return {
-        name: item.name,
-        role: item.role,
-        team: item.team,
-        price: item.price,
-        titPct: avgPct
+        name: item.name, role: item.role, team: item.team, price: item.price, titPct: avgPct
       };
     });
 
     if(list.length === 0){
-      alert('Non sono stati trovati calciatori validi. Verifica che i file contengano le colonne Ruolo, Nome e Quotazione.');
-      return;
+      alert('Non sono stati trovati calciatori validi.'); return;
     }
 
     cachedListone = list;
@@ -1951,7 +1838,7 @@
     document.getElementById('admin-listone-box').style.display = 'block';
     renderListoneTable('admin');
     renderListoneTable('user');
-    alert('Listone aggiornato con successo: ' + list.length + ' calciatori caricati con media titolarità calcolata da ' + files.length + ' file!');
+    alert('Listone caricato con successo: ' + list.length + ' calciatori pronti!');
   }
 
   function extractPlayersFromSheetRows(rows, map, defaultRoleSheet){
@@ -1963,21 +1850,18 @@
       var row = (rows[i] || []).map(function(c){
         return String(c || '').toLowerCase().trim().replace(/[\._\s]/g, '');
       });
-
       rIdx = row.findIndex(function(c){ return c === 'r' || c === 'ruolo'; });
       nameIdx = row.findIndex(function(c){ return c === 'nome' || c === 'calciatore' || c === 'giocatore'; });
       teamIdx = row.findIndex(function(c){ return c === 'squadra' || c === 'team' || c === 'club'; });
       qtIdx = row.findIndex(function(c){
-        return c === 'qta' || c === 'qti' || c === 'qt' || c === 'qa' || c === 'qi' ||
-               c === 'quo' || c === 'quotazione' || c === 'valore';
+        return c === 'qta' || c === 'qti' || c === 'qt' || c === 'qa' || c === 'qi' || c === 'quo' || c === 'quotazione' || c === 'valore';
       });
       titIdx = row.findIndex(function(c){
         return c.includes('titolari') || c === 'titolarita' || c === 'titolarità' || c === 'tit';
       });
 
       if(nameIdx !== -1 && (rIdx !== -1 || ['P','D','C','A'].includes(defaultRoleSheet.toUpperCase()))){
-        headerIndex = i;
-        break;
+        headerIndex = i; break;
       }
     }
 
@@ -2000,29 +1884,18 @@
 
       var teamStr = teamIdx !== -1 ? String(r[teamIdx] || '').trim() : '';
 
-      // Lettura valore Titolarità (es. 5, 4, 3, 2, 1 oppure "80%")
       var titVal = null;
       if(titIdx !== -1 && r[titIdx] !== undefined && r[titIdx] !== null && String(r[titIdx]).trim() !== ''){
         var cleanTit = String(r[titIdx]).replace('%', '').replace(',', '.').trim();
         var parsedTit = parseFloat(cleanTit);
-        if(!isNaN(parsedTit)){
-          titVal = parsedTit;
-        }
+        if(!isNaN(parsedTit)) titVal = parsedTit;
       }
 
       var key = rawName.toLowerCase() + '_' + primaryRole;
       if(!map[key]){
-        map[key] = {
-          name: rawName,
-          role: primaryRole,
-          team: teamStr,
-          price: priceParsed,
-          titList: []
-        };
+        map[key] = { name: rawName, role: primaryRole, team: teamStr, price: priceParsed, titList: [] };
       }
-      if(titVal !== null){
-        map[key].titList.push(titVal);
-      }
+      if(titVal !== null) map[key].titList.push(titVal);
       if(teamStr && !map[key].team) map[key].team = teamStr;
     }
   }
@@ -2038,10 +1911,9 @@
     renderListoneTable(context);
   }
 
-  async function renderListoneTable(context){
-    var log = await loadLog();
+  function renderListoneTable(context){
     var soldMap = {};
-    log.forEach(function(item){
+    liveLog.forEach(function(item){
       if(item.player && item.bidder) soldMap[item.player.toLowerCase()] = item.bidderTeam || item.bidder;
     });
 
@@ -2067,7 +1939,6 @@
       var buyer = soldMap[p.name.toLowerCase()];
       var isSold = !!buyer;
 
-      // Badge Titolarità colorato
       var titHtml = '—';
       if(p.titPct !== null && p.titPct !== undefined){
         var titClass = p.titPct >= 75 ? 'tit-high' : (p.titPct >= 50 ? 'tit-med' : 'tit-low');
@@ -2096,17 +1967,13 @@
     tableBody.innerHTML = html;
   }
 
-  // ---------- ROSE E GRUPPI SQUADRE (CON PROFILI COMPLETI) ----------
+  // ---------- RENDERING ROSE ----------
   function groupPurchasesWithAllProfiles(profiles, log){
     var map = {};
     (profiles || []).forEach(function(p){
       map[p.teamName] = {
-        teamName: p.teamName,
-        ownerName: p.name,
-        logoUrl: p.logoUrl || '',
-        items: [],
-        totalSpent: 0,
-        totalListValue: 0
+        teamName: p.teamName, ownerName: p.name, logoUrl: p.logoUrl || '',
+        items: [], totalSpent: 0, totalListValue: 0
       };
     });
 
@@ -2115,17 +1982,11 @@
       var teamKey = item.bidderTeam || item.bidder;
       if(!map[teamKey]){
         map[teamKey] = {
-          teamName: teamKey,
-          ownerName: item.bidder,
-          logoUrl: item.bidderLogo || '',
-          items: [],
-          totalSpent: 0,
-          totalListValue: 0
+          teamName: teamKey, ownerName: item.bidder, logoUrl: item.bidderLogo || '',
+          items: [], totalSpent: 0, totalListValue: 0
         };
       }
-      if(!map[teamKey].logoUrl && item.bidderLogo){
-        map[teamKey].logoUrl = item.bidderLogo;
-      }
+      if(!map[teamKey].logoUrl && item.bidderLogo) map[teamKey].logoUrl = item.bidderLogo;
       map[teamKey].items.push(item);
       map[teamKey].totalSpent += item.price;
       map[teamKey].totalListValue += (item.qt || item.price);
@@ -2134,7 +1995,6 @@
     return map;
   }
 
-  // Costruttore HTML per una colonna squadra con slot fissi (P:3, D:8, C:8, A:6)
   function buildTeamSlotColumnHtml(t, isSingleColumn){
     var remainingCredits = currentInitialBudget - t.totalSpent;
     var byRole = { P: [], D: [], C: [], A: [] };
@@ -2146,7 +2006,6 @@
 
     var html = '<div class="team-slot-column' + (isSingleColumn ? ' single' : '') + '">';
     
-    // Intestazione con crediti RIMASTI
     if(isSingleColumn){
       html += '  <div class="team-slot-header">';
       html += '    <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">';
@@ -2162,7 +2021,6 @@
       html += '    </div>';
       html += '  </div>';
     } else {
-      // Header compatto centrato per il Tabellone
       html += '  <div class="team-slot-header">';
       html +=      getCrestHtml(t.logoUrl, t.teamName, 'md');
       html += '    <div class="team-slot-name">' + escapeHtml(t.teamName) + '</div>';
@@ -2174,7 +2032,6 @@
       html += '  </div>';
     }
 
-    // Sezioni slot fissi
     ['P', 'D', 'C', 'A'].forEach(function(rKey){
       var cfg = ROSTER_SLOTS_CONFIG[rKey];
       var assignedList = byRole[rKey] || [];
@@ -2204,7 +2061,6 @@
     return html;
   }
 
-  // Render Slot Squadra nella schermata Partecipante
   function renderParticipantRoster(log, profiles){
     var wrap = document.getElementById('my-team-slot-wrap');
     var creditsMeta = document.getElementById('my-team-credits-meta');
@@ -2212,20 +2068,15 @@
 
     var groups = groupPurchasesWithAllProfiles(profiles, log);
     var myData = groups[myProfile.teamName] || groups[myProfile.name] || {
-      teamName: myProfile.teamName,
-      ownerName: myProfile.name,
-      logoUrl: myProfile.logoUrl || '',
-      items: [],
-      totalSpent: 0
+      teamName: myProfile.teamName, ownerName: myProfile.name, logoUrl: myProfile.logoUrl || '',
+      items: [], totalSpent: 0
     };
 
     var remaining = currentInitialBudget - myData.totalSpent;
     creditsMeta.innerHTML = 'Rimangono: <b style="color:var(--gold); font-size:14px;">' + remaining + '</b> cfu (spesi: ' + myData.totalSpent + ')';
-
     wrap.innerHTML = buildTeamSlotColumnHtml(myData, true);
   }
 
-  // Render Colonne Slot sul Tabellone (TV / PC fluide)
   function renderTvFixedSlotsRosters(log, profiles){
     var grid = document.getElementById('tv-teams-slots-grid');
     if(!grid) return;
@@ -2239,10 +2090,7 @@
     }
 
     var html = '';
-    teams.forEach(function(t){
-      html += buildTeamSlotColumnHtml(t, false);
-    });
-
+    teams.forEach(function(t){ html += buildTeamSlotColumnHtml(t, false); });
     grid.innerHTML = html;
   }
 
@@ -2302,16 +2150,13 @@
     wrap.innerHTML = html;
   }
 
-  // ---------- SCHERMATA RESOCONTO FINALE ----------
-  async function renderSummaryScreen(){
-    var log = await loadLog();
-    var profiles = await loadProfiles();
-
+  // ---------- RESOCONTO FINALE ----------
+  function renderSummaryScreen(){
     if(currentRoomData){
       document.getElementById('summary-league-title').textContent = currentRoomData.name;
     }
 
-    var groups = groupPurchasesWithAllProfiles(profiles, log);
+    var groups = groupPurchasesWithAllProfiles(liveProfiles, liveLog);
     var teams = Object.values(groups);
 
     var totalSpent = 0;
@@ -2329,7 +2174,7 @@
       }
     });
 
-    log.forEach(function(p){
+    liveLog.forEach(function(p){
       if(p.price && p.price > topPlayer.price){
         topPlayer = { name: p.player, price: p.price, buyer: p.bidderTeam || p.bidder, logo: p.bidderLogo };
       }
@@ -2370,65 +2215,41 @@
     grid.innerHTML = html;
   }
 
-  // ---------- ESPORTAZIONE COMPATIBILE UNIVERSALE ----------
-  async function exportRostersToExcel(){
-    var log = await loadLog();
-    if(!log || log.length === 0){
-      alert('Nessun acquisto registrato da esportare.');
-      return;
-    }
-
+  // ---------- ESPORTAZIONE ROSE ----------
+  function exportRostersToExcel(){
+    if(!liveLog || liveLog.length === 0){ alert('Nessun acquisto da esportare.'); return; }
     var exportRows = [];
-    log.forEach(function(item){
+    liveLog.forEach(function(item){
       if(!item.bidder || item.price === null) return;
       exportRows.push({
-        'Squadra': item.bidderTeam || item.bidder,
-        'Allenatore': item.bidder,
-        'Ruolo': item.role || '',
-        'Calciatore': item.player,
-        'Club Serie A': item.team || '',
+        'Squadra': item.bidderTeam || item.bidder, 'Allenatore': item.bidder,
+        'Ruolo': item.role || '', 'Calciatore': item.player, 'Club Serie A': item.team || '',
         'Prezzo': item.price
       });
     });
-
-    if(exportRows.length === 0){
-      alert('Nessun calciatore valido da esportare.');
-      return;
-    }
 
     try {
       var ws = XLSX.utils.json_to_sheet(exportRows);
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Rose");
-
       var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       var blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      
       var url = URL.createObjectURL(blob);
       var a = document.createElement("a");
       a.href = url;
       a.download = 'Rose_' + (currentRoomData ? currentRoomData.name.replace(/[^a-zA-Z0-9_-]/g, '_') : 'FantaAsta') + '.xlsx';
       document.body.appendChild(a);
       a.click();
-      setTimeout(function(){
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      }, 100);
+      setTimeout(function(){ document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
     } catch(err) {
-      console.error("Errore esportazione:", err);
       exportRostersToCsv();
     }
   }
 
-  async function exportRostersToCsv(){
-    var log = await loadLog();
-    if(!log || log.length === 0){
-      alert('Nessun acquisto registrato da esportare.');
-      return;
-    }
-
+  function exportRostersToCsv(){
+    if(!liveLog || liveLog.length === 0){ alert('Nessun acquisto da esportare.'); return; }
     var csvContent = "Squadra,Calciatore,Prezzo,Ruolo\n";
-    log.forEach(function(item){
+    liveLog.forEach(function(item){
       if(!item.bidder || item.price === null) return;
       var team = (item.bidderTeam || item.bidder).replace(/"/g, '""');
       var player = item.player.replace(/"/g, '""');
@@ -2451,61 +2272,8 @@
       .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
 
-  // ---------- SINCRONIZZAZIONE REALTIME ----------
-  async function refreshNow(){
-    if(!currentRoomId){
-      if(currentRoute === 'lobby') renderLobbyRooms();
-      return;
-    }
-
-    var s = await loadState();
-    var log = await loadLog();
-    var profiles = await loadProfiles();
-    currentInitialBudget = await loadBudget();
-    if(!s) return;
-
-    if(s.status === 'ended' && currentRoute !== 'summary' && currentRoute !== 'home' && currentRoute !== 'super-admin'){
-      goHome('summary');
-      return;
-    }
-
-    if(currentRoute === 'home'){
-      var claim = await loadAdminClaim();
-      var descEl = document.getElementById('role-admin-desc');
-      if(descEl){
-        if(!claim){
-          descEl.textContent = "Disponibile: clicca per assumere il ruolo.";
-        } else if(claim === myDeviceToken){
-          descEl.textContent = "Sei il Banditore attivo (clicca per entrare).";
-        } else {
-          descEl.textContent = "🔒 Ruolo occupato da un altro utente.";
-        }
-      }
-    }
-
-    if(currentRoute === 'tabellone'){
-      renderTabellone(s);
-      renderTvFixedSlotsRosters(log, profiles);
-    }
-    if(currentRoute === 'bid'){
-      renderBidScreen(s);
-      renderParticipantRoster(log, profiles);
-    }
-    if(currentRoute === 'admin'){
-      renderAdmin(s);
-      renderAdminRosters(log, profiles);
-      renderLog(log);
-    }
-  }
-
-  function startPolling(){
-    if(pollTimer) clearInterval(pollTimer);
-    pollTimer = setInterval(refreshNow, 800);
-  }
-
   // ---------- BOOT ----------
   (async function init(){
-    startPolling();
     var savedRoomId = localStorage.getItem(ACTIVE_ROOM_KEY);
     if(savedRoomId){
       var rooms = await loadRoomsIndex();
