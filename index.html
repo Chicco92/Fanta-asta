@@ -225,6 +225,20 @@
   .tv-footer{ margin-top: 22px; color: var(--chalk-dim); font-size: 13px; text-align:center; }
   .tv-footer b{ color: var(--gold); }
 
+  /* BADGE COUNTDOWN */
+  .countdown-badge{
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--brick); color: #fff; border-radius: 6px;
+    font-weight: 900; font-family: var(--font-display);
+    animation: countdownPulse .5s infinite alternate;
+  }
+  .countdown-badge.sm{ padding: 2px 8px; font-size: 13px; }
+  .countdown-badge.lg{ padding: 4px 14px; font-size: 20px; margin-left: 10px; }
+  @keyframes countdownPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+  }
+
   /* PARTECIPANTE */
   .bid-hero{ text-align:center; margin-bottom: 26px; }
   .bid-hero .label{ font-size: 12.5px; color: var(--chalk-dim); margin-bottom: 6px; }
@@ -401,7 +415,7 @@
     background: var(--pitch-mid); border:1px solid var(--pitch-line); border-radius: var(--radius);
     padding: 16px 18px; margin-bottom: 16px; font-size: 14px;
   }
-  .admin-current .row{ display:flex; justify-content:space-between; padding: 5px 0; }
+  .admin-current .row{ display:flex; justify-content:space-between; align-items:center; padding: 5px 0; }
   .admin-current .row span:first-child{ color: var(--chalk-dim); }
   .admin-current .row span:last-child{ font-weight:700; }
   .divider{ height:1px; background: var(--pitch-line); margin: 26px 0 18px; }
@@ -829,6 +843,15 @@
           <div class="row"><span>Prezzo attuale</span><span id="ac-price">—</span></div>
           <div class="row"><span>Ultima offerta</span><span id="ac-bidder">—</span></div>
           <div class="row"><span>Stato</span><span id="ac-status">—</span></div>
+          
+          <!-- RIGA COUNTDOWN TIMER BANDITORE -->
+          <div class="row" style="margin-top: 6px; border-top: 1px dashed var(--pitch-line); padding-top: 10px;">
+            <span>Countdown 3s</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span id="admin-timer-display" style="font-weight:900; color:var(--gold); font-size:15px;">—</span>
+              <button class="btn-secondary" style="width:auto; padding:5px 12px; font-size:12px;" onclick="triggerAuctionTimer()">⏱️ Timer (3s)</button>
+            </div>
+          </div>
         </div>
 
         <!-- ASSEGNAZIONE DIRETTA A 1 CREDITO -->
@@ -974,6 +997,7 @@
   var pendingProfileToUnlock = null;
   var currentInitialBudget = 500;
   var selectedAdminTeamView = '';
+  var countdownInterval = null;
 
   var liveState = null;
   var liveLog = [];
@@ -1020,6 +1044,66 @@
   }
   async function saveRoomsIndex(rooms){
     return await store.set(ROOMS_INDEX_KEY, rooms);
+  }
+
+  // ---------- GESTIONE COUNTDOWN 3 SECONDI ----------
+  function triggerAuctionTimer(){
+    if(!liveState || liveState.status !== 'open') return;
+    
+    // Chiama il trigger su Firebase impostando il timestamp di scadenza tra 3.5 secondi
+    var expireAt = Date.now() + 3500;
+    db.ref(getRoomPath('state/timerExpireAt')).set(expireAt);
+  }
+
+  function startLocalCountdown(expireAt){
+    if(countdownInterval) clearInterval(countdownInterval);
+
+    function updateTick(){
+      var now = Date.now();
+      var remainingMs = expireAt - now;
+      var remainingSec = Math.ceil(remainingMs / 1000);
+
+      if(remainingSec <= 0){
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+        updateTimerElements(0, false);
+      } else {
+        updateTimerElements(remainingSec, true);
+      }
+    }
+
+    updateTick();
+    countdownInterval = setInterval(updateTick, 250);
+  }
+
+  function updateTimerElements(sec, active){
+    var adminDisp = document.getElementById('admin-timer-display');
+    if(adminDisp){
+      adminDisp.textContent = active ? (sec + 's') : '—';
+      adminDisp.style.color = active ? 'var(--brick)' : 'var(--gold)';
+    }
+
+    // Badge sul Tabellone
+    var boardBadge = document.getElementById('board-countdown-badge');
+    if(boardBadge){
+      if(active){
+        boardBadge.style.display = 'inline-flex';
+        boardBadge.textContent = '⏱️ ' + sec + 's';
+      } else {
+        boardBadge.style.display = 'none';
+      }
+    }
+
+    // Badge per il Partecipante
+    var bidBadge = document.getElementById('bid-countdown-badge');
+    if(bidBadge){
+      if(active){
+        bidBadge.style.display = 'inline-flex';
+        bidBadge.textContent = '⏱️ ' + sec + 's';
+      } else {
+        bidBadge.style.display = 'none';
+      }
+    }
   }
 
   // ---------- FUNZIONI DI MODIFICA / ELIMINAZIONE ACQUISTO PER SQUADRA ----------
@@ -1074,6 +1158,14 @@
     var stateRef = db.ref(getRoomPath('state'));
     stateRef.on('value', function(snap){
       liveState = snap.val() || { status: 'idle', price: 0, player: '', basePrice: 0 };
+      
+      // Controllo se è scattato un timer
+      if(liveState.timerExpireAt && liveState.timerExpireAt > Date.now()){
+        startLocalCountdown(liveState.timerExpireAt);
+      } else {
+        updateTimerElements(0, false);
+      }
+
       if(liveState.status === 'ended' && currentRoute !== 'summary' && currentRoute !== 'home' && currentRoute !== 'super-admin'){
         goHome('summary');
         return;
@@ -1593,6 +1685,9 @@
       if(s.team) metaHtml += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
       if(s.qt !== undefined) metaHtml += '<span class="player-qt-pill">Qt. ' + s.qt + '</span>';
       if(s.titPct !== undefined && s.titPct !== null) metaHtml += '<span class="player-tit-pill">' + s.titPct + '% Tit</span>';
+      
+      // Badge countdown per partecipante
+      metaHtml += '<span id="bid-countdown-badge" class="countdown-badge sm" style="display:none;"></span>';
       metaWrap.innerHTML = metaHtml;
     } else {
       metaWrap.innerHTML = '';
@@ -1659,6 +1754,9 @@
     if(s.team) html += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
     if(s.qt !== undefined) html += '<span class="player-qt-pill">Quotazione: ' + s.qt + ' cfu</span>';
     if(s.titPct !== undefined && s.titPct !== null) html += '<span class="player-tit-pill">Titolarità: ' + s.titPct + '%</span>';
+    
+    // Badge countdown per Tabellone
+    html += '<span id="board-countdown-badge" class="countdown-badge lg" style="display:none;"></span>';
     html += '  </div>';
     html += '</div>';
 
@@ -1751,6 +1849,7 @@
       bidderTeam: '',
       bidderLogo: '',
       status: 'open',
+      timerExpireAt: null,
       updatedAt: Date.now()
     };
 
@@ -1774,7 +1873,7 @@
     var parts = target.split('|');
     var pName = parts[0], pTeam = parts[1] || pName, pLogo = parts[2] || '';
 
-    var newState = Object.assign({}, liveState, { price: 1, bidder: pName, bidderTeam: pTeam, bidderLogo: pLogo, status: 'closed', updatedAt: Date.now() });
+    var newState = Object.assign({}, liveState, { price: 1, bidder: pName, bidderTeam: pTeam, bidderLogo: pLogo, status: 'closed', timerExpireAt: null, updatedAt: Date.now() });
     await saveState(newState);
 
     var updatedLog = liveLog.slice();
@@ -1793,7 +1892,6 @@
       showMsg('admin-msg', 'Nessuna asta aperta da chiudere.', 'error'); return;
     }
 
-    // Prendi prezzo e offerente inseriti nei campi manuali
     var priceInput = document.getElementById('admin-close-final-price');
     var bidderSelect = document.getElementById('admin-close-final-bidder');
 
@@ -1824,6 +1922,7 @@
       bidder: finalBidderName || '',
       bidderTeam: finalBidderTeam || '',
       bidderLogo: finalBidderLogo || '',
+      timerExpireAt: null,
       updatedAt: Date.now()
     });
     await saveState(newState);
@@ -1875,7 +1974,6 @@
     closeBox.style.display = s.status === 'open' ? 'flex' : 'none';
     quickBox.style.display = s.status === 'open' ? 'block' : 'none';
 
-    // Se l'asta è aperta, precompila il campo prezzo finale con il prezzo attuale se non è già stato digitato qualcosa
     if(s.status === 'open'){
       var priceInput = document.getElementById('admin-close-final-price');
       if(document.activeElement !== priceInput){
@@ -1899,7 +1997,6 @@
     });
   }
 
-  // Popola il menu a tendina per scegliere chi si aggiudica il giocatore al momento della chiusura
   function updateAdminCloseBidderSelect(){
     var select = document.getElementById('admin-close-final-bidder');
     if(!select) return;
@@ -1912,7 +2009,6 @@
       opt.value = p.name + '|' + p.teamName + '|' + (p.logoUrl || '');
       opt.textContent = p.teamName + ' (' + p.name + ')';
       
-      // Seleziona di default l'ultimo offerente registrato da Firebase, altrimenti mantieni la scelta del banditore
       if(liveState && liveState.bidder && liveState.bidder.toLowerCase() === p.name.toLowerCase()){
         opt.selected = true;
       } else if(opt.value === currentVal){
