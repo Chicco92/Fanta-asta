@@ -58,7 +58,7 @@
     display: inline-block; vertical-align: middle; flex-shrink: 0;
   }
   .team-crest.lg{ width: 44px; height: 44px; border: 2px solid var(--gold); }
-  .team-crest.md{ width: 34px; height: 34px; }
+  .team-crest.md{ width: 32px; height: 32px; }
   .team-crest-fallback{
     display: inline-flex; align-items: center; justify-content: center;
     border-radius: 50%; background: var(--pitch-mid-2); border: 1px solid var(--gold-dim);
@@ -66,7 +66,7 @@
     text-transform: uppercase;
   }
   .team-crest-fallback.lg{ width: 44px; height: 44px; font-size: 16px; border-width: 2px; }
-  .team-crest-fallback.md{ width: 34px; height: 34px; font-size: 13px; }
+  .team-crest-fallback.md{ width: 32px; height: 32px; font-size: 12px; }
   .team-crest-fallback.sm{ width: 28px; height: 28px; font-size: 11px; }
 
   /* ---------- LOBBY PRINCIPALE ---------- */
@@ -182,8 +182,11 @@
   .msg.error{ color: var(--brick); }
   .msg.ok{ color: var(--gold); }
 
-  /* ---------- TABELLONE ---------- */
-  #screen-tabellone{ flex-direction:column; align-items:center; justify-content:flex-start; padding: 75px 20px 40px; width: 100%; }
+  /* ---------- TABELLONE (LAYOUT AMPIO FLUIDO) ---------- */
+  #screen-tabellone{
+    flex-direction:column; align-items:center; justify-content:flex-start;
+    padding: 75px 12px 40px; width: 100%; max-width: 100vw;
+  }
   .board{
     width:100%; max-width: 1200px; background: var(--pitch-mid);
     border: 2px solid var(--gold-dim); border-radius: 14px; overflow:hidden;
@@ -262,46 +265,105 @@
   .profile-pick-btn .p-name{ font-weight:700; font-size:14px; }
   .profile-pick-btn .p-team{ font-size:12px; color: var(--gold); }
 
-  /* ---------- TABELLONE SLOT ROSE (TV / PC / PARTECIPANTE) ---------- */
+  /* ---------- TABELLONE SLOT ROSE FLUIDO AL 100% ---------- */
   .section-divider{ height: 1px; background: var(--pitch-line); margin: 24px 0 16px; }
   .section-header{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 12px; }
   .section-title{ font-family: var(--font-display); font-size: 16px; color: var(--chalk); }
   .section-meta{ font-size: 12.5px; color: var(--gold); font-weight: 600; }
 
+  /* Griglia fluida che si adatta allo schermo intero */
   .teams-slots-grid{
-    display: flex; gap: 14px; overflow-x: auto; width: 100%; max-width: 100%;
-    padding-bottom: 14px; margin-top: 28px;
+    display: flex; gap: 6px; width: 100%; max-width: 100%;
+    margin-top: 24px; padding-bottom: 20px;
+    align-items: flex-start;
   }
-  .team-slot-column{
-    min-width: 285px; width: 285px; flex-shrink: 0; background: var(--pitch-mid);
-    border: 1px solid var(--pitch-line); border-radius: var(--radius); display: flex;
-    flex-direction: column; overflow: hidden;
+  .teams-slots-grid .team-slot-column{
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    background: var(--pitch-mid);
+    border: 1px solid var(--pitch-line);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   .team-slot-column.single{
-    width: 100%; min-width: 100%;
+    width: 100%;
+    min-width: 100%;
+    background: var(--pitch-mid);
+    border: 1px solid var(--pitch-line);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
-  .team-slot-header{
-    padding: 10px 12px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.22);
-    display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; min-height: 54px;
-  }
-  .team-slot-header-info{ overflow: hidden; }
-  .team-slot-name{ font-family: var(--font-display); font-size: 13.5px; color: var(--gold);
-    line-height: 1.2; word-break: break-word; white-space: normal; }
-  .team-slot-owner{ font-size: 11px; color: var(--chalk-dim); }
-  .team-slot-stats{ font-size: 12px; font-weight: 700; color: var(--chalk); text-align: right; white-space: nowrap; line-height: 1.3; }
 
-  .role-section-title{
+  /* Intestazione colonna fluida per il Tabellone */
+  .teams-slots-grid .team-slot-header{
+    padding: 8px 6px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.25);
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+    min-height: 74px; justify-content: center;
+  }
+  .teams-slots-grid .team-slot-name{
+    font-family: var(--font-display); font-size: 12px; color: var(--gold);
+    line-height: 1.15; word-break: break-word; white-space: normal;
+  }
+  .teams-slots-grid .team-slot-owner{
+    font-size: 10.5px; color: var(--chalk-dim);
+  }
+  .teams-slots-grid .team-slot-stats{
+    font-size: 10.5px; font-weight: 700; color: var(--chalk); line-height: 1.2;
+  }
+  .teams-slots-grid .role-section-title{
+    background: rgba(255,255,255,0.03); padding: 3px 5px; font-size: 9.5px; font-weight: 800;
+    letter-spacing: .4px; color: var(--chalk-dim); border-bottom: 1px solid rgba(233,230,219,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .teams-slots-grid .slot-row{
+    padding: 3px 5px; font-size: 11px; border-bottom: 1px solid rgba(233,230,219,0.05);
+    display: flex; justify-content: space-between; align-items: center; min-height: 25px;
+  }
+  .teams-slots-grid .slot-player-name{
+    font-weight: 600; color: var(--chalk); white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; max-width: 76%;
+  }
+  .teams-slots-grid .slot-price{
+    color: var(--gold); font-weight: 700; font-size: 10.5px; flex-shrink: 0;
+  }
+
+  /* Intestazione per la colonna singola della schermata partecipante */
+  .team-slot-column.single .team-slot-header{
+    padding: 12px 14px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.22);
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  }
+  .team-slot-column.single .team-slot-name{
+    font-family: var(--font-display); font-size: 14px; color: var(--gold); line-height: 1.2;
+  }
+  .team-slot-column.single .team-slot-owner{
+    font-size: 11px; color: var(--chalk-dim);
+  }
+  .team-slot-column.single .team-slot-stats{
+    font-size: 12px; font-weight: 700; color: var(--chalk); text-align: right; line-height: 1.3;
+  }
+  .team-slot-column.single .role-section-title{
     background: rgba(255,255,255,0.03); padding: 5px 10px; font-size: 11px; font-weight: 800;
     letter-spacing: .5px; color: var(--chalk-dim); border-bottom: 1px solid rgba(233,230,219,0.06);
     display: flex; justify-content: space-between; align-items: center;
   }
-  .slot-row{
+  .team-slot-column.single .slot-row{
     padding: 6px 10px; font-size: 12px; border-bottom: 1px solid rgba(233,230,219,0.05);
     display: flex; justify-content: space-between; align-items: center; min-height: 31px;
   }
-  .slot-row.empty{ color: rgba(231,227,212,0.25); font-style: italic; }
-  .slot-player-name{ font-weight: 600; color: var(--chalk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
-  .slot-price{ color: var(--gold); font-weight: 700; font-size: 11.5px; }
+  .team-slot-column.single .slot-player-name{
+    font-weight: 600; color: var(--chalk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
+  }
+  .team-slot-column.single .slot-price{
+    color: var(--gold); font-weight: 700; font-size: 11.5px;
+  }
+  .slot-row.empty{
+    color: rgba(231,227,212,0.25); font-style: italic;
+  }
 
   /* ---------- TABELLE NORMALI ---------- */
   .team-table{ width:100%; border-collapse: collapse; font-size: 13.5px; background: var(--pitch-mid); border-radius: var(--radius); overflow:hidden; border: 1px solid var(--pitch-line); }
@@ -347,7 +409,7 @@
   .btn-select-player:hover{ background:#eec25c; }
   .badge-assigned{ font-size: 11px; color: var(--brick); font-style: italic; font-weight: 600; }
 
-  /* ---------- ADMIN & ASSEGNAZIONE RAPIDA ---------- */
+  /* ---------- ADMIN & SETUP BUDGET ---------- */
   .budget-setup-box{
     background: var(--pitch-mid-2); border: 1px solid var(--gold-dim); border-radius: var(--radius);
     padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -584,7 +646,7 @@
     </div>
   </div>
 
-  <!-- ==================== TABELLONE (TV) ==================== -->
+  <!-- ==================== TABELLONE (TV / PC CON SLOT FLUIDI) ==================== -->
   <div id="screen-tabellone" class="screen">
     <div class="topbar">
       <span>Tabellone Live · <b id="tabellone-room-name" style="color:var(--gold)"></b></span>
@@ -1995,19 +2057,32 @@
     var html = '<div class="team-slot-column' + (isSingleColumn ? ' single' : '') + '">';
     
     // Intestazione con crediti RIMASTI
-    html += '  <div class="team-slot-header">';
-    html += '    <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">';
-    html +=        getCrestHtml(t.logoUrl, t.teamName, 'md');
-    html += '      <div class="team-slot-header-info">';
-    html += '        <div class="team-slot-name">' + escapeHtml(t.teamName) + '</div>';
-    html += '        <div class="team-slot-owner">' + escapeHtml(t.ownerName) + '</div>';
-    html += '      </div>';
-    html += '    </div>';
-    html += '    <div class="team-slot-stats">';
-    html += '      <div>' + t.items.length + '/25 giog.</div>';
-    html += '      <div style="color:var(--gold);">Rimangono: <b>' + remainingCredits + '</b> cfu</div>';
-    html += '    </div>';
-    html += '  </div>';
+    if(isSingleColumn){
+      html += '  <div class="team-slot-header">';
+      html += '    <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">';
+      html +=        getCrestHtml(t.logoUrl, t.teamName, 'md');
+      html += '      <div class="team-slot-header-info">';
+      html += '        <div class="team-slot-name">' + escapeHtml(t.teamName) + '</div>';
+      html += '        <div class="team-slot-owner">' + escapeHtml(t.ownerName) + '</div>';
+      html += '      </div>';
+      html += '    </div>';
+      html += '    <div class="team-slot-stats">';
+      html += '      <div>' + t.items.length + '/25 giog.</div>';
+      html += '      <div style="color:var(--gold);">Rimangono: <b>' + remainingCredits + '</b> cfu</div>';
+      html += '    </div>';
+      html += '  </div>';
+    } else {
+      // Header compatto centrato per il Tabellone
+      html += '  <div class="team-slot-header">';
+      html +=      getCrestHtml(t.logoUrl, t.teamName, 'md');
+      html += '    <div class="team-slot-name">' + escapeHtml(t.teamName) + '</div>';
+      html += '    <div class="team-slot-owner">' + escapeHtml(t.ownerName) + '</div>';
+      html += '    <div class="team-slot-stats">';
+      html += '      <div>' + t.items.length + '/25 giog.</div>';
+      html += '      <div style="color:var(--gold);">Rimasti: ' + remainingCredits + '</div>';
+      html += '    </div>';
+      html += '  </div>';
+    }
 
     // Sezioni slot fissi
     ['P', 'D', 'C', 'A'].forEach(function(rKey){
@@ -2060,7 +2135,7 @@
     wrap.innerHTML = buildTeamSlotColumnHtml(myData, true);
   }
 
-  // Render Colonne Slot sul Tabellone (TV)
+  // Render Colonne Slot sul Tabellone (TV / PC fluide)
   function renderTvFixedSlotsRosters(log, profiles){
     var grid = document.getElementById('tv-teams-slots-grid');
     if(!grid) return;
