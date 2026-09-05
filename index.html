@@ -207,6 +207,10 @@
     background: rgba(227,178,60,0.15); border: 1px solid var(--gold-dim); padding: 4px 10px;
     border-radius: 20px; font-size: 13px; font-weight: 700; color: var(--gold);
   }
+  .player-tit-pill{
+    background: rgba(46, 133, 64, 0.25); border: 1px solid #2E8540; padding: 4px 10px;
+    border-radius: 20px; font-size: 13px; font-weight: 800; color: #7fe1a8;
+  }
 
   .board-price{
     font-family: var(--font-display); font-size: clamp(48px, 11vw, 110px); color: var(--gold);
@@ -271,7 +275,6 @@
   .section-title{ font-family: var(--font-display); font-size: 16px; color: var(--chalk); }
   .section-meta{ font-size: 12.5px; color: var(--gold); font-weight: 600; }
 
-  /* Griglia fluida che si adatta allo schermo intero */
   .teams-slots-grid{
     display: flex; gap: 6px; width: 100%; max-width: 100%;
     margin-top: 24px; padding-bottom: 20px;
@@ -299,7 +302,6 @@
     overflow: hidden;
   }
 
-  /* Intestazione colonna fluida per il Tabellone */
   .teams-slots-grid .team-slot-header{
     padding: 8px 6px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.25);
     display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
@@ -332,7 +334,6 @@
     color: var(--gold); font-weight: 700; font-size: 10.5px; flex-shrink: 0;
   }
 
-  /* Intestazione per la colonna singola della schermata partecipante */
   .team-slot-column.single .team-slot-header{
     padding: 12px 14px; border-bottom: 1px solid var(--pitch-line); background: rgba(0,0,0,0.22);
     display: flex; justify-content: space-between; align-items: center; gap: 8px;
@@ -393,7 +394,7 @@
   }
   .btn-filter.active{ background: var(--gold); color: #17240F; border-color: var(--gold); }
   
-  .listone-table-wrap{ max-height: 280px; overflow-y: auto; border: 1px solid var(--pitch-line); border-radius: 6px; }
+  .listone-table-wrap{ max-height: 320px; overflow-y: auto; border: 1px solid var(--pitch-line); border-radius: 6px; }
   .listone-table{ width: 100%; border-collapse: collapse; font-size: 13px; }
   .listone-table th, .listone-table td{ padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--pitch-line); }
   .listone-table th{ position: sticky; top: 0; background: var(--pitch-dark); color: var(--chalk-dim); font-size: 11px; z-index: 2; }
@@ -402,6 +403,13 @@
   .role-D{ background: #2E8540; color: #fff; }
   .role-C{ background: #2B6CB0; color: #fff; }
   .role-A{ background: #C53030; color: #fff; }
+  .tit-badge{
+    display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 800;
+  }
+  .tit-high{ background: rgba(46,133,64,0.3); color: #7fe1a8; border: 1px solid rgba(127,225,168,0.3); }
+  .tit-med{ background: rgba(227,178,60,0.25); color: var(--gold); border: 1px solid var(--gold-dim); }
+  .tit-low{ background: rgba(193,90,69,0.25); color: #f09581; border: 1px solid rgba(240,149,129,0.3); }
+
   .btn-select-player{
     padding: 5px 10px; background: var(--gold); color: #17240F; border: none;
     border-radius: 4px; font-weight: 700; font-size: 11px;
@@ -764,8 +772,8 @@
           </div>
           <div class="listone-table-wrap">
             <table class="listone-table" id="user-listone-table">
-              <thead><tr><th>R</th><th>Calciatore</th><th>Squadra</th><th>Qt</th><th>Stato</th></tr></thead>
-              <tbody><tr><td colspan="5" style="text-align:center; color:var(--chalk-dim);">Nessun listone caricato.</td></tr></tbody>
+              <thead><tr><th>R</th><th>Calciatore</th><th>Squadra</th><th>Qt</th><th>% Tit</th><th>Stato</th></tr></thead>
+              <tbody><tr><td colspan="6" style="text-align:center; color:var(--chalk-dim);">Nessun listone caricato.</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -786,7 +794,7 @@
     <div class="panel-wrap">
       <div class="panel">
         <h2>Gestisci l'asta</h2>
-        <p class="hint">Imposta il budget iniziale, carica il listone e batti i calciatori all'asta.</p>
+        <p class="hint">Imposta il budget iniziale, carica uno o più listoni Excel e batti i calciatori all'asta.</p>
 
         <!-- CONFIGURAZIONE BUDGET INIZIALE -->
         <div class="budget-setup-box">
@@ -797,10 +805,10 @@
           <input id="admin-initial-budget" type="number" value="500" min="1" step="10" onchange="updateInitialBudget(this.value)">
         </div>
 
-        <!-- CARICAMENTO FILE LISTONE -->
+        <!-- CARICAMENTO FILE LISTONE (SUPPORTA SELEZIONE MULTIPLA DI PIÙ FILE EXCEL) -->
         <div class="field">
-          <label>Carica Listone Fantacalcio (.xlsx, .xls o .csv)</label>
-          <input type="file" id="file-listone" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(event)">
+          <label>Carica Listone/i Excel (.xlsx o .xls) — <i>puoi selezionare anche 3 file contemporaneamente</i></label>
+          <input type="file" id="file-listone" accept=".xlsx, .xls, .csv" multiple onchange="handleFileUpload(event)">
         </div>
 
         <!-- LISTONE BROWSER BANDITORE -->
@@ -815,7 +823,7 @@
           </div>
           <div class="listone-table-wrap">
             <table class="listone-table" id="admin-listone-table">
-              <thead><tr><th>R</th><th>Calciatore</th><th>Sq</th><th>Qt</th><th>Azione</th></tr></thead>
+              <thead><tr><th>R</th><th>Calciatore</th><th>Sq</th><th>Qt</th><th>% Tit</th><th>Azione</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -964,7 +972,7 @@
   var pollTimer = null;
   var cachedListone = [];
   var filterRoles = { admin: '', user: '' };
-  var pendingPlayer = { role: '', team: '', qt: 1 };
+  var pendingPlayer = { role: '', team: '', qt: 1, titPct: null };
   var tempLogoBase64 = '';
   var pendingProfileToUnlock = null;
   var currentInitialBudget = 500;
@@ -1329,7 +1337,7 @@
   async function ensureInitRoom(){
     var s = await loadState();
     if(!s){
-      s = { player:'', role:'', team:'', qt:0, basePrice:0, price:0, bidder:'', bidderTeam:'', bidderLogo:'', status:'idle', updatedAt: Date.now() };
+      s = { player:'', role:'', team:'', qt:0, titPct:null, basePrice:0, price:0, bidder:'', bidderTeam:'', bidderLogo:'', status:'idle', updatedAt: Date.now() };
       await saveState(s);
     }
     currentInitialBudget = await loadBudget();
@@ -1565,6 +1573,7 @@
       if(s.role) metaHtml += '<span class="role-tag role-' + s.role + '">' + s.role + '</span>';
       if(s.team) metaHtml += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
       if(s.qt !== undefined) metaHtml += '<span class="player-qt-pill">Qt. ' + s.qt + '</span>';
+      if(s.titPct !== undefined && s.titPct !== null) metaHtml += '<span class="player-tit-pill">' + s.titPct + '% Tit</span>';
       metaWrap.innerHTML = metaHtml;
     } else {
       metaWrap.innerHTML = '';
@@ -1631,6 +1640,7 @@
     if(s.role) html += '<span class="role-tag role-' + s.role + '">' + s.role + '</span>';
     if(s.team) html += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
     if(s.qt !== undefined) html += '<span class="player-qt-pill">Quotazione: ' + s.qt + ' cfu</span>';
+    if(s.titPct !== undefined && s.titPct !== null) html += '<span class="player-tit-pill">Titolarità: ' + s.titPct + '%</span>';
     html += '  </div>';
     html += '</div>';
 
@@ -1657,19 +1667,23 @@
   }
 
   // ---------- BANDITORE ----------
-  function selectFromListone(name, price, role, team){
-    document.getElementById('admin-player').value = name;
+  // Selezione sicura tramite indice dell'array per evitare bug con apostrofi
+  function selectListonePlayer(idx){
+    var p = cachedListone[idx];
+    if(!p) return;
+    document.getElementById('admin-player').value = p.name;
     document.getElementById('admin-base').value = 0;
-    pendingPlayer = { role: role, team: team, qt: price };
+    pendingPlayer = { role: p.role, team: p.team, qt: p.price, titPct: p.titPct };
     
     var metaBox = document.getElementById('admin-selected-meta');
     metaBox.innerHTML = 
-      '<span class="role-tag role-' + role + '">' + role + '</span>' +
-      '<span class="player-team-pill">' + escapeHtml(team) + '</span>' +
-      '<span class="player-qt-pill">Quotazione: ' + price + ' cfu</span>';
+      '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' +
+      '<span class="player-team-pill">' + escapeHtml(p.team) + '</span>' +
+      '<span class="player-qt-pill">Qt: ' + p.price + ' cfu</span>' +
+      (p.titPct !== null ? '<span class="player-tit-pill">' + p.titPct + '% Titolarità</span>' : '');
 
     document.getElementById('admin-base').focus();
-    showMsg('admin-msg', 'Selezionato! Imposta la base e avvia.', 'ok');
+    showMsg('admin-msg', 'Selezionato ' + p.name + '! Imposta base e avvia.', 'ok');
   }
 
   async function startAuctionManually(){
@@ -1695,6 +1709,7 @@
     var role = pendingPlayer.role;
     var team = pendingPlayer.team;
     var qt = pendingPlayer.qt;
+    var titPct = pendingPlayer.titPct;
 
     if(!role){
       var found = cachedListone.find(function(p){ return p.name.toLowerCase() === player.toLowerCase(); });
@@ -1702,13 +1717,14 @@
         role = found.role;
         team = found.team;
         qt = found.price;
+        titPct = found.titPct;
       }
     }
 
-    launchAuction(player, base, role, team, qt);
+    launchAuction(player, base, role, team, qt, titPct);
   }
 
-  async function launchAuction(player, base, role, team, qt){
+  async function launchAuction(player, base, role, team, qt, titPct){
     var s = await loadState();
     if(s && s.status === 'open'){
       var confirmOverwrite = confirm('C\'è già un\'asta aperta per "' + s.player + '". Vuoi sostituirla con "' + player + '"?');
@@ -1720,6 +1736,7 @@
       role: role || '',
       team: team || '',
       qt: qt !== undefined ? qt : base,
+      titPct: (titPct !== undefined && titPct !== null) ? titPct : null,
       basePrice: base,
       price: base,
       bidder: '',
@@ -1734,7 +1751,7 @@
       document.getElementById('admin-player').value = '';
       document.getElementById('admin-base').value = '0';
       document.getElementById('admin-selected-meta').innerHTML = '';
-      pendingPlayer = { role: '', team: '', qt: 1 };
+      pendingPlayer = { role: '', team: '', qt: 1, titPct: null };
       showMsg('admin-msg', 'Asta aperta per ' + player + ' (base ' + base + ' cfu)!', 'ok');
       renderAdmin(newState);
       updateAdminParticipantSelect();
@@ -1769,6 +1786,7 @@
         role: s.role || '',
         team: s.team || '',
         qt: s.qt || 1,
+        titPct: s.titPct || null,
         price: 1,
         bidder: pName,
         bidderTeam: pTeam,
@@ -1797,6 +1815,7 @@
         role: s.role || '',
         team: s.team || '',
         qt: s.qt || 1,
+        titPct: s.titPct || null,
         price: s.bidder ? s.price : null,
         bidder: s.bidder || null,
         bidderTeam: s.bidderTeam || null,
@@ -1865,42 +1884,80 @@
     });
   }
 
-  // ---------- GESTIONE FILE LISTONE ----------
-  function handleFileUpload(e){
-    var file = e.target.files[0];
-    if(!file) return;
+  // ---------- GESTIONE MULTI-FILE LISTONE CON MEDIA TITOLARITÀ ----------
+  async function handleFileUpload(e){
+    var files = e.target.files;
+    if(!files || files.length === 0) return;
 
-    var reader = new FileReader();
-    reader.onload = async function(evt){
-      try {
-        var data = new Uint8Array(evt.target.result);
-        var workbook = XLSX.read(data, { type: 'array' });
-        var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        var rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+    var playersMap = {}; // key: "name_role" -> { name, role, team, price, titList: [] }
 
-        var parsed = parseFantaRows(rows);
-        if(parsed.length === 0){
-          alert('Non sono stati trovati calciatori validi. Verifica che il file contenga le colonne Ruolo, Nome e Quotazione.');
-          return;
+    var readPromises = Array.from(files).map(function(file){
+      return new Promise(function(resolve, reject){
+        var reader = new FileReader();
+        reader.onload = function(evt){
+          try {
+            var data = new Uint8Array(evt.target.result);
+            var workbook = XLSX.read(data, { type: 'array' });
+            
+            // Itera su tutti i fogli del file Excel (es. P, D, C, A)
+            workbook.SheetNames.forEach(function(sheetName){
+              var sheet = workbook.Sheets[sheetName];
+              var rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+              extractPlayersFromSheetRows(rows, playersMap, sheetName);
+            });
+            resolve();
+          } catch(err){
+            console.error("Errore lettura file:", file.name, err);
+            resolve(); // Non bloccare gli altri file
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    });
+
+    await Promise.all(readPromises);
+
+    var list = Object.values(playersMap).map(function(item){
+      var avgPct = null;
+      if(item.titList && item.titList.length > 0){
+        var sum = item.titList.reduce(function(a, b){ return a + b; }, 0);
+        var rawAvg = sum / item.titList.length; // media da 1 a 5
+        // Se espressa su base 5 stelle (es. 5 = 100%, 4 = 80%, 3 = 60%, 2 = 40%, 1 = 20%)
+        if(rawAvg <= 5.0 && rawAvg > 0){
+          avgPct = Math.round((rawAvg / 5) * 100);
+        } else if(rawAvg <= 1.0 && rawAvg > 0){
+          avgPct = Math.round(rawAvg * 100);
+        } else {
+          avgPct = Math.min(100, Math.round(rawAvg));
         }
-
-        cachedListone = parsed;
-        await saveListone(parsed);
-        document.getElementById('admin-listone-box').style.display = 'block';
-        renderListoneTable('admin');
-        renderListoneTable('user');
-        alert('Listone caricato con successo per questa lega: ' + parsed.length + ' calciatori pronti!');
-      } catch(err){
-        console.error(err);
-        alert('Errore nella lettura del file. Verifica che sia un file Excel o CSV valido.');
       }
-    };
-    reader.readAsArrayBuffer(file);
+      return {
+        name: item.name,
+        role: item.role,
+        team: item.team,
+        price: item.price,
+        titPct: avgPct
+      };
+    });
+
+    if(list.length === 0){
+      alert('Non sono stati trovati calciatori validi. Verifica che i file contengano le colonne Ruolo, Nome e Quotazione.');
+      return;
+    }
+
+    cachedListone = list;
+    await saveListone(list);
+    document.getElementById('admin-listone-box').style.display = 'block';
+    renderListoneTable('admin');
+    renderListoneTable('user');
+    alert('Listone aggiornato con successo: ' + list.length + ' calciatori caricati con media titolarità calcolata da ' + files.length + ' file!');
   }
 
-  function parseFantaRows(rows){
+  function extractPlayersFromSheetRows(rows, map, defaultRoleSheet){
+    if(!rows || rows.length === 0) return;
     var headerIndex = -1;
-    var rIdx = -1, nameIdx = -1, teamIdx = -1, qtIdx = -1;
+    var rIdx = -1, nameIdx = -1, teamIdx = -1, qtIdx = -1, titIdx = -1;
 
     for(var i = 0; i < Math.min(rows.length, 15); i++){
       var row = (rows[i] || []).map(function(c){
@@ -1909,26 +1966,31 @@
 
       rIdx = row.findIndex(function(c){ return c === 'r' || c === 'ruolo'; });
       nameIdx = row.findIndex(function(c){ return c === 'nome' || c === 'calciatore' || c === 'giocatore'; });
-      teamIdx = row.findIndex(function(c){ return c === 'squadra' || c === 'club'; });
+      teamIdx = row.findIndex(function(c){ return c === 'squadra' || c === 'team' || c === 'club'; });
       qtIdx = row.findIndex(function(c){
         return c === 'qta' || c === 'qti' || c === 'qt' || c === 'qa' || c === 'qi' ||
-               c === 'quotazione' || c === 'quotazionea' || c === 'valore';
+               c === 'quo' || c === 'quotazione' || c === 'valore';
+      });
+      titIdx = row.findIndex(function(c){
+        return c.includes('titolari') || c === 'titolarita' || c === 'titolarità' || c === 'tit';
       });
 
-      if(nameIdx !== -1 && rIdx !== -1){
+      if(nameIdx !== -1 && (rIdx !== -1 || ['P','D','C','A'].includes(defaultRoleSheet.toUpperCase()))){
         headerIndex = i;
         break;
       }
     }
 
-    if(headerIndex === -1) return [];
+    if(headerIndex === -1) return;
 
-    var list = [];
     for(var j = headerIndex + 1; j < rows.length; j++){
       var r = rows[j];
       if(!r || !r[nameIdx]) continue;
       
-      var rawRole = String(r[rIdx] || '').trim().toUpperCase();
+      var rawName = String(r[nameIdx]).trim();
+      if(!rawName) continue;
+
+      var rawRole = rIdx !== -1 ? String(r[rIdx] || '').trim().toUpperCase() : defaultRoleSheet.toUpperCase();
       var primaryRole = rawRole.charAt(0);
       if(!['P','D','C','A'].includes(primaryRole)) continue;
 
@@ -1936,14 +1998,33 @@
       var priceParsed = parseInt(String(rawPrice).replace(/[^0-9]/g, ''), 10);
       if(isNaN(priceParsed) || priceParsed < 0) priceParsed = 1;
 
-      list.push({
-        name: String(r[nameIdx]).trim(),
-        role: primaryRole,
-        team: teamIdx !== -1 ? String(r[teamIdx] || '').trim() : '',
-        price: priceParsed
-      });
+      var teamStr = teamIdx !== -1 ? String(r[teamIdx] || '').trim() : '';
+
+      // Lettura valore Titolarità (es. 5, 4, 3, 2, 1 oppure "80%")
+      var titVal = null;
+      if(titIdx !== -1 && r[titIdx] !== undefined && r[titIdx] !== null && String(r[titIdx]).trim() !== ''){
+        var cleanTit = String(r[titIdx]).replace('%', '').replace(',', '.').trim();
+        var parsedTit = parseFloat(cleanTit);
+        if(!isNaN(parsedTit)){
+          titVal = parsedTit;
+        }
+      }
+
+      var key = rawName.toLowerCase() + '_' + primaryRole;
+      if(!map[key]){
+        map[key] = {
+          name: rawName,
+          role: primaryRole,
+          team: teamStr,
+          price: priceParsed,
+          titList: []
+        };
+      }
+      if(titVal !== null){
+        map[key].titList.push(titVal);
+      }
+      if(teamStr && !map[key].team) map[key].team = teamStr;
     }
-    return list;
   }
 
   function setRoleFilter(context, role){
@@ -1976,26 +2057,35 @@
     });
 
     if(filtered.length === 0){
-      tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--chalk-dim);">Nessun calciatore trovato.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--chalk-dim);">Nessun calciatore trovato.</td></tr>';
       return;
     }
 
     var html = '';
     filtered.slice(0, 100).forEach(function(p){
+      var realIdx = cachedListone.indexOf(p);
       var buyer = soldMap[p.name.toLowerCase()];
       var isSold = !!buyer;
+
+      // Badge Titolarità colorato
+      var titHtml = '—';
+      if(p.titPct !== null && p.titPct !== undefined){
+        var titClass = p.titPct >= 75 ? 'tit-high' : (p.titPct >= 50 ? 'tit-med' : 'tit-low');
+        titHtml = '<span class="tit-badge ' + titClass + '">' + p.titPct + '%</span>';
+      }
 
       html += '<tr>';
       html += '  <td><span class="role-tag role-' + p.role + '">' + p.role + '</span></td>';
       html += '  <td><b>' + escapeHtml(p.name) + '</b></td>';
       html += '  <td>' + escapeHtml(p.team) + '</td>';
       html += '  <td style="color:var(--gold); font-weight:700;">' + p.price + '</td>';
+      html += '  <td>' + titHtml + '</td>';
 
       if(context === 'admin'){
         if(isSold){
           html += '<td><span class="badge-assigned">Assegnato a ' + escapeHtml(buyer) + '</span></td>';
         } else {
-          html += '<td><button class="btn-select-player" onclick="selectFromListone(\'' + escapeHtml(p.name).replace(/'/g, "\\'") + '\', ' + p.price + ', \'' + p.role + '\', \'' + escapeHtml(p.team).replace(/'/g, "\\'") + '\')">Seleziona</button></td>';
+          html += '<td><button class="btn-select-player" onclick="selectListonePlayer(' + realIdx + ')">Seleziona</button></td>';
         }
       } else {
         html += '<td>' + (isSold ? ('<span class="badge-assigned">' + escapeHtml(buyer) + '</span>') : '<span style="color:#2E8540;">Libero</span>') + '</td>';
