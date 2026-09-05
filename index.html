@@ -208,12 +208,30 @@
     border-radius: 20px; font-size: 13px; font-weight: 800; color: #7fe1a8;
   }
 
+  /* RIGA PREZZO + TIMER DEL TABELLONE */
+  .board-price-row-wrap{
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
   .board-price{
     font-family: var(--font-display); font-size: clamp(48px, 11vw, 110px); color: var(--gold);
     line-height:1; font-variant-numeric: tabular-nums; transition: transform .18s ease;
   }
   .board-price.pulse{ transform: scale(1.06); }
   .board-price .unit{ font-family: var(--font-body); font-size: 0.28em; color: var(--chalk-dim); font-weight:700; margin-left: 10px; }
+  
+  /* BADGE COUNTDOWN GIGANTE NELLA RIGA PREZZO DEL TABELLONE */
+  .board-countdown-hero{
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    background: linear-gradient(135deg, #B5361D, #E64A2E);
+    color: #fff; border: 3px solid rgba(255,255,255,0.4);
+    box-shadow: 0 0 24px rgba(230, 74, 46, 0.55);
+    border-radius: 12px; padding: 6px 20px;
+    font-family: var(--font-display); font-size: clamp(36px, 6vw, 68px);
+    line-height: 1; letter-spacing: 1px;
+    animation: countdownPulse .4s infinite alternate;
+  }
+  .board-countdown-hero .timer-icon{ font-size: 0.85em; }
+
   .board-bidder-wrap{ display: flex; align-items: center; gap: 12px; }
   .board-bidder{ font-family: var(--font-display); font-size: clamp(22px, 4vw, 42px); }
   .board-idle{ text-align:center; padding: 60px 20px; color: var(--chalk-dim); }
@@ -225,7 +243,7 @@
   .tv-footer{ margin-top: 22px; color: var(--chalk-dim); font-size: 13px; text-align:center; }
   .tv-footer b{ color: var(--gold); }
 
-  /* BADGE COUNTDOWN */
+  /* BADGE COUNTDOWN PER SCHERMI PARTECIPANTE E BANNER */
   .countdown-badge{
     display: inline-flex; align-items: center; justify-content: center;
     background: var(--brick); color: #fff; border-radius: 6px;
@@ -233,10 +251,9 @@
     animation: countdownPulse .5s infinite alternate;
   }
   .countdown-badge.sm{ padding: 2px 8px; font-size: 13px; }
-  .countdown-badge.lg{ padding: 4px 14px; font-size: 20px; margin-left: 10px; }
   @keyframes countdownPulse {
     from { transform: scale(1); }
-    to { transform: scale(1.08); }
+    to { transform: scale(1.06); }
   }
 
   /* PARTECIPANTE */
@@ -1049,8 +1066,6 @@
   // ---------- GESTIONE COUNTDOWN 3 SECONDI ----------
   function triggerAuctionTimer(){
     if(!liveState || liveState.status !== 'open') return;
-    
-    // Chiama il trigger su Firebase impostando il timestamp di scadenza tra 3.5 secondi
     var expireAt = Date.now() + 3500;
     db.ref(getRoomPath('state/timerExpireAt')).set(expireAt);
   }
@@ -1083,14 +1098,14 @@
       adminDisp.style.color = active ? 'var(--brick)' : 'var(--gold)';
     }
 
-    // Badge sul Tabellone
-    var boardBadge = document.getElementById('board-countdown-badge');
-    if(boardBadge){
+    // Badge gigante sul Tabellone accanto al prezzo
+    var boardHeroBadge = document.getElementById('board-countdown-hero-badge');
+    if(boardHeroBadge){
       if(active){
-        boardBadge.style.display = 'inline-flex';
-        boardBadge.textContent = '⏱️ ' + sec + 's';
+        boardHeroBadge.style.display = 'inline-flex';
+        boardHeroBadge.innerHTML = '<span class="timer-icon">⏱️</span> ' + sec + 's';
       } else {
-        boardBadge.style.display = 'none';
+        boardHeroBadge.style.display = 'none';
       }
     }
 
@@ -1159,7 +1174,6 @@
     stateRef.on('value', function(snap){
       liveState = snap.val() || { status: 'idle', price: 0, player: '', basePrice: 0 };
       
-      // Controllo se è scattato un timer
       if(liveState.timerExpireAt && liveState.timerExpireAt > Date.now()){
         startLocalCountdown(liveState.timerExpireAt);
       } else {
@@ -1686,7 +1700,6 @@
       if(s.qt !== undefined) metaHtml += '<span class="player-qt-pill">Qt. ' + s.qt + '</span>';
       if(s.titPct !== undefined && s.titPct !== null) metaHtml += '<span class="player-tit-pill">' + s.titPct + '% Tit</span>';
       
-      // Badge countdown per partecipante
       metaHtml += '<span id="bid-countdown-badge" class="countdown-badge sm" style="display:none;"></span>';
       metaWrap.innerHTML = metaHtml;
     } else {
@@ -1754,13 +1767,17 @@
     if(s.team) html += '<span class="player-team-pill">' + escapeHtml(s.team) + '</span>';
     if(s.qt !== undefined) html += '<span class="player-qt-pill">Quotazione: ' + s.qt + ' cfu</span>';
     if(s.titPct !== undefined && s.titPct !== null) html += '<span class="player-tit-pill">Titolarità: ' + s.titPct + '%</span>';
-    
-    // Badge countdown per Tabellone
-    html += '<span id="board-countdown-badge" class="countdown-badge lg" style="display:none;"></span>';
     html += '  </div>';
     html += '</div>';
 
-    html += '<div class="board-row"><div class="board-label">Prezzo attuale</div><div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div></div>';
+    // RIGA PREZZO ATTUALE CON TIMER INGRANDITO SULLA STESSA RIGA
+    html += '<div class="board-row">';
+    html += '  <div class="board-label">Prezzo attuale</div>';
+    html += '  <div class="board-price-row-wrap">';
+    html += '    <div class="board-price' + (priceChanged?' pulse':'') + '">' + s.price + '<span class="unit">crediti</span></div>';
+    html += '    <div id="board-countdown-hero-badge" class="board-countdown-hero" style="display:none;"></div>';
+    html += '  </div>';
+    html += '</div>';
     
     html += '<div class="board-row"><div class="board-label">Ultimo offerente</div>';
     if(s.bidder){
@@ -1886,7 +1903,6 @@
     showMsg('admin-msg', liveState.player + ' assegnato a ' + pTeam + ' per 1 credito!', 'ok');
   }
 
-  // Chiusura d'asta con possibilità di personalizzare prezzo finale e offerente vincente
   async function closeAuction(){
     if(!liveState || liveState.status !== 'open'){
       showMsg('admin-msg', 'Nessuna asta aperta da chiudere.', 'error'); return;
