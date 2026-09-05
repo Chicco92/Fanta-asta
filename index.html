@@ -334,6 +334,15 @@
   .team-slot-column.single .slot-price{ color: var(--gold); font-weight: 700; font-size: 11.5px; }
   .slot-row.empty{ color: rgba(231,227,212,0.25); font-style: italic; }
 
+  /* BOTTONI MODIFICA/ELIMINA ACQUISTO ROSA */
+  .btn-action-mini{
+    background: transparent; border: none; font-size: 12px; padding: 2px 4px;
+    border-radius: 4px; line-height: 1; cursor: pointer; transition: background .15s ease;
+  }
+  .btn-action-mini:hover{ background: rgba(255,255,255,0.1); }
+  .btn-action-edit:hover{ color: var(--gold); }
+  .btn-action-del:hover{ color: var(--brick); }
+
   /* TABELLE NORMALI */
   .team-table{ width:100%; border-collapse: collapse; font-size: 13.5px; background: var(--pitch-mid); border-radius: var(--radius); overflow:hidden; border: 1px solid var(--pitch-line); }
   .team-table th, .team-table td{ text-align:left; padding: 9px 12px; border-bottom: 1px solid var(--pitch-line); }
@@ -822,8 +831,9 @@
         <div class="divider"></div>
         <button class="btn-danger" style="border-color:var(--brick); color:var(--chalk); background:rgba(193,90,69,0.35);" onclick="concludeWholeAuction()">🏁 Concludi definitivamente l'asta</button>
 
+        <!-- SEZIONE ROSE PARTECIPANTI CON GESTIONE SINGOLA SQUADRA -->
         <div class="divider"></div>
-        <div class="section-header"><span class="section-title">Rose partecipanti (con crediti rimasti)</span></div>
+        <div class="section-header"><span class="section-title">Rose partecipanti (con opzioni modifica squadra)</span></div>
         <div id="admin-teams-wrap"></div>
 
         <div class="divider"></div>
@@ -913,7 +923,7 @@
     localStorage.setItem(DEVICE_TOKEN_KEY, myDeviceToken);
   }
 
-  // ---------- STATO IN MEMORIA LOCALE (ZERO RE-DOWNLOAD INUTILI) ----------
+  // ---------- STATO LOCALE IN MEMORIA ----------
   var currentRoomId = localStorage.getItem(ACTIVE_ROOM_KEY) || null;
   var currentRoomData = null;
   var myProfile = null;
@@ -926,7 +936,6 @@
   var pendingProfileToUnlock = null;
   var currentInitialBudget = 500;
 
-  // Dati attivi della stanza sincronizzati in push da Firebase
   var liveState = null;
   var liveLog = [];
   var liveProfiles = [];
@@ -939,14 +948,9 @@
     return currentRoomId ? ('rooms/' + currentRoomId + '/' + keySuffix) : keySuffix;
   }
 
-  // ---------- METODI SCRITTURA VELOCI (SENZA LAG) ----------
   var store = {
-    set: function(path, val){
-      return db.ref(path).set(val);
-    },
-    remove: function(path){
-      return db.ref(path).remove();
-    }
+    set: function(path, val){ return db.ref(path).set(val); },
+    remove: function(path){ return db.ref(path).remove(); }
   };
 
   async function saveState(s){ return await store.set(getRoomPath('state'), s); }
@@ -979,7 +983,41 @@
     return await store.set(ROOMS_INDEX_KEY, rooms);
   }
 
-  // ---------- VERO LISTENER REALTIME FIREBASE (ADDIO POLL A 800MS!) ----------
+  // ---------- FUNZIONI DI MODIFICA / ELIMINAZIONE ACQUISTO PER SQUADRA ----------
+  async function editPlayerPrice(logIndex){
+    var item = liveLog[logIndex];
+    if(!item) return;
+
+    var newPriceStr = prompt('Modifica prezzo per ' + item.player + ' (' + item.bidderTeam + '):', item.price);
+    if(newPriceStr === null) return;
+
+    var newPrice = parseInt(newPriceStr, 10);
+    if(isNaN(newPrice) || newPrice < 0){
+      alert('Inserisci un prezzo valido.');
+      return;
+    }
+
+    var updatedLog = liveLog.slice();
+    updatedLog[logIndex].price = newPrice;
+    await saveLog(updatedLog);
+    showMsg('admin-msg', 'Prezzo di ' + item.player + ' aggiornato a ' + newPrice + ' cfu!', 'ok');
+  }
+
+  async function removePlayerPurchase(logIndex){
+    var item = liveLog[logIndex];
+    if(!item) return;
+
+    if(!confirm('Vuoi davvero rimuovere ' + item.player + ' dalla rosa di ' + item.bidderTeam + '? Il giocatore tornerà libero nel listone.')){
+      return;
+    }
+
+    var updatedLog = liveLog.slice();
+    updatedLog.splice(logIndex, 1);
+    await saveLog(updatedLog);
+    showMsg('admin-msg', item.player + ' rimosso dalla squadra e tornato libero!', 'ok');
+  }
+
+  // ---------- VERO REALTIME FIREBASE ----------
   function detachRealtimeListeners(){
     activeListeners.forEach(function(ref){ ref.off(); });
     activeListeners = [];
@@ -989,7 +1027,6 @@
     detachRealtimeListeners();
     if(!currentRoomId) return;
 
-    // 1. Ascolto Stato Asta in corso (subito e solo quando cambia)
     var stateRef = db.ref(getRoomPath('state'));
     stateRef.on('value', function(snap){
       liveState = snap.val() || { status: 'idle', price: 0, player: '', basePrice: 0 };
@@ -1001,7 +1038,6 @@
     });
     activeListeners.push(stateRef);
 
-    // 2. Ascolto Cronologia Acquisti Log
     var logRef = db.ref(getRoomPath('log'));
     logRef.on('value', function(snap){
       liveLog = snap.val() || [];
@@ -1009,7 +1045,6 @@
     });
     activeListeners.push(logRef);
 
-    // 3. Ascolto Profili Partecipanti
     var profRef = db.ref(getRoomPath('profiles'));
     profRef.on('value', function(snap){
       liveProfiles = snap.val() || [];
@@ -1018,7 +1053,6 @@
     });
     activeListeners.push(profRef);
 
-    // 4. Ascolto Banditore Claim
     var claimRef = db.ref(getRoomPath('adminClaim'));
     claimRef.on('value', function(snap){
       liveAdminClaim = snap.val();
@@ -1026,7 +1060,6 @@
     });
     activeListeners.push(claimRef);
 
-    // 5. Ascolto Budget Iniziale
     var bRef = db.ref(getRoomPath('initialBudget'));
     bRef.on('value', function(snap){
       currentInitialBudget = snap.exists() ? snap.val() : 500;
@@ -1036,7 +1069,6 @@
     });
     activeListeners.push(bRef);
 
-    // 6. Listone caricato una volta sola
     var cached = localStorage.getItem('listone_' + currentRoomId);
     if(cached){
       cachedListone = JSON.parse(cached);
@@ -1084,7 +1116,6 @@
     }
   }
 
-  // ---------- BUDGET BANDITORE ----------
   async function updateInitialBudget(val){
     var num = parseInt(val, 10);
     if(isNaN(num) || num < 1) num = 500;
@@ -1093,7 +1124,6 @@
     showMsg('admin-msg', 'Budget impostato a ' + num + ' crediti!', 'ok');
   }
 
-  // ---------- GESTIONE STEMMA E LOGHI ----------
   function handleLogoPreview(e){
     var file = e.target.files[0];
     if(!file) return;
@@ -1126,12 +1156,8 @@
     return '<span class="team-crest-fallback ' + sizeClass + '">' + letter + '</span>';
   }
 
-  // ---------- BANDITORE CLAIM ----------
   async function claimOrEnterAdmin(){
-    if(currentRoomData && currentRoomData.ended){
-      goHome('summary');
-      return;
-    }
+    if(currentRoomData && currentRoomData.ended){ goHome('summary'); return; }
     if(!liveAdminClaim){
       await saveAdminClaim(myDeviceToken);
       goHome('admin');
@@ -1141,17 +1167,16 @@
       goHome('admin');
       return;
     }
-    alert('⚠️ Accesso negato: questa asta ha già un Banditore attivo designato. Solo lui può gestire i calciatori e le offerte.');
+    alert('⚠️ Accesso negato: questa asta ha già un Banditore attivo designato.');
   }
 
   async function releaseAdminClaim(){
-    if(!confirm('Vuoi davvero cedere il ruolo da Banditore? Il prossimo utente che cliccherà su Banditore prenderà il controllo dell\'asta.')) return;
+    if(!confirm('Vuoi davvero cedere il ruolo da Banditore?')) return;
     await store.remove(getRoomPath('adminClaim'));
     alert('Hai rilasciato il ruolo di banditore.');
     goHome('home');
   }
 
-  // ---------- LOBBY & STANZE ----------
   function openCreateModal(){
     document.getElementById('modal-create').classList.add('active');
     document.getElementById('new-room-name').value = '';
@@ -1165,9 +1190,7 @@
     document.getElementById('input-room-pin').value = '';
   }
 
-  function closeModal(id){
-    document.getElementById(id).classList.remove('active');
-  }
+  function closeModal(id){ document.getElementById(id).classList.remove('active'); }
 
   function togglePinField(type){
     document.getElementById('pin-field-wrap').style.display = (type === 'private') ? 'block' : 'none';
@@ -1278,7 +1301,6 @@
     }
   }
 
-  // ---------- SUPER ADMIN ----------
   function openSuperAdminLogin(){
     document.getElementById('modal-super-login').classList.add('active');
     document.getElementById('super-user').value = '';
@@ -1470,7 +1492,7 @@
     }
   }
 
-  // ---------- OFFERTE ULTRA VELOCI SENZA LATENZA ----------
+  // ---------- OFFERTE ULTRA VELOCI ----------
   async function quickBid(amount){
     if(!liveState || liveState.status !== 'open'){
       showMsg('bid-msg', 'L\'asta non è aperta al momento.', 'error');
@@ -1561,7 +1583,6 @@
     }
   }
 
-  // ---------- TABELLONE ----------
   function renderTabellone(s){
     var el = document.getElementById('board-content');
     if(!s || s.status === 'idle'){
@@ -1977,7 +1998,7 @@
       };
     });
 
-    (log || []).forEach(function(item){
+    (log || []).forEach(function(item, idx){
       if(!item.bidder || item.price === null) return;
       var teamKey = item.bidderTeam || item.bidder;
       if(!map[teamKey]){
@@ -1987,7 +2008,10 @@
         };
       }
       if(!map[teamKey].logoUrl && item.bidderLogo) map[teamKey].logoUrl = item.bidderLogo;
-      map[teamKey].items.push(item);
+      
+      // Conserva l'indice originario nel log per modifiche/eliminazioni
+      var itemWithIdx = Object.assign({}, item, { logIndex: idx });
+      map[teamKey].items.push(itemWithIdx);
       map[teamKey].totalSpent += item.price;
       map[teamKey].totalListValue += (item.qt || item.price);
     });
@@ -2094,6 +2118,7 @@
     grid.innerHTML = html;
   }
 
+  // Schede del Banditore con i tasti modifica ✏️ ed elimina 🗑️ per ciascun calciatore
   function renderAdminRosters(log, profiles){
     var wrap = document.getElementById('admin-teams-wrap');
     if(!wrap) return;
@@ -2123,11 +2148,25 @@
       html += '      <div style="font-size:11.5px; color:var(--gold);">Rimangono: <b>' + remaining + ' cfu</b></div>';
       html += '    </div>';
       html += '  </div>';
-      html += '  <table class="team-table"><tbody>';
-      data.items.forEach(function(p){
-        html += '<tr><td>' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td><td>' + escapeHtml(p.player) + '</td><td class="price-cell">' + p.price + ' cfu</td></tr>';
-      });
-      html += '  </tbody></table>';
+
+      if(data.items.length === 0){
+        html += '<div style="font-size:12px; color:var(--chalk-dim); padding:10px 0; text-align:center;">Nessun acquisto ancora effettuato.</div>';
+      } else {
+        html += '  <table class="team-table"><tbody>';
+        data.items.forEach(function(p){
+          html += '<tr>';
+          html += '  <td style="width:28px;">' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td>';
+          html += '  <td><b>' + escapeHtml(p.player) + '</b></td>';
+          html += '  <td class="price-cell">' + p.price + ' cfu</td>';
+          html += '  <td style="text-align:right; width:56px;">';
+          html += '    <button class="btn-action-mini btn-action-edit" title="Modifica prezzo" onclick="editPlayerPrice(' + p.logIndex + ')">✏️</button>';
+          html += '    <button class="btn-action-mini btn-action-del" title="Elimina / Svincola" onclick="removePlayerPurchase(' + p.logIndex + ')">🗑️</button>';
+          html += '  </td>';
+          html += '</tr>';
+        });
+        html += '  </tbody></table>';
+      }
+
       html += '</div>';
     });
     html += '</div>';
