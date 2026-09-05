@@ -831,9 +831,17 @@
         <div class="divider"></div>
         <button class="btn-danger" style="border-color:var(--brick); color:var(--chalk); background:rgba(193,90,69,0.35);" onclick="concludeWholeAuction()">🏁 Concludi definitivamente l'asta</button>
 
-        <!-- SEZIONE ROSE PARTECIPANTI CON GESTIONE SINGOLA SQUADRA -->
+        <!-- SEZIONE ROSE PARTECIPANTI CON MENU A TENDINA PER SELEZIONARE UNA SQUADRA ALLA VOLTA -->
         <div class="divider"></div>
-        <div class="section-header"><span class="section-title">Rose partecipanti (con opzioni modifica squadra)</span></div>
+        <div class="section-header"><span class="section-title">Rose partecipanti</span></div>
+        
+        <div class="field" style="margin-bottom: 12px;">
+          <label for="admin-select-team-view">Seleziona squadra da visualizzare:</label>
+          <select id="admin-select-team-view" onchange="onAdminTeamSelectChange(this.value)">
+            <option value="">Seleziona una squadra...</option>
+          </select>
+        </div>
+
         <div id="admin-teams-wrap"></div>
 
         <div class="divider"></div>
@@ -935,6 +943,7 @@
   var tempLogoBase64 = '';
   var pendingProfileToUnlock = null;
   var currentInitialBudget = 500;
+  var selectedAdminTeamView = ''; // Memorizza la squadra selezionata nel menu a tendina del banditore
 
   var liveState = null;
   var liveLog = [];
@@ -1017,6 +1026,12 @@
     showMsg('admin-msg', item.player + ' rimosso dalla squadra e tornato libero!', 'ok');
   }
 
+  // Cambio selezione squadra nel menu a tendina del banditore
+  function onAdminTeamSelectChange(teamName){
+    selectedAdminTeamView = teamName;
+    renderAdminRosters(liveLog, liveProfiles);
+  }
+
   // ---------- VERO REALTIME FIREBASE ----------
   function detachRealtimeListeners(){
     activeListeners.forEach(function(ref){ ref.off(); });
@@ -1049,6 +1064,7 @@
     profRef.on('value', function(snap){
       liveProfiles = snap.val() || [];
       updateAdminParticipantSelect();
+      updateAdminTeamViewSelect();
       renderCurrentScreen();
     });
     activeListeners.push(profRef);
@@ -1109,6 +1125,7 @@
       renderParticipantRoster(liveLog, liveProfiles);
     } else if(currentRoute === 'admin'){
       renderAdmin(liveState);
+      updateAdminTeamViewSelect();
       renderAdminRosters(liveLog, liveProfiles);
       renderLog(liveLog);
     } else if(currentRoute === 'summary'){
@@ -1475,6 +1492,7 @@
     if(route === 'admin'){
       renderListoneTable('admin');
       updateAdminParticipantSelect();
+      updateAdminTeamViewSelect();
     }
     if(route === 'lobby'){
       renderLobbyRooms();
@@ -1801,6 +1819,27 @@
     });
   }
 
+  // Popola il menu a tendina per scegliere la squadra da visualizzare nel Banditore
+  function updateAdminTeamViewSelect(){
+    var select = document.getElementById('admin-select-team-view');
+    if(!select) return;
+
+    var currentVal = selectedAdminTeamView || select.value;
+    select.innerHTML = '<option value="">Seleziona una squadra...</option>';
+
+    liveProfiles.forEach(function(p){
+      var opt = document.createElement('option');
+      opt.value = p.teamName;
+      opt.textContent = p.teamName + ' (' + p.name + ')';
+      if(opt.value === currentVal) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    if(currentVal && !selectedAdminTeamView) {
+      selectedAdminTeamView = currentVal;
+    }
+  }
+
   // ---------- GESTIONE MULTI-FILE LISTONE ----------
   async function handleFileUpload(e){
     var files = e.target.files;
@@ -2009,7 +2048,6 @@
       }
       if(!map[teamKey].logoUrl && item.bidderLogo) map[teamKey].logoUrl = item.bidderLogo;
       
-      // Conserva l'indice originario nel log per modifiche/eliminazioni
       var itemWithIdx = Object.assign({}, item, { logIndex: idx });
       map[teamKey].items.push(itemWithIdx);
       map[teamKey].totalSpent += item.price;
@@ -2118,7 +2156,7 @@
     grid.innerHTML = html;
   }
 
-  // Schede del Banditore con i tasti modifica ✏️ ed elimina 🗑️ per ciascun calciatore
+  // Scheda del Banditore: mostra esclusivamente la squadra scelta dal menu a tendina
   function renderAdminRosters(log, profiles){
     var wrap = document.getElementById('admin-teams-wrap');
     if(!wrap) return;
@@ -2131,44 +2169,50 @@
       return;
     }
 
-    var html = '<div class="teams-grid" style="margin-top:0;">';
-    teams.forEach(function(data){
-      var remaining = currentInitialBudget - data.totalSpent;
-      html += '<div class="team-card">';
-      html += '  <div class="team-card-header">';
-      html += '    <div class="team-card-title-wrap">';
-      html +=        getCrestHtml(data.logoUrl, data.teamName, 'md');
-      html += '      <div>';
-      html += '        <span class="team-card-name">' + escapeHtml(data.teamName) + '</span>';
-      html += '        <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div>';
-      html += '      </div>';
-      html += '    </div>';
-      html += '    <div style="text-align:right;">';
-      html += '      <div class="team-card-stats">' + data.items.length + '/25 giog.</div>';
-      html += '      <div style="font-size:11.5px; color:var(--gold);">Rimangono: <b>' + remaining + ' cfu</b></div>';
-      html += '    </div>';
-      html += '  </div>';
+    // Se non è selezionata nessuna squadra nel menu a tendina
+    if(!selectedAdminTeamView || !groups[selectedAdminTeamView]){
+      wrap.innerHTML = '<div class="team-empty">Seleziona una squadra dal menu a tendina qui sopra per visualizzarne la rosa e le opzioni.</div>';
+      return;
+    }
 
-      if(data.items.length === 0){
-        html += '<div style="font-size:12px; color:var(--chalk-dim); padding:10px 0; text-align:center;">Nessun acquisto ancora effettuato.</div>';
-      } else {
-        html += '  <table class="team-table"><tbody>';
-        data.items.forEach(function(p){
-          html += '<tr>';
-          html += '  <td style="width:28px;">' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td>';
-          html += '  <td><b>' + escapeHtml(p.player) + '</b></td>';
-          html += '  <td class="price-cell">' + p.price + ' cfu</td>';
-          html += '  <td style="text-align:right; width:56px;">';
-          html += '    <button class="btn-action-mini btn-action-edit" title="Modifica prezzo" onclick="editPlayerPrice(' + p.logIndex + ')">✏️</button>';
-          html += '    <button class="btn-action-mini btn-action-del" title="Elimina / Svincola" onclick="removePlayerPurchase(' + p.logIndex + ')">🗑️</button>';
-          html += '  </td>';
-          html += '</tr>';
-        });
-        html += '  </tbody></table>';
-      }
+    var data = groups[selectedAdminTeamView];
+    var remaining = currentInitialBudget - data.totalSpent;
 
-      html += '</div>';
-    });
+    var html = '<div style="width:100%; margin-top:8px;">';
+    html += '<div class="team-card">';
+    html += '  <div class="team-card-header">';
+    html += '    <div class="team-card-title-wrap">';
+    html +=        getCrestHtml(data.logoUrl, data.teamName, 'md');
+    html += '      <div>';
+    html += '        <span class="team-card-name">' + escapeHtml(data.teamName) + '</span>';
+    html += '        <div style="font-size:11px; color:var(--chalk-dim);">(' + escapeHtml(data.ownerName) + ')</div>';
+    html += '      </div>';
+    html += '    </div>';
+    html += '    <div style="text-align:right;">';
+    html += '      <div class="team-card-stats">' + data.items.length + '/25 giog.</div>';
+    html += '      <div style="font-size:11.5px; color:var(--gold);">Rimangono: <b>' + remaining + ' cfu</b></div>';
+    html += '    </div>';
+    html += '  </div>';
+
+    if(data.items.length === 0){
+      html += '<div style="font-size:12px; color:var(--chalk-dim); padding:14px 0; text-align:center;">Nessun calciatore acquistato al momento da questa squadra.</div>';
+    } else {
+      html += '  <table class="team-table"><tbody>';
+      data.items.forEach(function(p){
+        html += '<tr>';
+        html += '  <td style="width:28px;">' + (p.role ? '<span class="role-tag role-' + p.role + '">' + p.role + '</span>' : '') + '</td>';
+        html += '  <td><b>' + escapeHtml(p.player) + '</b></td>';
+        html += '  <td class="price-cell">' + p.price + ' cfu</td>';
+        html += '  <td style="text-align:right; width:56px;">';
+        html += '    <button class="btn-action-mini btn-action-edit" title="Modifica prezzo" onclick="editPlayerPrice(' + p.logIndex + ')">✏️</button>';
+        html += '    <button class="btn-action-mini btn-action-del" title="Elimina / Svincola" onclick="removePlayerPurchase(' + p.logIndex + ')">🗑️</button>';
+        html += '  </td>';
+        html += '</tr>';
+      });
+      html += '  </tbody></table>';
+    }
+
+    html += '</div>';
     html += '</div>';
     wrap.innerHTML = html;
   }
